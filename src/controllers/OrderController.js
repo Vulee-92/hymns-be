@@ -27,7 +27,9 @@ const createOrder = async (req, res) => {
         message: "The input is required",
       });
     }
+    console.log("req.body", req.body);
     const response = await OrderService.createOrder(req.body);
+    console.log("req.response", response);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
