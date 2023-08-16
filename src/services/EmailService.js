@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const sendEmailCreateOrder = async (email, createdOrder) => {
+  console.log("email", email);
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -857,7 +858,7 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: process.env.MAIL_ACCOUNT, // sender address
-    to: process.env.MAIL_ACCOUNT, // list of receivers
+    to: "hymnsguitarclass@gmail.com", // list of receivers
     subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
     text: "", // plain text body
     html: `${listItem} `,
