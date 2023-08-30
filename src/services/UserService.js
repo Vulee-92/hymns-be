@@ -46,6 +46,38 @@ const createUser = (newUser) => {
     }
   });
 };
+
+const sendContactEmail = async (contactInfo, adminEmail) => {
+  const { name, email, message } = contactInfo;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "your-email@gmail.com",
+        pass: "your-password",
+      },
+    });
+
+    const mailOptions = {
+      from: email,
+      to: adminEmail,
+      subject: "New contact message from your website",
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.response);
+    return {
+      status: "OK",
+      message: "Your message has been sent successfully",
+    };
+  } catch (e) {
+    console.log(e);
+    throw new Error("An error occurred while sending the message");
+  }
+};
+
 // const createUser = (newUser) => {
 //   return new Promise(async (resolve, reject) => {
 //     const { name, email, password, confirmPassword, phone } = newUser;
@@ -272,4 +304,5 @@ module.exports = {
   getAllUser,
   getDetailsUser,
   deleteManyUser,
+  sendContactEmail,
 };

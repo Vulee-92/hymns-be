@@ -31,6 +31,36 @@ const createUser = async (req, res) => {
     });
   }
 };
+const createContact = async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+    const isCheckEmail = reg.test(email);
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "All fields are required",
+      });
+    } else if (!isCheckEmail) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Please enter a valid email address",
+      });
+    }
+    const adminEmail = "hymnsguitarclass@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
+    const result = await UserService.sendContactEmail(
+      { name, email, message },
+      adminEmail
+    );
+    return res.status(200).json(result);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      status: "ERR",
+      message: "An error occurred while sending the message",
+    });
+  }
+};
 
 const loginUser = async (req, res) => {
   try {
@@ -166,9 +196,28 @@ const refreshToken = async (req, res) => {
   }
 };
 
+// const logoutUser = async (req, res) => {
+//   try {
+//     res.clearCookie("refresh_token");
+//     return res.status(200).json({
+//       status: "OK",
+//       message: "Logout successfully",
+//     });
+//   } catch (e) {
+//     return res.status(404).json({
+//       message: e,
+//     });
+//   }
+// };
 const logoutUser = async (req, res) => {
   try {
-    res.clearCookie("refresh_token");
+    res.clearCookie("refresh_token", {
+      secure: true,
+      httpOnly: true,
+      domain: "http://localhost:3001/api/",
+      expires: new Date(0),
+    });
+
     return res.status(200).json({
       status: "OK",
       message: "Logout successfully",
@@ -179,6 +228,7 @@ const logoutUser = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createUser,
   loginUser,
@@ -189,4 +239,5 @@ module.exports = {
   refreshToken,
   logoutUser,
   deleteMany,
+  createContact,
 };
