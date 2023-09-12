@@ -5,7 +5,7 @@ dotenv.config();
 const nodemailer = require("nodemailer");
 const Contact = require("../models/ContactModel");
 const sendContactEmail = async (contactInfo, adminEmail) => {
-  const { name, email, contactmessenger } = contactInfo;
+  const { name, email,phone, contactmessenger } = contactInfo;
 
   try {
     const transporter = nodemailer.createTransport({
@@ -22,12 +22,13 @@ const sendContactEmail = async (contactInfo, adminEmail) => {
       from: process.env.MAIL_ACCOUNT, // sender address
       to: "hymnsguitarclass@gmail.com", // list of receivers
       subject: "New contact message from your website",
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${contactmessenger}`,
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${contactmessenger}\nPhone: ${phone}`,
     };
 
     const newContact = await Contact.create({
       name,
       email,
+			phone,
       contactmessenger,
     });
 

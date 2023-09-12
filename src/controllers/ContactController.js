@@ -3,10 +3,10 @@ const JwtService = require("../services/JwtService");
 
 const createContact = async (req, res) => {
   try {
-    const { name, email, contactmessenger } = req.body;
+    const { name, email, contactmessenger, phone } = req.body;
     const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
     const isCheckEmail = reg.test(email);
-    if (!name || !email || !contactmessenger) {
+    if (!name || !email || !contactmessenger ||!phone) {
       return res.status(400).json({
         status: "ERR",
         message: "All fields are required",
@@ -19,7 +19,7 @@ const createContact = async (req, res) => {
     }
     const adminEmail = "hymnsguitarclass@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
     const result = await ContactService.sendContactEmail(
-      { name, email, contactmessenger },
+      { name, email, contactmessenger,phone },
       adminEmail
     );
     return res.status(200).json(result);

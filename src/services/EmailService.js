@@ -385,7 +385,7 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
                   <img
           class="center autowidth"
           src="${order?.image}"
-          alt=""
+          alt="${order?.name}"
           style="display:block;height:300px;border:0;width:auto;max-width:100%">
                 </div>
               </td>
@@ -426,7 +426,7 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
             <td style="width: 100%;text-align: left;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
               <div style="font-size: 14px;font-family: inherit;line-height: 120%;text-align: right;direction: ltr;letter-spacing: 0px;">
                 <p style="margin:0;"><span style="color: rgb(74, 74, 74); font-size: 16px">Số lượng: ${
-                  order.amount
+                  order?.amount
                 }</span></p>
               </div>
             </td>
@@ -858,7 +858,7 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: process.env.MAIL_ACCOUNT, // sender address
-    to: "hymnsguitarclass@gmail.com", // list of receivers
+    to: "hymnsguitarclass@gmail.com" && email, // list of receivers
     subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
     text: "", // plain text body
     html: `${listItem} `,
