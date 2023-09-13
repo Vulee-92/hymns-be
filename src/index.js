@@ -94,6 +94,13 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+// Thêm header Cache-Control vào phản hồi của máy chủ
+app.get("/", (req, res) => {
+  res.setHeader("Cache-Control", "no-store"); // Không lưu trữ bản sao của trang web trong bộ nhớ cache
+  res.send("Hello world!");
+});
+
 app.listen(port, () => {
   console.log("Server is running in port: ", +port);
 });
