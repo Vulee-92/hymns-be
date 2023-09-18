@@ -80,11 +80,14 @@ const loginUser = async (req, res) => {
     }
     const response = await UserService.loginUser(req.body);
     const { refresh_token, ...newReponse } = response;
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Thiết lập thời gian hết hạn là 7 ngày sau khi đăng nhập
     res.cookie("refresh_token", refresh_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
-      sameSite: "strict",
+      sameSite: "Lax",
       path: "/",
+      // domain: ".example.com", // Thay thế bằng miền của trang web của bạn
+      // expires,
     });
     return res.status(200).json({ ...newReponse, refresh_token });
   } catch (e) {
@@ -93,6 +96,7 @@ const loginUser = async (req, res) => {
     });
   }
 };
+
 
 const updateUser = async (req, res) => {
   try {
@@ -209,13 +213,32 @@ const refreshToken = async (req, res) => {
 //     });
 //   }
 // };
+// const logoutUser = async (req, res) => {
+//   try {
+//     res.clearCookie("refresh_token", {
+//       secure: false,
+//       httpOnly: true,
+//       expires: new Date(0),
+//     });
+
+//     return res.status(200).json({
+//       status: "OK",
+//       message: "Logout successfully",
+//     });
+//   } catch (e) {
+//     return res.status(404).json({
+//       message: e,
+//     });
+//   }
+// };
 const logoutUser = async (req, res) => {
   try {
     res.clearCookie("refresh_token", {
-      secure: true,
-      httpOnly: true,
-      domain: "http://localhost:3001/api/",
+      secure: false,
+      httpOnly: false,
+      domain: "http://localhost:3000", // Đảm bảo domain và path chính xác
       expires: new Date(0),
+      path: '/' // Đảm bảo path chính xác
     });
 
     return res.status(200).json({
@@ -228,6 +251,14 @@ const logoutUser = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+
 
 module.exports = {
   createUser,
