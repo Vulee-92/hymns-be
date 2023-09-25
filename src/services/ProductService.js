@@ -1,5 +1,7 @@
 const Product = require("../models/ProductModel");
 
+const slugify = require('slugify');
+
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
     const {
@@ -22,6 +24,15 @@ const createProduct = (newProduct) => {
           message: "The name of product is already",
         });
       }
+
+      // Tạo slug từ name
+   const slug = slugify(name, {
+  lower: true,
+  remove: /[*+~.()'"!:@]/g,
+  replacement: '-'
+});
+
+
       const newProduct = await Product.create({
         name,
         image,
@@ -31,6 +42,7 @@ const createProduct = (newProduct) => {
         rating,
         description,
         discount: Number(discount),
+        slug, // Thêm slug vào đối tượng newProduct
       });
       if (newProduct) {
         resolve({
@@ -44,6 +56,7 @@ const createProduct = (newProduct) => {
     }
   });
 };
+
 
 const updateProduct = (id, data) => {
   return new Promise(async (resolve, reject) => {
@@ -133,6 +146,7 @@ const getDetailsProduct = (id) => {
     }
   });
 };
+
 
 const getAllProduct = (limit, page, sort, filter) => {
   return new Promise(async (resolve, reject) => {
