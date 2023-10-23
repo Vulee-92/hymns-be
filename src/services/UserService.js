@@ -31,7 +31,7 @@ const createUser = (newUser) => {
 			});
 
 			const userId = createdUser._id.toString();
-			const verificationLink = `http://localhost:3000/verify/${userId}/${verificationCode}`;
+			const verificationLink = `https://hymnscenter.vercel.app/verify/${userId}/${verificationCode}`;
 			console.log("verificationLink",verificationLink)
 
 			if (createdUser) {
