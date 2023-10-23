@@ -79,6 +79,12 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
+// app.use(cors({
+// 	origin: '*',
+// 	methods: 'GET,PUT,POST,DELETE',
+// 	allowedHeaders: 'Content-Type,Authorization',
+// 	credentials: true
+// }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 app.use(bodyParser.json());
@@ -87,20 +93,20 @@ app.use(cookieParser());
 routes(app);
 
 mongoose
-  .connect(`${process.env.MONGO_DB}`)
-  .then(() => {
-    console.log("Connect Db success!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+	.connect(`${process.env.MONGO_DB}`)
+	.then(() => {
+		console.log("Connect Db success!");
+	})
+	.catch((err) => {
+		console.log(err);
+	});
 
 // Thêm header Cache-Control vào phản hồi của máy chủ
-app.get("/", (req, res) => {
-  res.setHeader("Cache-Control", "no-store"); // Không lưu trữ bản sao của trang web trong bộ nhớ cache
-  res.send("Hello world!");
+app.get("/",(req,res) => {
+	res.setHeader("Cache-Control","no-store"); // Không lưu trữ bản sao của trang web trong bộ nhớ cache
+	res.send("Hello world!");
 });
 
-app.listen(port, () => {
-  console.log("Server is running in port: ", +port);
+app.listen(port,() => {
+	console.log("Server is running in port: ",+port);
 });
