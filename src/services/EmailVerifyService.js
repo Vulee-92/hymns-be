@@ -10,8 +10,8 @@ const sendEmailVerify = async (name,email,createdOrder,verificationCode,verifica
 		port: 465,
 		secure: true, // use TLS
 		auth: {
-			user: process.env.MAIL_ACCOUNT, // generated ethereal user
-			pass: process.env.MAIL_PASSWORD, // generated ethereal password
+			user: "hymnsguitarclass@gmail.com", // generated ethereal user
+			pass: "gaam rqew pfva ymki", // generated ethereal password
 		},
 	});
 	// const verificationCode = Math.floor(100000 + Math.random() * 900000);
