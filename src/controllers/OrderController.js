@@ -1,35 +1,47 @@
 const OrderService = require("../services/OrderService");
-
 const createOrder = async (req,res) => {
 	try {
 		const {
 			paymentMethod,
+			shippingMethod,
 			itemsPrice,
 			shippingPrice,
 			totalPrice,
 			fullName,
 			address,
 			city,
+			province,
+			ward,
+			email,
 			phone,
 		} = req.body;
-		if (
-			!paymentMethod ||
-			!itemsPrice ||
-			!shippingPrice ||
-			!totalPrice ||
-			!fullName ||
-			!address ||
-			!city ||
-			!phone
-		) {
+
+		const requiredFields = [];
+
+		if (!paymentMethod) requiredFields.push("paymentMethod");
+		if (!shippingMethod) requiredFields.push("shippingMethod");
+		if (!itemsPrice) requiredFields.push("itemsPrice");
+		if (typeof shippingPrice === 'undefined' || shippingPrice === null) {
+			requiredFields.push("shippingPrice");
+		}
+		if (!totalPrice) requiredFields.push("totalPrice");
+		if (!fullName) requiredFields.push("fullName");
+		if (!address) requiredFields.push("address");
+		if (!city) requiredFields.push("city");
+		if (!province) requiredFields.push("province");
+		if (!ward) requiredFields.push("ward");
+		if (!email) requiredFields.push("email");
+		if (!phone) requiredFields.push("phone");
+
+		if (requiredFields.length > 0) {
 			return res.status(200).json({
 				status: "ERR",
-				message: "The input is required",
+				message: "The following fields are required",
+				fields: requiredFields,
 			});
 		}
-		console.log("req.body",req.body);
+
 		const response = await OrderService.createOrder(req.body);
-		console.log("req.response",response);
 		return res.status(200).json(response);
 	} catch (e) {
 		return res.status(404).json({
@@ -37,6 +49,7 @@ const createOrder = async (req,res) => {
 		});
 	}
 };
+
 
 const getAllOrderDetails = async (req,res) => {
 	try {
@@ -107,11 +120,30 @@ const getAllOrder = async (req,res) => {
 		});
 	}
 };
-
+const updateOrder = async (req,res) => {
+	try {
+		const orderId = req.params.id;
+		const data = req.body;
+		if (!orderId) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The orderId is required",
+			});
+		}
+		const response = await OrderService.updateOrder(orderId,data);
+		console.log("updateOrder",response)
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
+};
 module.exports = {
 	createOrder,
 	getAllOrderDetails,
 	getDetailsOrder,
 	cancelOrderDetails,
 	getAllOrder,
+	updateOrder
 };
