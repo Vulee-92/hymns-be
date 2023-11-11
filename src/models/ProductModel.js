@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const productSchema = new mongoose.Schema(
 	{
 		name: { type: String,required: true,unique: true },
-		image: { type: String,required: true },
+		image: [{ type: String,required: true }], // Mảng chứa nhiều hình ảnh
 		type: { type: String,required: true },
 		price: { type: Number,required: true },
 		fee: { type: Number,required: true },
@@ -12,12 +12,13 @@ const productSchema = new mongoose.Schema(
 		description: { type: String },
 		discount: { type: Number },
 		selled: { type: Number },
-		slug: { type: String }
+		slug: { type: String },
 	},
 	{
 		timestamps: true,
 	}
 );
+
 const Product = mongoose.model('Product',productSchema);
 
 module.exports = Product;

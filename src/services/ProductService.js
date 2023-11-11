@@ -2,23 +2,71 @@ const Product = require("../models/ProductModel");
 
 const slugify = require('slugify');
 
+// const createProduct = (newProduct) => {
+// 	return new Promise(async (resolve,reject) => {
+// 		const {
+// 			name,
+// 			image,
+// 			type,
+// 			countInStock,
+// 			price,
+// 			rating,
+// 			description,
+// 			discount,
+// 			fee
+// 		} = newProduct;
+// 		try {
+// 			const checkProduct = await Product.findOne({
+// 				name: name,
+// 			});
+// 			if (checkProduct !== null) {
+// 				resolve({
+// 					status: "ERR",
+// 					message: "The name of product is already",
+// 				});
+// 			}
+
+// 			// Tạo slug từ name
+// 			const slug = slugify(name,{
+// 				lower: true,
+// 				remove: /[*+~.()'"!:@]/g,
+// 				replacement: '-'
+// 			});
+
+
+// 			const newProduct = await Product.create({
+// 				name,
+// 				image,
+// 				type,
+// 				countInStock: Number(countInStock),
+// 				price,
+// 				rating,
+// 				fee,
+// 				description,
+// 				discount: Number(discount),
+// 				slug, // Thêm slug vào đối tượng newProduct
+// 			});
+// 			if (newProduct) {
+// 				resolve({
+// 					status: "OK",
+// 					message: "SUCCESS",
+// 					data: newProduct,
+// 				});
+// 			}
+// 		} catch (e) {
+// 			reject(e);
+// 		}
+// 	});
+// };
 const createProduct = (newProduct) => {
 	return new Promise(async (resolve,reject) => {
-		const {
-			name,
-			image,
-			type,
-			countInStock,
-			price,
-			rating,
-			description,
-			discount,
-			fee
-		} = newProduct;
+		const { name,image,type,countInStock,price,rating,description,discount,fee } = newProduct;
+
 		try {
 			const checkProduct = await Product.findOne({
 				name: name,
 			});
+
 			if (checkProduct !== null) {
 				resolve({
 					status: "ERR",
@@ -33,8 +81,7 @@ const createProduct = (newProduct) => {
 				replacement: '-'
 			});
 
-
-			const newProduct = await Product.create({
+			const newProductInstance = new Product({
 				name,
 				image,
 				type,
@@ -44,13 +91,16 @@ const createProduct = (newProduct) => {
 				fee,
 				description,
 				discount: Number(discount),
-				slug, // Thêm slug vào đối tượng newProduct
+				slug,
 			});
-			if (newProduct) {
+
+			const createdProduct = await newProductInstance.save();
+
+			if (createdProduct) {
 				resolve({
-					status: "OK",
-					message: "SUCCESS",
-					data: newProduct,
+					status: 'OK',
+					message: 'SUCCESS',
+					data: createdProduct,
 				});
 			}
 		} catch (e) {
