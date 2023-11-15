@@ -14,4 +14,10 @@ router.post('/refresh-token',userController.refreshToken)
 router.post('/delete-many',authMiddleWare,userController.deleteMany)
 router.get('/verify/:id/:verificationCode',userController.verifyUser);
 
+// Thêm route cho quên mật khẩu
+router.post('/forgot-password',userController.forgotPassword);
+
+// Thêm route cho reset mật khẩu
+router.post('/reset-password',userController.resetPassword);
+
 module.exports = router

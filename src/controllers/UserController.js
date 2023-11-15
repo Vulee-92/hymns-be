@@ -276,7 +276,37 @@ const logoutUser = async (req,res) => {
 };
 
 
+// Thêm phương thức quên mật khẩu
+const forgotPassword = async (req,res) => {
+	try {
+		const { email } = req.body;
+		console.log("req.body",req.body)
+		// Kiểm tra email và gửi email reset mật khẩu
+		const response = await UserService.forgotPassword(email);
 
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(500).json({
+			message: e.message || e,
+		});
+	}
+};
+
+// Thêm phương thức reset mật khẩu
+const resetPassword = async (req,res) => {
+	try {
+		const { email,token,newPassword } = req.body;
+
+		// Kiểm tra token và cập nhật mật khẩu mới
+		const response = await UserService.resetPassword(email,token,newPassword);
+
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(500).json({
+			message: e.message || e,
+		});
+	}
+};
 
 
 
@@ -294,5 +324,7 @@ module.exports = {
 	logoutUser,
 	deleteMany,
 	createContact,
-	verifyUser
+	verifyUser,
+	forgotPassword,
+	resetPassword
 };
