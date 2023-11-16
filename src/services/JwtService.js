@@ -31,8 +31,7 @@ const genneralResetToken = async (payload) => {
 				...payload,
 				exp: expirationTime,
 			},
-			process.env.RESET_TOKEN
-		);
+			process.env.RESET_TOKEN,{ expiresIn: '1h' })
 
 		return reset_token;
 	} catch (error) {
