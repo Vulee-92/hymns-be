@@ -390,16 +390,15 @@ const forgotPassword = async (email) => {
 				message: "User not found",
 			};
 		}
+		console.log("useruseruseruser",user)
 
 		// Tạo mã token reset mật khẩu
 		const resetToken = await generateResetToken(user._id);
-		console.log("resetToken",resetToken)
 		// Lưu mã token vào trường resetToken của user
 		user.resetToken = resetToken;
 
 		// Lưu thay đổi vào cơ sở dữ liệu
 		await user.save();
-		console.log("user",user)
 
 		const resetLink = `http://localhost:3000/reset-password/${user._id}/${resetToken}`;
 		// Sử dụng service để gửi email

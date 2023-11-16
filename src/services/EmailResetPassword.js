@@ -3,7 +3,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const EmailResetPassword = async (user,resetLink) => {
-	console.log("user",user)
 	let transporter = nodemailer.createTransport({
 		host: "smtp.gmail.com",
 		port: 465,
@@ -18,7 +17,6 @@ const EmailResetPassword = async (user,resetLink) => {
 
 
 	let listItem = "";
-	const attachImage = [];
 	listItem += `
 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -821,13 +819,7 @@ body {
                                                
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td align="left" class="esd-block-text es-p20">
-                                                    <h3 style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif; font-size: 35px;"><br></h3>
-                                                    <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">Trong trường hợp nút "Đặt lại mật khẩu" không hoạt động, bạn hãy copy link dưới và dán vào trình duyệt.<br></p>
-                                                    <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">${resetLink}<br></p>
-                                                </td>
-                                            </tr>
+                                           
 																						  <tr>
                                                 <td align="left" class="esd-block-text es-p20">
                                                     <h3 style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif; font-size: 35px;"><br></h3>
@@ -890,7 +882,7 @@ body {
 		// send mail with defined transport object
 		let info = await transporter.sendMail({
 			from: process.env.MAIL_ACCOUNT, // sender address
-			to: process.env.MAIL_ACCOUNT, // list of receivers
+			to: user?.email, // list of receivers
 			subject: `Đặt lại mật khẩu`, // Subject line
 			text: "", // plain text body
 			html: `${listItem} `,
