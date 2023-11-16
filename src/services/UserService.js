@@ -33,7 +33,7 @@ const createUser = (newUser) => {
 			});
 
 			const userId = createdUser._id.toString();
-			const verificationLink = `http://localhost:3000/verify/${userId}/${verificationCode}`;
+			const verificationLink = ` https://hymns-be-json.onrender.com/verify/${userId}/${verificationCode}`;
 			console.log("verificationLink",verificationLink)
 
 			if (createdUser) {
@@ -400,7 +400,7 @@ const forgotPassword = async (email) => {
 		// Lưu thay đổi vào cơ sở dữ liệu
 		await user.save();
 
-		const resetLink = `http://localhost:3000/reset-password/${user._id}/${resetToken}`;
+		const resetLink = ` https://hymns-be-json.onrender.com/reset-password/${user._id}/${resetToken}`;
 		// Sử dụng service để gửi email
 		await EmailResetPassword(user,resetLink);
 
