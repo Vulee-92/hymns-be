@@ -235,44 +235,7 @@ const verifyUser = async (id,data) => {
 // 		}
 // 	});
 // };
-const updateUser = (id,data) => {
-	return new Promise(async (resolve,reject) => {
-		try {
-			const checkUser = await User.findOne({ _id: id });
 
-			if (!checkUser) {
-				return resolve({
-					status: "ERR",
-					message: "The user is not defined",
-				});
-			}
-
-			// Kiểm tra nếu có mật khẩu trong dữ liệu để mã hóa
-			if (data.password) {
-				// Mã hóa mật khẩu trước khi cập nhật
-				const hash = bcrypt.hashSync(data.password,10);
-				data.password = hash; // Gán mật khẩu đã được mã hóa vào dữ liệu
-			}
-
-			const updatedUser = await User.findByIdAndUpdate(id,data,{ new: true });
-
-			if (!updatedUser) {
-				return resolve({
-					status: "ERR",
-					message: "Failed to update user",
-				});
-			}
-
-			resolve({
-				status: "OK",
-				message: "SUCCESS",
-				data: updatedUser,
-			});
-		} catch (e) {
-			reject(e);
-		}
-	});
-};
 
 const loginUser = (userLogin) => {
 	return new Promise(async (resolve,reject) => {
@@ -438,8 +401,7 @@ const forgotPassword = async (email) => {
 		await user.save();
 		console.log("user",user)
 
-		const resetLink = `http://localhost:3000/reset-password?userId=${user._id}&resetToken=${resetToken}`;
-
+		const resetLink = `http://localhost:3000/reset-password/${user._id}/${resetToken}`;
 		// Sử dụng service để gửi email
 		await EmailResetPassword(user,resetLink);
 
@@ -451,33 +413,81 @@ const forgotPassword = async (email) => {
 		throw new Error(error);
 	}
 };
+const updateUser = (id,data) => {
+	return new Promise(async (resolve,reject) => {
+		try {
+			const checkUser = await User.findOne({ _id: id });
 
-// Thêm phương thức reset mật khẩu
-const resetPassword = async (email,token,newPassword) => {
-	console.log("email,token,newPassword",email,token,newPassword)
-	try {
-		const user = await User.findOne({ email });
+			if (!checkUser) {
+				return resolve({
+					status: "ERR",
+					message: "The user is not defined",
+				});
+			}
 
-		if (!user || user.resetToken !== token || user.resetTokenExpiry < Date.now()) {
-			return {
-				status: "ERR",
-				message: "Invalid or expired reset token",
-			};
+			// Kiểm tra nếu có mật khẩu trong dữ liệu để mã hóa
+			if (data.password) {
+				// Mã hóa mật khẩu trước khi cập nhật
+				const hash = bcrypt.hashSync(data.password,10);
+				data.password = hash; // Gán mật khẩu đã được mã hóa vào dữ liệu
+			}
+
+			const updatedUser = await User.findByIdAndUpdate(id,data,{ new: true });
+
+			if (!updatedUser) {
+				return resolve({
+					status: "ERR",
+					message: "Failed to update user",
+				});
+			}
+
+			resolve({
+				status: "OK",
+				message: "SUCCESS",
+				data: updatedUser,
+			});
+		} catch (e) {
+			reject(e);
 		}
+	});
+};
+// Thêm phương thức reset mật khẩu
+const resetPassword = async (id,token,data) => {
+	return new Promise(async (resolve,reject) => {
+		try {
+			const user = await User.findOne({ _id: id });
+			console.log("yusser",user)
+			if (!user) {
+				return {
+					status: "ERR",
+					message: "Invalid or expired reset token",
+				};
+			}
 
-		user.password = bcrypt.hashSync(newPassword,10);
-		user.resetToken = null;
-		user.resetTokenExpiry = null;
+			if (data.password) {
+				// Mã hóa mật khẩu trước khi cập nhật
+				const hash = bcrypt.hashSync(data.password,10);
+				data.password = hash; // Gán mật khẩu đã được mã hóa vào dữ liệu
+			}
 
-		await user.save();
+			const updatedUser = await User.findByIdAndUpdate(id,data,{ new: true });
 
-		return {
-			status: "OK",
-			message: "Password reset successfully",
-		};
-	} catch (error) {
-		throw new Error(error);
-	}
+			if (!updatedUser) {
+				return resolve({
+					status: "ERR",
+					message: "Failed to update user",
+				});
+			}
+
+			resolve({
+				status: "OK",
+				message: "SUCCESS",
+				data: updatedUser,
+			});
+		} catch (error) {
+			throw new Error(error);
+		}
+	});
 };
 module.exports = {
 	createUser,

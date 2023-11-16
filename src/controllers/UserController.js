@@ -34,42 +34,8 @@ const createUser = async (req,res) => {
 	}
 };
 
-const verifyUser = async (req,res) => {
-	try {
-		const userId = req.params.id;
-		const data = req.params.verificationCode;
-		if (!userId && !data) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The userId & data is required",
-			});
-		}
-		const response = await UserService.verifyUser(userId,data);
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
-};
-const updateUser = async (req,res) => {
-	try {
-		const userId = req.params.id;
-		const data = req.body;
-		if (!userId) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The userId is required",
-			});
-		}
-		const response = await UserService.updateUser(userId,data);
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
-};
+
+
 const createContact = async (req,res) => {
 	try {
 		const { name,email,message } = req.body;
@@ -280,7 +246,6 @@ const logoutUser = async (req,res) => {
 const forgotPassword = async (req,res) => {
 	try {
 		const { email } = req.body;
-		console.log("req.body",req.body)
 		// Kiểm tra email và gửi email reset mật khẩu
 		const response = await UserService.forgotPassword(email);
 
@@ -291,14 +256,46 @@ const forgotPassword = async (req,res) => {
 		});
 	}
 };
-
+const updateUser = async (req,res) => {
+	try {
+		const userId = req.params.id;
+		const data = req.body;
+		if (!userId) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId is required",
+			});
+		}
+		const response = await UserService.updateUser(userId,data);
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
+};
 // Thêm phương thức reset mật khẩu
 const resetPassword = async (req,res) => {
 	try {
-		const { email,token,newPassword } = req.body;
+		const userId = req.params.id;
+		const token = req.params.tokenReset;
+		const data = req.body;
+		console.log("data",data)
 
+		if (!userId && !token && !data.password || !data.confirmPassword) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId & data is required",
+			});
+		} else if (!data.password !== !data.confirmPassword) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The password is equal confirmPassword",
+			});
+		}
+		console.log("req.body",req.body)
 		// Kiểm tra token và cập nhật mật khẩu mới
-		const response = await UserService.resetPassword(email,token,newPassword);
+		const response = await UserService.resetPassword(userId,token,data);
 
 		return res.status(200).json(response);
 	} catch (e) {
@@ -309,7 +306,24 @@ const resetPassword = async (req,res) => {
 };
 
 
-
+const verifyUser = async (req,res) => {
+	try {
+		const userId = req.params.id;
+		const data = req.params.verificationCode;
+		if (!userId && !data) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId & data is required",
+			});
+		}
+		const response = await UserService.verifyUser(userId,data);
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
+};
 
 
 

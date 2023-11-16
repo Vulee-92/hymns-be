@@ -18,6 +18,6 @@ router.get('/verify/:id/:verificationCode',userController.verifyUser);
 router.post('/forgot-password',userController.forgotPassword);
 
 // Thêm route cho reset mật khẩu
-router.post('/reset-password',userController.resetPassword);
+router.post('/reset-password/:id/:tokenReset',userController.resetPassword);
 
 module.exports = router
