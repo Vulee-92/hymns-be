@@ -362,7 +362,7 @@ const updateOrder = (id,data) => {
 					message: "The order is not defined",
 				});
 			}
-			const isPaidSuccess = `http://localhost:3000/order-success/${id}`;
+			const isPaidSuccess = `https://hymnscenter.vercel.app/order-success/${id}`;
 			const updatedOrder = await Order.findByIdAndUpdate(id,data,{
 				new: true,
 			});

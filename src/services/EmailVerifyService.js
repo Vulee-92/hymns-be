@@ -903,7 +903,7 @@ body {
 	// send mail with defined transport object
 	let info = await transporter.sendMail({
 		from: process.env.MAIL_ACCOUNT, // sender address
-		to: "hymnsguitarclass@gmail.com", // list of receivers
+		to: email, // list of receivers
 		subject: `Mã xác minh của bạn`, // Subject line
 		html: `${listItem} `,
 		// text: `Mã xác minh của bạn là ${verificationLink}`,
