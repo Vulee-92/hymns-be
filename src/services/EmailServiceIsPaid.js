@@ -10,8 +10,8 @@ const sendEmailOrderIsPaid = async (updatedOrder,isPaidSuccess) => {
 		port: 465,
 		secure: true, // use TLS
 		auth: {
-			user: "hymnsguitarclass@gmail.com", // generated ethereal user
-			pass: "gaam rqew pfva ymki"// generated ethereal password
+			user: process.env.MAIL_ACCOUNT, // generated ethereal user
+			pass: process.env.MAIL_PASSWORD,
 		},
 	});
 	transporter.use("compile",inlineBase64({ cidPrefix: "somePrefix_" }));
@@ -80,7 +80,7 @@ const sendEmailOrderIsPaid = async (updatedOrder,isPaidSuccess) => {
 	// send mail with defined transport object
 	let info = await transporter.sendMail({
 		from: process.env.MAIL_ACCOUNT, // sender address
-		to: updatedOrder?.shippingAddress?.email, // list of receivers
+		to: updatedOrder?.shippingAddress?.email && "hymnscenter@gmail.com",// list of receivers
 		subject: `Đơn hàng thanh toán thành công`, // Subject line
 		text: "", // plain text body
 		html: `${listItem} `,

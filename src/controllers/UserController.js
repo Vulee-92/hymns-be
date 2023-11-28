@@ -52,7 +52,7 @@ const createContact = async (req,res) => {
 				message: "Please enter a valid email address",
 			});
 		}
-		const adminEmail = "hymnsguitarclass@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
+		const adminEmail = "hymnscenter@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
 		const result = await UserService.sendContactEmail(
 			{ name,email,message },
 			adminEmail
@@ -246,10 +246,8 @@ const logoutUser = async (req,res) => {
 const forgotPassword = async (req,res) => {
 	try {
 		const { email } = req.body;
-		console.log("req.body",email)
 		// Kiểm tra email và gửi email reset mật khẩu
 		const response = await UserService.forgotPassword(email);
-		console.log("response",response)
 		return res.status(200).json(response);
 	} catch (e) {
 		return res.status(500).json({

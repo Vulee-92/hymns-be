@@ -8,10 +8,11 @@ const EmailResetPassword = async (user,resetLink) => {
 		port: 465,
 		secure: true, // use TLS
 		auth: {
-			user: "hymnsguitarclass@gmail.com", // generated ethereal user
-			pass: "gaam rqew pfva ymki"// generated ethereal password
+			user: process.env.MAIL_ACCOUNT, // generated ethereal user
+			pass: process.env.MAIL_PASSWORD,
 		},
 	});
+	console.log("auth",auth)
 	transporter.use("compile",inlineBase64({ cidPrefix: "somePrefix_" }));
 
 

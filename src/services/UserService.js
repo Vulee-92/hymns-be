@@ -128,13 +128,13 @@ const sendContactEmail = async (contactInfo,adminEmail) => {
 //       // });
 //       // let info = {
 //       //   from: process.env.MAIL_ACCOUNT, // sender address
-//       //   to: "hymnsguitarclass@gmail.com", // list of receivers
+//       //   to: "hymnscenter@gmail.com", // list of receivers
 //       //   subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
 //       //   text: `Mã xác minh của bạn là ${verificationCode}`,
 //       // };
 //       // const mailOptions = await transporter({
 //       //   from: process.env.MAIL_ACCOUNT, // sender address
-//       //   to: "hymnsguitarclass@gmail.com",
+//       //   to: "hymnscenter@gmail.com",
 //       //   subject: "Xác minh địa chỉ email của bạn",
 //       //   text: `Mã xác minh của bạn là ${verificationCode}`,
 //       // });
@@ -390,7 +390,6 @@ const forgotPassword = async (email) => {
 				message: "User not found",
 			};
 		}
-		console.log("useruseruseruser",user)
 
 		// Tạo mã token reset mật khẩu
 		const resetToken = await generateResetToken(user._id);
