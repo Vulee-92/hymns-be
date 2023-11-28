@@ -30,7 +30,6 @@ const sendEmailOrderIsPaid = async (updatedOrder,isPaidSuccess) => {
 	let listItem = "";
 	const attachImage = [];
 	listItem += `
-	< !DOCTYPE html >
 		<html>
 
 			<head>
@@ -52,7 +51,7 @@ const sendEmailOrderIsPaid = async (updatedOrder,isPaidSuccess) => {
 									<td style="padding: 0 40px;">
 										<h2 style="font-family: Public Sans, sans-serif; color: #333333;">${updatedOrder?.orderStatus ? `Thanh toán cho đơn hàng ${updatedOrder?.codeOrder} thành công` : `Huỷ đơn hàng ${updatedOrder?.codeOrder} thành công`}</h2>
 										<p style="font-family: Public Sans, sans-serif; color: #666666;">Xin chào ${updatedOrder?.shippingAddress?.fullName},</p>
-										<p style="font-family: Public Sans, sans-serif; color: #666666;">${updatedOrder?.isPaid ? `Thanh toán cho đơn hàng ${updatedOrder?.codeOrder}  của bạn đã được xử lý thành công. Chúng tôi đang chuẩn bị gói hàng cho bạn. Cảm ơn bạn đã lựa chọn chúng tôi!` : `Đơn hàng ${updatedOrder?.codeOrder} đã được huỷ theo yêu cầu. `}</p>
+										<p style="font-family: Public Sans, sans-serif; color: #666666;">${!updatedOrder?.isPaid ? `Thanh toán cho đơn hàng ${updatedOrder?.codeOrder}  của bạn đã được xử lý thành công. Chúng tôi đang chuẩn bị gói hàng cho bạn. Cảm ơn bạn đã lựa chọn chúng tôi!` : `Đơn hàng ${updatedOrder?.codeOrder} đã được huỷ theo yêu cầu. `}</p>
 										<p style="font-family: Public Sans, sans-serif; color: #666666;">Để theo dõi đơn hàng, vui lòng click vào nút dưới đây:</p>
 										<a href="${isPaidSuccess}" style="text-decoration: none;">
 											<button style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #436e67; color: white; font-family: Public Sans, sans-serif;">Theo Dõi Đơn Hàng</button>

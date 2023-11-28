@@ -4,6 +4,7 @@ dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const { getMaxListeners } = require("../models/UserModel");
 const sendEmailVerify = async (name,email,createdOrder,verificationCode,verificationLink) => {
+	console.log("email",email)
 	console.log("verificationCode",verificationCode);
 	let transporter = nodemailer.createTransport({
 		host: "smtp.gmail.com",

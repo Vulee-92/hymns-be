@@ -34,7 +34,7 @@ const createUser = (newUser) => {
 
 			const userId = createdUser._id.toString();
 			const verificationLink = ` https://hymnscenter.vercel.app/verify/${userId}/${verificationCode}`;
-			console.log("verificationLink",verificationLink)
+			console.log("emailemailemailemail",email)
 
 			if (createdUser) {
 				await EmailVerifyService.sendEmailVerify(
