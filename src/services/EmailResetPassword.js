@@ -12,7 +12,6 @@ const EmailResetPassword = async (user,resetLink) => {
 			pass: process.env.MAIL_PASSWORD,
 		},
 	});
-	console.log("auth",auth)
 	transporter.use("compile",inlineBase64({ cidPrefix: "somePrefix_" }));
 
 
