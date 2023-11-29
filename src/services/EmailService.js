@@ -2,38 +2,38 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
-const sendEmailCreateOrder = async (email, createdOrder) => {
-  console.log("email", email);
-  let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // use TLS
-    auth: {
-      user: process.env.MAIL_ACCOUNT, // generated ethereal user
-      pass: process.env.MAIL_PASSWORD, // generated ethereal password
-    },
-  });
-  transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
-  // const fCurrencyVND = (number) => {
-  //   const format = number ? numeral(number).format("0,0 VND") + " VNĐ" : "";
+const sendEmailCreateOrder = async (email,createdOrder) => {
+	console.log("email",email);
+	let transporter = nodemailer.createTransport({
+		host: "smtp.gmail.com",
+		port: 465,
+		secure: true, // use TLS
+		auth: {
+			user: process.env.MAIL_ACCOUNT, // generated ethereal user
+			pass: process.env.MAIL_PASSWORD,
+		},
+	});
+	transporter.use("compile",inlineBase64({ cidPrefix: "somePrefix_" }));
+	// const fCurrencyVND = (number) => {
+	//   const format = number ? numeral(number).format("0,0 VND") + " VNĐ" : "";
 
-  //   return result(format, ".00");
-  // };
-  const formatter = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    minimumFractionDigits: 0,
-  });
-  const convert = (str) => {
-    var date = new Date(str),
-      mnth = ("0" + (date.getMonth() + 1)).slice(-2),
-      day = ("0" + date.getDate()).slice(-2);
-    return [day, mnth, date.getFullYear()].join("-");
-  };
-  let listItem = "";
-  const attachImage = [];
+	//   return result(format, ".00");
+	// };
+	const formatter = new Intl.NumberFormat("vi-VN",{
+		style: "currency",
+		currency: "VND",
+		minimumFractionDigits: 0,
+	});
+	const convert = (str) => {
+		var date = new Date(str),
+			mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+			day = ("0" + date.getDate()).slice(-2);
+		return [day,mnth,date.getFullYear()].join("-");
+	};
+	let listItem = "";
+	const attachImage = [];
 
-  listItem += `<!DOCTYPE html>
+	listItem += `<!DOCTYPE html>
     <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
     
     <head>
@@ -235,9 +235,8 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 20px;padding-right: 0px;padding-bottom: 20px;padding-left: 0px;">
           <h1 style="color: #393d47;font-size: 29px;font-family: inherit;line-height: 120%;text-align: center;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
-            <span>Chào ${
-              createdOrder?.shippingAddress?.fullName
-            }, cảm ơn bạn đã mua hàng tại Hymns!</span>
+            <span>Chào ${createdOrder?.shippingAddress?.fullName
+		}, cảm ơn bạn đã mua hàng tại Hymns!</span>
           </h1>
           </td>
         </tr>
@@ -269,8 +268,8 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
           <td style="width: 100%;text-align: left;padding-top: 0px;padding-right: 0px;padding-bottom: 20px;padding-left: 0px;">
             <div style="font-size: 20px;font-family: inherit;line-height: 120%;text-align: center;direction: ltr;letter-spacing: 0px;">
               <p style="margin:0;"><span style="color: rgb(74, 74, 74); font-size: 16px">Chúng tôi đã nhận đơn hàng của bạn ngày: ${convert(
-                createdOrder?.createdAt
-              )}
+			createdOrder?.createdAt
+		)}
               , và chúng tôi đang tiến hành xử lý đơn hàng.</span></p>
             </div>
           </td>
@@ -372,8 +371,8 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
                 width="805">
                   <tbody>
                   ${createdOrder?.orderItems
-                    ?.map((order) => {
-                      return ` 
+			?.map((order) => {
+				return ` 
                     <tr>
           <td class="column column-1" width="33.333%" style="mso-table-lspace:0;mso-table-rspace:0;vertical-align:top;background-color: transparent;border-top: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-left: 0px solid transparent;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
             
@@ -425,9 +424,8 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
           <tr>
             <td style="width: 100%;text-align: left;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
               <div style="font-size: 14px;font-family: inherit;line-height: 120%;text-align: right;direction: ltr;letter-spacing: 0px;">
-                <p style="margin:0;"><span style="color: rgb(74, 74, 74); font-size: 16px">Số lượng: ${
-                  order?.amount
-                }</span></p>
+                <p style="margin:0;"><span style="color: rgb(74, 74, 74); font-size: 16px">Số lượng: ${order?.amount
+					}</span></p>
               </div>
             </td>
           </tr>
@@ -445,14 +443,14 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
             <td style="width: 100%;text-align: left;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
               <div style="font-size: 14px;font-family: inherit;line-height: 120%;text-align: right;direction: ltr;letter-spacing: 0px;">
                 <p style="margin:0;"><span style="color: rgb(74, 74, 74); font-size: 16px">Tổng: ${formatter.format(
-                  order.price
-                )}</span></p>
+						order.price
+					)}</span></p>
               </div>
             </td>
           </tr>
         </table>`;
-                    })
-                    .join("")}
+			})
+			.join("")}
           </td>
           </tr>
                   </tbody>
@@ -661,9 +659,8 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
         <tr>
           <td style="width: 100%;text-align: left;padding-top: 1px;padding-right: 1px;padding-bottom: 20px;padding-left: 10px;">
             <div style="font-size: 14px;font-family: inherit;line-height: 150%;text-align: left;direction: ltr;letter-spacing: 0px;">
-              <p style="margin:0;">Địa Chỉ Nhận Hàng:</p><p style="margin:0;margin-top:5px"><strong class="hhg-bold">VũLê<br>${
-                createdOrder?.shippingAddress?.address
-              } ${createdOrder?.shippingAddress?.city}<br>Việt Nam</strong></p>
+              <p style="margin:0;">Địa Chỉ Nhận Hàng:</p><p style="margin:0;margin-top:5px"><strong class="hhg-bold">VũLê<br>${createdOrder?.shippingAddress?.address
+		} ${createdOrder?.shippingAddress?.city}<br>Việt Nam</strong></p>
             </div>
           </td>
         </tr>
@@ -855,17 +852,17 @@ const sendEmailCreateOrder = async (email, createdOrder) => {
       </table><!-- End -->
     </body>
   </html>`;
-  // send mail with defined transport object
-  let info = await transporter.sendMail({
-    from: process.env.MAIL_ACCOUNT, // sender address
-    to: "hymnsguitarclass@gmail.com" && email, // list of receivers
-    subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
-    text: "", // plain text body
-    html: `${listItem} `,
-    attachments: attachImage,
-  });
+	// send mail with defined transport object
+	let info = await transporter.sendMail({
+		from: process.env.MAIL_ACCOUNT, // sender address
+		to: "hymnscenter@gmail.com" && email, // list of receivers
+		subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
+		text: "", // plain text body
+		html: `${listItem} `,
+		attachments: attachImage,
+	});
 };
 
 module.exports = {
-  sendEmailCreateOrder,
+	sendEmailCreateOrder,
 };

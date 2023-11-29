@@ -1,5 +1,6 @@
 const UserService = require("../services/UserService");
 const JwtService = require("../services/JwtService");
+const User = require("../models/UserModel");
 
 const createUser = async (req,res) => {
 	try {
@@ -7,7 +8,7 @@ const createUser = async (req,res) => {
 			req.body;
 		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
 		const isCheckEmail = reg.test(email);
-		if (!email || !password || !confirmPassword) {
+		if (!name || !email || !password || !confirmPassword) {
 			return res.status(200).json({
 				status: "ERR",
 				message: "The input is required",
@@ -24,6 +25,7 @@ const createUser = async (req,res) => {
 			});
 		}
 		const response = await UserService.createUser(req.body);
+
 		return res.status(200).json(response);
 	} catch (e) {
 		return res.status(404).json({
@@ -31,6 +33,8 @@ const createUser = async (req,res) => {
 		});
 	}
 };
+
+
 
 const createContact = async (req,res) => {
 	try {
@@ -48,7 +52,7 @@ const createContact = async (req,res) => {
 				message: "Please enter a valid email address",
 			});
 		}
-		const adminEmail = "hymnsguitarclass@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
+		const adminEmail = "hymnscenter@gmail.com"; // Lấy địa chỉ email của quản trị viên từ cơ sở dữ liệu hoặc một file cấu hình nào đó
 		const result = await UserService.sendContactEmail(
 			{ name,email,message },
 			adminEmail
@@ -64,6 +68,7 @@ const createContact = async (req,res) => {
 };
 
 const loginUser = async (req,res) => {
+	console.log("email,password",req,res)
 	try {
 		const { email,password } = req.body;
 		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
@@ -99,24 +104,7 @@ const loginUser = async (req,res) => {
 };
 
 
-const updateUser = async (req,res) => {
-	try {
-		const userId = req.params.id;
-		const data = req.body;
-		if (!userId) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The userId is required",
-			});
-		}
-		const response = await UserService.updateUser(userId,data);
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
-};
+
 
 const deleteUser = async (req,res) => {
 	try {
@@ -254,10 +242,87 @@ const logoutUser = async (req,res) => {
 };
 
 
+// Thêm phương thức quên mật khẩu
+const forgotPassword = async (req,res) => {
+	try {
+		const { email } = req.body;
+		// Kiểm tra email và gửi email reset mật khẩu
+		const response = await UserService.forgotPassword(email);
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(500).json({
+			message: e.message || e,
+		});
+	}
+};
+const updateUser = async (req,res) => {
+	try {
+		const userId = req.params.id;
+		const data = req.body;
+		if (!userId) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId is required",
+			});
+		}
+		const response = await UserService.updateUser(userId,data);
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
+};
+// Thêm phương thức reset mật khẩu
+const resetPassword = async (req,res) => {
+	try {
+		const userId = req.params.id;
+		const token = req.params.tokenReset;
+		const data = req.body;
+		console.log("data",data)
+
+		if (!userId && !token && !data.password || !data.confirmPassword) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId & data is required",
+			});
+		} else if (!data.password !== !data.confirmPassword) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The password is equal confirmPassword",
+			});
+		}
+		console.log("req.body",req.body)
+		// Kiểm tra token và cập nhật mật khẩu mới
+		const response = await UserService.resetPassword(userId,token,data);
+
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(500).json({
+			message: e.message || e,
+		});
+	}
+};
 
 
-
-
+const verifyUser = async (req,res) => {
+	try {
+		const userId = req.params.id;
+		const data = req.params.verificationCode;
+		if (!userId && !data) {
+			return res.status(200).json({
+				status: "ERR",
+				message: "The userId & data is required",
+			});
+		}
+		const response = await UserService.verifyUser(userId,data);
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
+};
 
 
 
@@ -272,4 +337,7 @@ module.exports = {
 	logoutUser,
 	deleteMany,
 	createContact,
+	verifyUser,
+	forgotPassword,
+	resetPassword
 };
