@@ -171,8 +171,8 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
       <table class="title_block" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;word-break:break-word">
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
-          <h1 style="color: #f9c22b;font-size: 51px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;direction: ltr;font-weight: 700;letter-spacing: 3px;background-color: #ffffff;margin: 0;padding: 0;">
-            <span>HYMNS GUITAR CLASS</span>
+          <h1 style="color: #436e67;font-size: 51px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;direction: ltr;font-weight: 700;letter-spacing: 3px;background-color: #ffffff;margin: 0;padding: 0;">
+            <span>HYMNS CENTER</span>
           </h1>
           </td>
         </tr>
@@ -831,7 +831,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
         <tr>
           <td style="padding-bottom: 20px;padding-left: 20px;padding-right: 20px;padding-top: 20px;">
             <div style="color: #ffffff;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;font-size: 14px;">
-              <p style="margin:0;"><em>Copyright © 2023 Hymns Guitar Class, All rights reserved.</em><br>Bạn nhận được email này từ việc đăng ký Hello Bacsi newsletter<br><br><strong class="hhg-bold">Mọi thông tin vui lòng liên hệ:</strong><br>Hymns Guitar Class<br>Kiệt 31/03, đường Nguyễn Hoàng, Phương Hoà Đông, Phường Hoà Thuận</p><p style="margin:0;margin-top:0">TP. Tam Kỳ, tỉnh Quảng Nam</p>
+              <p style="margin:0;"><em>Copyright © 2023 Hymns Center, All rights reserved.</em><br>Bạn nhận được email này khi mua hàng tại Hymns Center<br><br><strong class="hhg-bold">Mọi thông tin vui lòng liên hệ:</strong><br>Hymns Center<br>Kiệt 03/31, đường Nguyễn Hoàng, Phương Hoà Đông, Phường Hoà Thuận</p><p style="margin:0;margin-top:0">TP. Tam Kỳ, tỉnh Quảng Nam</p>
             </div>
           </td>
         </tr>
