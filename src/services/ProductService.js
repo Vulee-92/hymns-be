@@ -175,11 +175,11 @@ const deleteManyProduct = (ids) => {
 	});
 };
 
-const getDetailsProduct = (id) => {
+const getDetailsProduct = (idSlug) => {
 	return new Promise(async (resolve,reject) => {
 		try {
 			const product = await Product.findOne({
-				_id: id,
+				slug: idSlug,
 			});
 			if (product === null) {
 				resolve({

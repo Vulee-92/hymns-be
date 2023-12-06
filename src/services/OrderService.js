@@ -222,7 +222,7 @@ const getDetailsOrder = (id) => {
 // 					if (order === null) {
 // 						resolve({
 // 							status: "ERR",
-// 							message: "The order is not defined",
+// 							message: "The order is not defined",sendEmailOrderIsPaid
 // 						});
 // 					}
 // 				} else {
