@@ -15,19 +15,22 @@ const updateRecentlyViewed = async (req,res) => {
 		console.log("userId",userId)
 		let deviceId = req.cookies.deviceId || uuidv4();
 		userId = userId || deviceId;
-		res.cookie("deviceId",deviceId,{
+
+		res.cookie('deviceId',deviceId,{
 			maxAge: 900000,httpOnly: false,sameSite: 'Lax',
-			secure: false,
+			secure: true,
 		});
 		console.log("deviceId",deviceId)
-
+		localStorage.setItem('deviceId',deviceId);
+		localStorage.setItem('userId',userId);
 		// Kiểm tra nếu không có cookie userId, tạo mới và gửi về cho người dùng
-		if (!req.cookies.userId) {
-			res.cookie("userId",userId,{
-				maxAge: 900000,httpOnly: false,sameSite: 'Lax',
-				secure: false,
-			});
-		}
+		// if (!req.cookies.userId) {
+		res.cookie("userId",userId,{
+			maxAge: 900000,httpOnly: false,sameSite: 'Lax',
+			secure: true,
+		});
+		// }
+		res.send('Cookie đã được đặt thành công!');
 		const response = await RecentlyViewedService.updateRecentlyViewed(deviceId,productIdSlug);
 		return res.status(200).json(response);
 	} catch (e) {
