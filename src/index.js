@@ -17,7 +17,7 @@ const port = process.env.PORT || 3001;
 
 // app.use(cors());
 app.use(cors({
-	origin: 'http://localhost:3003/'
+	origin: 'https://hymns-be-json.onrender.com'
 }));
 
 
