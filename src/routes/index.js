@@ -5,6 +5,7 @@ const PaymentRouter = require("./PaymentRouter");
 const ContactRouter = require("./ContactRoute");
 const CateRouter = require("./CateRoute");
 const BlogRouter = require("./BlogRoute");
+const RecentlyViewedRoute = require("./recentlyViewedRoute");
 const routes = (app) => {
 	app.use("/api/user",UserRouter);
 	app.use("/api/product",ProductRouter);
@@ -13,6 +14,7 @@ const routes = (app) => {
 	app.use("/api/contact",ContactRouter);
 	app.use("/api/cate",CateRouter);
 	app.use("/api/blog",BlogRouter);
+	app.use("/api/viewed",RecentlyViewedRoute);
 };
 
 module.exports = routes;

@@ -1,5 +1,6 @@
 const ProductService = require("../services/ProductService");
-
+const RecentlyViewedController = require('../controllers/RecentlyViewedController');
+const { v4: uuidv4 } = require('uuid'); // Sử dụng thư viện uuid để tạo UUID độc nhất
 
 const createProduct = async (req,res) => {
 	try {
@@ -64,16 +65,38 @@ const updateProduct = async (req,res) => {
 	}
 };
 
+// const getDetailsProduct = async (req,res) => {
+// 	try {
+// 		const productIdSlug = req.params.id;
+// 		console.log("productIdSlug",productIdSlug)
+// 		if (!productIdSlug) {
+// 			return res.status(200).json({
+// 				status: "ERR",
+// 				message: "The productId is required",
+// 			});
+// 		}
+// 		const response = await ProductService.getDetailsProduct(productIdSlug);
+// 		return res.status(200).json(response);
+// 	} catch (e) {
+// 		return res.status(404).json({
+// 			message: e,
+// 		});
+// 	}
+// };
 const getDetailsProduct = async (req,res) => {
 	try {
 		const productIdSlug = req.params.id;
-		console.log("productIdSlug",productIdSlug)
 		if (!productIdSlug) {
 			return res.status(200).json({
 				status: "ERR",
 				message: "The productId is required",
 			});
 		}
+
+
+
+
+
 		const response = await ProductService.getDetailsProduct(productIdSlug);
 		return res.status(200).json(response);
 	} catch (e) {
