@@ -171,8 +171,8 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
       <table class="title_block" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;word-break:break-word">
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
-          <h1 style="color: #f9c22b;font-size: 51px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;direction: ltr;font-weight: 700;letter-spacing: 3px;background-color: #ffffff;margin: 0;padding: 0;">
-            <span>HYMNS GUITAR CLASS</span>
+          <h1 style="color: #436e67;font-size: 51px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;direction: ltr;font-weight: 700;letter-spacing: 3px;background-color: #ffffff;margin: 0;padding: 0;">
+            <span>HYMNS CENTER</span>
           </h1>
           </td>
         </tr>
@@ -339,7 +339,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
       <table class="title_block" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;word-break:break-word">
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 10px;">
-          <h1 style="color: #af9a65;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
+          <h1 style="color: #436e67;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
             <span>Thông Tin Đơn Hàng Của Bạn</span>
           </h1>
           </td>
@@ -383,7 +383,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
                 <div align="center">
                   <img
           class="center autowidth"
-          src="${order?.image}"
+          src="${order?.image[0]}"
           alt="${order?.name}"
           style="display:block;height:300px;border:0;width:auto;max-width:100%">
                 </div>
@@ -620,7 +620,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
       <table class="title_block" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;word-break:break-word">
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 20px;padding-right: 0px;padding-bottom: 0px;padding-left: 10px;">
-          <h1 style="color: #af9a65;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
+          <h1 style="color: #436e67;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
             <span>Địa Chỉ Của Bạn</span>
           </h1>
           </td>
@@ -659,8 +659,12 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
         <tr>
           <td style="width: 100%;text-align: left;padding-top: 1px;padding-right: 1px;padding-bottom: 20px;padding-left: 10px;">
             <div style="font-size: 14px;font-family: inherit;line-height: 150%;text-align: left;direction: ltr;letter-spacing: 0px;">
-              <p style="margin:0;">Địa Chỉ Nhận Hàng:</p><p style="margin:0;margin-top:5px"><strong class="hhg-bold">VũLê<br>${createdOrder?.shippingAddress?.address
-		} ${createdOrder?.shippingAddress?.city}<br>Việt Nam</strong></p>
+              <p style="margin:0;">Địa Chỉ Nhận Hàng:</p><p style="margin:0;margin-top:5px"><strong class="hhg-bold">VũLê<br>
+							${createdOrder?.shippingAddress?.address} 
+							<br>${createdOrder?.shippingAddress?.ward}
+		<br>${createdOrder?.shippingAddress?.city}
+				<br>${createdOrder?.shippingAddress?.province}
+		<br>Việt Nam</strong></p>
             </div>
           </td>
         </tr>
@@ -722,7 +726,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
       <table class="title_block" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;word-break:break-word">
         <tr>
           <td style="width: 100%;text-align: center;padding-top: 20px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">
-          <h1 style="color: #af9a65;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
+          <h1 style="color: #436e67;font-size: 23px;font-family: inherit;line-height: 120%;text-align: left;direction: ltr;font-weight: 700;letter-spacing: 0px;margin: 0;padding: 0;">
             <span>Giao Nhận Hàng Tiêu Chuẩn</span>
           </h1>
           </td>
@@ -831,7 +835,7 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
         <tr>
           <td style="padding-bottom: 20px;padding-left: 20px;padding-right: 20px;padding-top: 20px;">
             <div style="color: #ffffff;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;line-height: 150%;text-align: center;font-size: 14px;">
-              <p style="margin:0;"><em>Copyright © 2023 Hymns Guitar Class, All rights reserved.</em><br>Bạn nhận được email này từ việc đăng ký Hello Bacsi newsletter<br><br><strong class="hhg-bold">Mọi thông tin vui lòng liên hệ:</strong><br>Hymns Guitar Class<br>Kiệt 31/03, đường Nguyễn Hoàng, Phương Hoà Đông, Phường Hoà Thuận</p><p style="margin:0;margin-top:0">TP. Tam Kỳ, tỉnh Quảng Nam</p>
+              <p style="margin:0;"><em>Copyright © 2023 Hymns Center, All rights reserved.</em><br>Bạn nhận được email này khi mua hàng tại Hymns Center<br><br><strong class="hhg-bold">Mọi thông tin vui lòng liên hệ:</strong><br>Hymns Center<br>Kiệt 03/31, đường Nguyễn Hoàng, Phương Hoà Đông, Phường Hoà Thuận</p><p style="margin:0;margin-top:0">TP. Tam Kỳ, tỉnh Quảng Nam</p>
             </div>
           </td>
         </tr>
@@ -855,8 +859,8 @@ const sendEmailCreateOrder = async (email,createdOrder) => {
 	// send mail with defined transport object
 	let info = await transporter.sendMail({
 		from: process.env.MAIL_ACCOUNT, // sender address
-		to: "hymnscenter@gmail.com" && email, // list of receivers
-		subject: `Đơn đặt hàng đã được xác nhận`, // Subject line
+		to: ["hymnscenter@gmail.com",email], // list of receivers
+		subject: `Xác nhận đơn hàng ${createdOrder?.codeOrder} tại Hymns Center`, // Subject line
 		text: "", // plain text body
 		html: `${listItem} `,
 		attachments: attachImage,

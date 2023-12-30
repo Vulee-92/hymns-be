@@ -222,7 +222,7 @@ const getDetailsOrder = (id) => {
 // 					if (order === null) {
 // 						resolve({
 // 							status: "ERR",
-// 							message: "The order is not defined",
+// 							message: "The order is not defined",sendEmailOrderIsPaid
 // 						});
 // 					}
 // 				} else {
@@ -362,7 +362,7 @@ const updateOrder = (id,data) => {
 					message: "The order is not defined",
 				});
 			}
-			const isPaidSuccess = `https://hymnscenter.vercel.app/order-success/${id}`;
+			const isPaidSuccess = `https://www.hymnscenter.com/order-success/${id}`;
 			const updatedOrder = await Order.findByIdAndUpdate(id,data,{
 				new: true,
 			});

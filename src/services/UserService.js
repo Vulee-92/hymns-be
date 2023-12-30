@@ -33,7 +33,7 @@ const createUser = (newUser) => {
 			});
 
 			const userId = createdUser._id.toString();
-			const verificationLink = ` https://hymnscenter.vercel.app/verify/${userId}/${verificationCode}`;
+			const verificationLink = ` https://www.hymnscenter.com/verify/${userId}/${verificationCode}`;
 			console.log("emailemailemailemail",email)
 
 			if (createdUser) {
@@ -168,7 +168,6 @@ const verifyUser = async (id,data) => {
 			const checkUser = await User.findOne({
 				_id: id,
 			});
-			console.log("checkUser",checkUser)
 			// if (checkUser === null) {
 			// 	resolve({
 			// 		status: "ERR",
@@ -399,7 +398,7 @@ const forgotPassword = async (email) => {
 		// Lưu thay đổi vào cơ sở dữ liệu
 		await user.save();
 
-		const resetLink = `https://hymnscenter.vercel.app/reset-password/${user._id}/${resetToken}`;
+		const resetLink = `https://www.hymnscenter.com/reset-password/${user._id}/${resetToken}`;
 		// Sử dụng service để gửi email
 		await EmailResetPassword(user,resetLink);
 

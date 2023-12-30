@@ -39,24 +39,6 @@ const createProduct = async (req,res) => {
 	}
 };
 
-// const updateProduct = async (req,res) => {
-// 	try {
-// 		const productId = req.params.id;
-// 		const data = req.body;
-// 		if (!productId) {
-// 			return res.status(200).json({
-// 				status: "ERR",
-// 				message: "The productId is required",
-// 			});
-// 		}
-// 		const response = await ProductService.updateProduct(productId,data);
-// 		return res.status(200).json(response);
-// 	} catch (e) {
-// 		return res.status(404).json({
-// 			message: e,
-// 		});
-// 	}
-// };
 const updateProduct = async (req,res) => {
 	try {
 		const productId = req.params.id;
@@ -84,14 +66,14 @@ const updateProduct = async (req,res) => {
 
 const getDetailsProduct = async (req,res) => {
 	try {
-		const productId = req.params.id;
-		if (!productId) {
+		const productIdSlug = req.params.id;
+		if (!productIdSlug) {
 			return res.status(200).json({
 				status: "ERR",
 				message: "The productId is required",
 			});
 		}
-		const response = await ProductService.getDetailsProduct(productId);
+		const response = await ProductService.getDetailsProduct(productIdSlug);
 		return res.status(200).json(response);
 	} catch (e) {
 		return res.status(404).json({
@@ -141,19 +123,37 @@ const deleteMany = async (req,res) => {
 const getAllProduct = async (req,res) => {
 	try {
 		const { limit,page,sort,filter } = req.query;
+
+		if ((limit && limit < 0) || (page && page < 0)) {
+			return res.status(400).json({
+				message: "Invalid limit or page value",
+			});
+		}
+
+		const processedFilter = filter ? processFilter(filter) : null;
+
 		const response = await ProductService.getAllProduct(
 			Number(limit) || null,
 			Number(page) || 0,
 			sort,
-			filter
+			processedFilter
 		);
+
 		return res.status(200).json(response);
 	} catch (e) {
-		return res.status(404).json({
-			message: e,
+		return res.status(500).json({
+			message: e.message || "Internal Server Error",
 		});
 	}
 };
+
+const processFilter = (filter) => {
+	return filter.map((filterItem) => {
+		const [label,value] = filterItem.split(",");
+		return [label,value].join(",");
+	});
+};
+
 
 const getAllType = async (req,res) => {
 	try {
