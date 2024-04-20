@@ -1,3 +1,5 @@
+const TelegramBot = require('node-telegram-bot-api');
+
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const { genneralAccessToken,genneralRefreshToken } = require("./JwtService");
@@ -8,47 +10,157 @@ const JwtService = require("../services/JwtService");
 dotenv.config();
 const nodemailer = require("nodemailer");
 
+const token = '6871153640:AAGpNaq5Td4W-Jdn4DRFVxKJlQojaWXWl2Q';
+const bot = new TelegramBot(token,{ polling: true });
+
+// const createUser = (newUser) => {
+// 	return new Promise(async (resolve,reject) => {
+
+// 		const { name,email,password,confirmPassword,phone } = newUser;
+
+// 		const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
+// 		// Create a bot that uses 'polling' to fetch new updates
+// 		try {
+// 			const checkUser = await User.findOne({
+// 				email: email,
+// 			});
+// 			if (checkUser !== null) {
+// 				resolve({
+// 					status: "ERR",
+// 					message: "The email is already",
+// 				});
+// 			}
+// 			const hash = bcrypt.hashSync(password,10);
+// 			const createdUser = await User.create({
+// 				name,
+// 				email,
+// 				password: hash,
+// 				phone,
+// 				verificationCode,
+// 			});
+// 			const userId = createdUser._id.toString();
+// 			const verificationLink = ` https://www.hymnscenter.com/verify/${userId}/${verificationCode}`;
+// 			if (createdUser) {
+
+
+
+// 				const chatId = '6749566951';
+// 				// const message = `New user created!\nName: ${name}\nEmail: ${email}`;
+// 				// bot.sendMessage(chatId,message);
+// 				bot.on('callback_query',(callbackQuery) => {
+// 					const data = callbackQuery.data;
+// 					// Xử lý lựa chọn từ người dùng
+// 					if (data === 'option1') {
+// 						bot.sendMessage(chatId,'Xác nhận đã chuyển khoản.');
+// 						bot.sendMessage(chatId,'Cảm ơn quý khách!');
+// 					} else if (data === 'option2') {
+// 						EmailVerifyService.sendEmailVerify(
+// 							name,
+// 							email,
+// 							createdUser,
+// 							verificationCode,
+// 							verificationLink
+// 							// verificationLink
+// 						);
+// 						bot.sendMessage(chatId,'Đã gửi email.');
+// 					} else if (data === 'option3') {
+// 						bot.sendMessage(chatId,'Đơn hàng của bạn đã bị huỷ.');
+// 						userOrders[chatId].status = 'cancelled';
+// 					}
+// 				});
+// 				if (chatId) {
+// 					const keyboard = {
+// 						inline_keyboard: [
+// 							[
+// 								{ text: 'Thanh toán',callback_data: 'option1',color: 'green',background: "#320eee" },
+// 								{ text: 'Vận chuyển',callback_data: 'option2',color: 'green',background: "#320eee" },
+// 								{ text: 'Huỷ',callback_data: 'option3',color: 'red' }
+// 							]
+// 						]
+// 					};
+// 					const options = {
+// 						reply_markup: JSON.stringify(keyboard)
+// 					};
+
+// 					bot.sendMessage(chatId,`New user created!\nName: ${name}\nEmail: ${email}`,options);
+// 				}
+// 				resolve({
+// 					status: "OK",
+// 					message: "SUCCESS",
+// 					data: createdUser,
+// 				});
+// 			}
+// 		} catch (e) {
+// 			reject(e);
+// 		}
+// 	});
+// };
 const createUser = (newUser) => {
 	return new Promise(async (resolve,reject) => {
-		const { name,email,password,confirmPassword,phone } = newUser;
+
+		const { name,email } = newUser;
+
 		const verificationCode = Math.floor(100000 + Math.random() * 900000);
+		const password = generateRandomPassword(); // Tạo mật khẩu ngẫu nhiên
 
 		try {
-			const checkUser = await User.findOne({
-				email: email,
-			});
+			const checkUser = await User.findOne({ email: email });
+
 			if (checkUser !== null) {
 				resolve({
 					status: "ERR",
-					message: "The email is already",
+					message: "The email is already in use",
 				});
 			}
-			const hash = bcrypt.hashSync(password,10);
+
+			const hash = bcrypt.hashSync(password,10); // Hash mật khẩu
 			const createdUser = await User.create({
 				name,
 				email,
-				password: hash,
-				phone,
+				password: hash, // Lưu mật khẩu đã hash
 				verificationCode,
 			});
 
 			const userId = createdUser._id.toString();
-			const verificationLink = ` https://www.hymnscenter.com/verify/${userId}/${verificationCode}`;
-			console.log("emailemailemailemail",email)
+			const verificationLink = `https://www.hymnscenter.com/verify/${userId}/${verificationCode}`;
 
 			if (createdUser) {
-				await EmailVerifyService.sendEmailVerify(
-					name,
-					email,
-					createdUser,
-					verificationCode,
-					verificationLink
-					// verificationLink
-				);
+				// 			if (createdUser) {
+
+
+
+				const chatId = '6749566951';
+				// const message = `New user created!\nName: ${name}\nEmail: ${email}`;
+				// bot.sendMessage(chatId,message);
+				bot.on('callback_query',(callbackQuery) => {
+					const data = callbackQuery.data;
+					// Xử lý lựa chọn từ người dùng
+					if (data === 'option1') {
+						bot.sendMessage(chatId,'Xác nhận đã chuyển khoản.');
+						bot.sendMessage(chatId,'Cảm ơn quý khách!');
+					} else if (data === 'option2') {
+						EmailVerifyService.sendEmailVerify(
+							name,
+							email,
+							createdUser,
+							hash,
+							verificationCode,
+							verificationLink
+							// verificationLink
+						);
+						bot.sendMessage(chatId,'Đã gửi email.');
+					} else if (data === 'option3') {
+						bot.sendMessage(chatId,'Đơn hàng của bạn đã bị huỷ.');
+						userOrders[chatId].status = 'cancelled';
+					}
+				});
+
 				resolve({
 					status: "OK",
 					message: "SUCCESS",
 					data: createdUser,
+					password: password, // Trả về mật khẩu cho người dùng
 				});
 			}
 		} catch (e) {
@@ -56,7 +168,17 @@ const createUser = (newUser) => {
 		}
 	});
 };
-
+// Hàm tạo mật khẩu ngẫu nhiên
+function generateRandomPassword() {
+	// Đây là một ví dụ đơn giản, bạn có thể tùy chỉnh theo nhu cầu của bạn
+	const length = 10;
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	let password = "";
+	for (let i = 0; i < length; i++) {
+		password += charset.charAt(Math.floor(Math.random() * charset.length));
+	}
+	return password;
+}
 const sendContactEmail = async (contactInfo,adminEmail) => {
 	const { name,email,message } = contactInfo;
 
@@ -500,3 +622,11 @@ module.exports = {
 	resetPassword,
 	generateResetToken
 };
+// await EmailVerifyService.sendEmailVerify(
+// 	name,
+// 	email,
+// 	createdUser,
+// 	verificationCode,
+// 	verificationLink
+// 	// verificationLink
+// );

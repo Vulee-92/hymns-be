@@ -1,8 +1,14 @@
+const TelegramBot = require('node-telegram-bot-api');
+const EventEmitter = require('events');
+const orderEventEmitter = new EventEmitter();
+const telegramService = require('./telegramService/telegramService');
 const Order = require("../models/OrderModel");
 const Product = require("../models/ProductModel");
 const EmailService = require("../services/EmailService");
 const EmailServiceIsPaid = require("../services/EmailServiceIsPaid");
 const OrderNotificationService = require('./OrderNotificationService');
+const token = '6551170125:AAEAtDG4bpoRFtt1CIWt_WYcVhiH9qxptYk';
+const bot = new TelegramBot(token,{ polling: true });
 const createOrder = (newOrder) => {
 	return new Promise(async (resolve,reject) => {
 		const {
@@ -100,7 +106,22 @@ const createOrder = (newOrder) => {
 					// Gửi thông báo đơn hàng mới khi tạo thành công
 					await EmailService.sendEmailCreateOrder(email,createdOrder);
 					OrderNotificationService.sendNewOrderNotification(orderId);
-
+					const chatId = '6749566951';
+					const message = `
+					🛵 🛒 - Đơn hàng mới
+					Ngày đặt: ${convert(
+						createdOrder?.createdAt
+					)}
+					${createdOrder?.shippingAddress?.city ? 'Đơn trong thành phố Tam Kỳ' : 'Đơn đi tỉnh'}
+					📞 ${createdOrder?.shippingAddress?.phone} (SNew) - Tên: ${createdOrder?.shippingAddress?.fullName} - Phiếu: ${createdOrder?.codeOrder}
+					Sản phẩm:
+					${createdOrder?.orderItems
+							?.map((order) => {
+								return `+ ${order?.name}: ${order?.amount} x ${order?.price}\n`
+							})}
+					Tổng tiền (đơn hàng & vận chuyển): ${formatter.format(createdOrder?.totalPrice)}
+					Địa chỉ giao hàng: ${createdOrder?.shippingAddress?.address},${createdOrder?.shippingAddress?.ward}, ${createdOrder?.shippingAddress?.city}, ${createdOrder?.shippingAddress?.province}`;
+					bot.sendMessage(chatId,message);
 					resolve({
 						status: "OK",
 						message: "success",

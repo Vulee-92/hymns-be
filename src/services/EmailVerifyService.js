@@ -3,9 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const { getMaxListeners } = require("../models/UserModel");
-const sendEmailVerify = async (name,email,createdOrder,verificationCode,verificationLink) => {
-	console.log("email",email)
-	console.log("verificationCode",verificationCode);
+const sendEmailVerify = async (name,email,hash,verificationCode,verificationLink) => {
 	let transporter = nodemailer.createTransport({
 		host: "smtp.gmail.com",
 		port: 465,
@@ -828,6 +826,13 @@ body {
                                                     <p><br></p>
                                                     <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">Chúng tôi thấy bạn đang gửi yêu cầu xác thực địa chỉ email này để tạo tài khoản trên <strong>Hymns Center</strong>.
 																											<!-- <br>Để xác nhận email đăng ký, bạn vui lòng click vào nút "Xác thực".</p> -->
+                                                </td>
+                                            </tr>
+																						 <tr>
+                                                <td align="left" class="esd-block-text es-p20">
+                                                    <h3 style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif; font-size: 35px;">Xin chào, ${name}</h3>
+                                                    <p><br></p>
+                                                    <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">Mật khẩu của bạn:${hash}
                                                 </td>
                                             </tr>
 																						 <td align="left" class="esd-block-text es-p20">

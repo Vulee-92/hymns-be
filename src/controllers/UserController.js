@@ -2,13 +2,45 @@ const UserService = require("../services/UserService");
 const JwtService = require("../services/JwtService");
 const User = require("../models/UserModel");
 
+// const createUser = async (req,res) => {
+// 	try {
+// 		const { name,email,password,confirmPassword,phone,verificationCode } =
+// 			req.body;
+// 		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+// 		const isCheckEmail = reg.test(email);
+// 		if (!name || !email || !password || !confirmPassword) {
+// 			return res.status(200).json({
+// 				status: "ERR",
+// 				message: "The input is required",
+// 			});
+// 		} else if (!isCheckEmail) {
+// 			return res.status(200).json({
+// 				status: "ERR",
+// 				message: "The input is email",
+// 			});
+// 		} else if (password !== confirmPassword) {
+// 			return res.status(200).json({
+// 				status: "ERR",
+// 				message: "The password is equal confirmPassword",
+// 			});
+// 		}
+// 		const response = await UserService.createUser(req.body);
+
+// 		return res.status(200).json(response);
+// 	} catch (e) {
+// 		return res.status(404).json({
+// 			message: e,
+// 		});
+// 	}
+// };
+
 const createUser = async (req,res) => {
 	try {
-		const { name,email,password,confirmPassword,phone,verificationCode } =
+		const { name,email } =
 			req.body;
 		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
 		const isCheckEmail = reg.test(email);
-		if (!name || !email || !password || !confirmPassword) {
+		if (!name || !email) {
 			return res.status(200).json({
 				status: "ERR",
 				message: "The input is required",
@@ -17,11 +49,6 @@ const createUser = async (req,res) => {
 			return res.status(200).json({
 				status: "ERR",
 				message: "The input is email",
-			});
-		} else if (password !== confirmPassword) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The password is equal confirmPassword",
 			});
 		}
 		const response = await UserService.createUser(req.body);
@@ -33,8 +60,6 @@ const createUser = async (req,res) => {
 		});
 	}
 };
-
-
 
 const createContact = async (req,res) => {
 	try {

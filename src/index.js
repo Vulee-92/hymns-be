@@ -10,7 +10,8 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const OrderNotificationService = require('./services/OrderNotificationService');
 const helmet = require('helmet');
-
+// Require the service module for Telegram
+const telegramService = require('./services/telegramService/telegramService');
 dotenv.config();
 
 
@@ -21,14 +22,14 @@ const port = process.env.PORT || 3001;
 // app.use(cors({
 // 	origin: 'https://hymnscenter.online'
 // }));
-app.use(
-	cors({
-		credentials: true,
-		origin: 'https://www.hymnscenter.com',
-	})
-);
+// app.use(
+// 	cors({
+// 		credentials: true,
+// 		origin: 'https://www.hymnscenter.com',
+// 	})
+// );
 
-app.set('x-powered-by',false);
+// app.set('x-powered-by',false);
 // app.use(cors({
 // 	origin: '*',
 // 	methods: 'GET,PUT,POST,DELETE',
@@ -46,14 +47,14 @@ app.use(bodyParser.json());
 // Middleware để kiểm tra xem dữ liệu JSON có hợp lệ hay không
 
 // Middleware để cho phép CORS từ tất cả các domain
-app.use((req,res,next) => {
-	res.header('Access-Control-Allow-Origin','https://www.hymnscenter.com');
-	res.header('Access-Control-Allow-Credentials',true);
-	res.header('Access-Control-Allow-Origin','*'); // Cho phép từ tất cả các domain
-	res.header('Access-Control-Allow-Methods','GET, POST, OPTIONS, PUT, PATCH, DELETE');
-	res.header('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept');
-	next();
-});
+// app.use((req,res,next) => {
+// 	res.header('Access-Control-Allow-Origin','https://www.hymnscenter.com');
+// 	res.header('Access-Control-Allow-Credentials',true);
+// 	res.header('Access-Control-Allow-Origin','*'); // Cho phép từ tất cả các domain
+// 	res.header('Access-Control-Allow-Methods','GET, POST, OPTIONS, PUT, PATCH, DELETE');
+// 	res.header('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept');
+// 	next();
+// });
 
 // app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
