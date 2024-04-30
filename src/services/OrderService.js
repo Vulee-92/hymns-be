@@ -48,7 +48,6 @@ const createOrder = (newOrder) => {
 					},
 					{ new: true }
 				);
-				console.log("promises",productData);
 
 				if (productData) {
 					return {
@@ -109,7 +108,7 @@ const createOrder = (newOrder) => {
 					const chatId = '6749566951';
 					const message = `
 					🛵 🛒 - Đơn hàng mới
-					Ngày đặt: ${convert(
+					Ngày đặt: ${(
 						createdOrder?.createdAt
 					)}
 					${createdOrder?.shippingAddress?.city ? 'Đơn trong thành phố Tam Kỳ' : 'Đơn đi tỉnh'}
@@ -154,7 +153,7 @@ const createOrder = (newOrder) => {
 //   return new Promise(async (resolve, reject) => {
 //     try {
 //       const order = await Order.find({
-//         user: id,
+//         user: id,z
 //       }).sort({ createdAt: -1, updatedAt: -1 });
 //       if (order === null) {
 //         resolve({
