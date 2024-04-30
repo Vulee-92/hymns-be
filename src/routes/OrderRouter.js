@@ -6,6 +6,7 @@ const {
 	authMiddleWare,
 } = require("../middleware/authMiddleware");
 
+
 router.post("/create",OrderController.createOrder);
 router.get(
 	"/get-all-order/:id",
