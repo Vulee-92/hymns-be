@@ -21,10 +21,10 @@ app.use(bodyParser.json({ limit: "50mb" }));
 // Middleware để kiểm tra xem dữ liệu JSON có hợp lệ hay không
 
 // Middleware để cho phép CORS từ tất cả các domain
-app.use(cors({
-  origin: 'https://hymnscenter.com', // Thay thế bằng domain của ứng dụng react của bạn
-  credentials: true // Kích hoạt cookie cho các yêu cầu chéo nguồn (nếu cần)
-}));
+// app.use(cors({
+//   origin: 'https://hymnscenter.com', // Thay thế bằng domain của ứng dụng react của bạn
+//   credentials: true // Kích hoạt cookie cho các yêu cầu chéo nguồn (nếu cần)
+// }));
 
 // Sử dụng middleware Helmet
 app.use(helmet());
