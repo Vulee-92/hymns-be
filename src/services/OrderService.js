@@ -10,6 +10,7 @@ const OrderNotificationService = require('./OrderNotificationService');
 const token = '6551170125:AAEAtDG4bpoRFtt1CIWt_WYcVhiH9qxptYk';
 const bot = new TelegramBot(token,{ polling: true });
 const createOrder = (newOrder) => {
+	console.log("newOrder",newOrder);
 	return new Promise(async (resolve,reject) => {
 		const {
 			orderItems,
@@ -118,7 +119,7 @@ const createOrder = (newOrder) => {
 							?.map((order) => {
 								return `+ ${order?.name}: ${order?.amount} x ${order?.price}\n`
 							})}
-					Tổng tiền (đơn hàng & vận chuyển): ${formatter.format(createdOrder?.totalPrice)}
+					Tổng tiền (đơn hàng & vận chuyển): ${(createdOrder?.totalPrice)}
 					Địa chỉ giao hàng: ${createdOrder?.shippingAddress?.address},${createdOrder?.shippingAddress?.ward}, ${createdOrder?.shippingAddress?.city}, ${createdOrder?.shippingAddress?.province}`;
 					bot.sendMessage(chatId,message);
 					resolve({
