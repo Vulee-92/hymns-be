@@ -10,7 +10,6 @@ const OrderNotificationService = require('./OrderNotificationService');
 const token = '6551170125:AAEAtDG4bpoRFtt1CIWt_WYcVhiH9qxptYk';
 const bot = new TelegramBot(token,{ polling: true });
 const createOrder = (newOrder) => {
-	console.log("newOrder",newOrder);
 	return new Promise(async (resolve,reject) => {
 		const {
 			orderItems,
@@ -104,8 +103,7 @@ const createOrder = (newOrder) => {
 				const orderId = createdOrder._id;
 				if (createdOrder) {
 					// Gửi thông báo đơn hàng mới khi tạo thành công
-					await EmailService.sendEmailCreateOrder(email,createdOrder);
-					OrderNotificationService.sendNewOrderNotification(orderId);
+				
 					const chatId = '6749566951';
 					const message = `
 					🛵 🛒 - Đơn hàng mới
@@ -127,6 +125,9 @@ const createOrder = (newOrder) => {
 						message: "success",
 						id: orderId
 					});
+
+					await EmailService.sendEmailCreateOrder(email,createdOrder);
+					OrderNotificationService.sendNewOrderNotification(orderId);
 				}
 			}
 		} catch (e) {

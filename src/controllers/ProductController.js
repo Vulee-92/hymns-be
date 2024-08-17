@@ -131,7 +131,8 @@ const getAllProduct = async (req,res) => {
 			Number(limit) || null,
 			Number(page) || 0,
 		);
-
+		console.log("response: ",response);
+		
 		return res.status(200).json(response);
 	} catch (e) {
 		return res.status(500).json({

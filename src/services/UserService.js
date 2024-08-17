@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const User = require("../models/UserModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { genneralAccessToken,genneralRefreshToken } = require("./JwtService");
 const dotenv = require("dotenv");
 const EmailVerifyService = require("../services/EmailVerifyService");
@@ -359,6 +359,8 @@ const verifyUser = async (id,data) => {
 
 
 const loginUser = (userLogin) => {
+	console.log("user login: " , userLogin);
+	
 	return new Promise(async (resolve,reject) => {
 		const { email,password } = userLogin;
 		try {
