@@ -15,6 +15,11 @@ const port = process.env.PORT || 3001;
 // Sử dụng middleware body-parser để phân tích dữ liệu JSON
 app.use(bodyParser.json({ limit: "50mb" }));
 
+app.use(cors({
+  origin: '*', // Hoặc cấu hình domain cụ thể
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Đảm bảo tất cả các phương thức bạn cần đều được liệt kê
+  allowedHeaders: ['Content-Type', 'Authorization'] // Đảm bảo các headers cần thiết đều được chấp nhận
+}));
 
 // Thiết lập các route của ứng dụng
 routes(app);
