@@ -16,10 +16,11 @@ const port = process.env.PORT || 3001;
 app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(cors({
-  origin: '*', // Hoặc cấu hình domain cụ thể
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Đảm bảo tất cả các phương thức bạn cần đều được liệt kê
-  allowedHeaders: ['Content-Type', 'Authorization'] // Đảm bảo các headers cần thiết đều được chấp nhận
+  origin: ['https://your-react-app.com', 'https://hymnscenter.online'], // Thay bằng domain ứng dụng React của bạn
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true // Nếu bạn cần gửi cookie hoặc các thông tin xác thực
 }));
+app.options('*', cors()); // Kích hoạt preflight cho tất cả các route
 
 // Thiết lập các route của ứng dụng
 routes(app);
