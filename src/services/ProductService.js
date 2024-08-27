@@ -8,6 +8,8 @@ const createProduct = (newProduct) => {
 	return new Promise(async (resolve,reject) => {
 		try {
 			const { name,image,countInStock,price,rating,description,discount,fee,category,brand,collections } = newProduct;
+			console.log("newProduct",newProduct);
+			
 			// const checkProduct = await Product.findOne({
 			// 	name: name,
 			// });
@@ -292,68 +294,72 @@ const updateProductsInCates = async () => {
 	}
 };
 
-const getAllProduct = async (limit,page,sort,vendor,type,collections) => {
+const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
 	try {
-		let filter = {};
-		let collectionsFilter = [];
-
-		// Lọc theo collections
-		if (collections) {
-			const collectionsSlug = await Collections.findOne({ slug: collections });
+	  // Gán giá trị mặc định cho limit và page nếu không có giá trị truyền vào
+	  limit = Number(limit) || 10; // Mặc định hiển thị 10 sản phẩm mỗi trang
+	  page = Number(page) || 0; // Mặc định trang đầu tiên là 0
+  
+	  let filter = {};
+	  let collectionsFilter = [];
+  
+	  // Lọc theo collections
+	  if (collections) {
+		const collectionsSlug = await Collections.findOne({ slug: collections });
 			collectionsFilter = [{ name: collectionsSlug?.name,description: collectionsSlug?.description }]
-			if (collectionsSlug) {
-				filter.collections = collectionsSlug.collection_id;
-			}
+		if (collectionsSlug) {
+		  filter.collections = collectionsSlug.collection_id;
 		}
+	  }
 		// Lấy danh sách các brand và cate từ collections (nếu có)
-		let brandsFromCollections = [];
-		let catesFromCollections = [];
-		if (filter.collections) {
-			const productsInCollection = await Product.find({ collections: filter.collections });
-
+	  let brandsFromCollections = [];
+	  let catesFromCollections = [];
+	  if (filter.collections) {
+		const productsInCollection = await Product.find({ collections: filter.collections });
+  
 			const brandsId = [...new Set(productsInCollection.map(product => product.brand))];
-
+  
 			// const categoryName = await Brand.find({ brand_id: brandsId });
 
 			catesId = [...new Set(productsInCollection.map(product => product.category))];
 			const [brandNames,categoryNames] = await Promise.all([
-				Brand.find({ brand_id: { $in: brandsId } }),
-				Category.find({ cate_id: { $in: catesId } })
-			]);
+		  Brand.find({ brand_id: { $in: brandsId } }),
+		  Category.find({ cate_id: { $in: catesId } })
+		]);
 			// const cateName = await Category.find({ cate_id: catesId })
 			brandsFromCollections = brandNames.map(item => ({ slug: item.slug,brand: item.brand,count: item.count }));
 			catesFromCollections = categoryNames.map(item => ({ slug: item.slug,category: item.category,count: item.count }));
-		}
-
-		// Lọc theo vendor
-		if (vendor && vendor.length > 0) {
-			const brandArray = vendor.split(',');
-			const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('brand_id');
-			filter.brand = { $in: brandIds };
-		}
-
+	  }
+  
+	  // Lọc theo vendor
+	  if (vendor && vendor.length > 0) {
+		const brandArray = vendor.split(',');
+		const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('brand_id');
+		filter.brand = { $in: brandIds };
+	  }
+  
+	  // Lọc theo type
+	  if (type && type.length > 0) {
+		const categoryArray = type.split(',');
+		const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
+		filter.category = { $in: categoryIds };
+	  }
 		// Lọc theo type
 		if (type && type.length > 0) {
 			const categoryArray = type.split(',');
 			const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
 			filter.category = { $in: categoryIds };
+  
 		}
-		// Lọc theo type
-		if (type && type.length > 0) {
-			const categoryArray = type.split(',');
-			const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
-			filter.category = { $in: categoryIds };
-
-		}
-		// Truy vấn dữ liệu với các điều kiện lọc và sắp xếp
+	  // Truy vấn dữ liệu với các điều kiện lọc và sắp xếp
 		let query = Product.find(filter).sort({ createdAt: -1,updatedAt: -1 });
-
-		// Áp dụng phân trang nếu có
+  
+	  // Áp dụng phân trang nếu có
 		if (limit) {
-			query = query.limit(limit).skip(page * limit);
+	  query = query.limit(limit).skip(page * limit);
 		}
-
-		const allProduct = await query;
+  
+	  const allProduct = await query;
 
 		const totalProduct = await Product.count();
 		// Định nghĩa đối tượng để lưu trữ tổng số lượng sản phẩm cho từng thương hiệu và từng danh mục
@@ -378,21 +384,21 @@ const getAllProduct = async (limit,page,sort,vendor,type,collections) => {
 		// Update brand count
 		// await updateBrandAndCategoryCount();
 		// Gọi hàm để cập nhật sản phẩm
-		return {
-			status: "OK",
-			message: "Success",
-			data: allProduct,
-			total: totalProduct,
+	  return {
+		status: "OK",
+		message: "Success",
+		data: allProduct,
+		total: totalProduct,
 			pageCurrent: Number(page) + 1,
 			totalPage: Math.ceil(totalProduct / Number(limit) || 1),
-			brands: brandsFromCollections,
-			categories: catesFromCollections,
-			collections: collectionsFilter
-		};
+		brands: brandsFromCollections,
+		categories: catesFromCollections,
+		collections: collectionsFilter
+	  };
 	} catch (e) {
-		throw e;
+	  throw e;
 	}
-};
+  };
 
 const getAllProductAllowBrand = async (limit,page,sort,type,brand) => {
 	try {

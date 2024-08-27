@@ -9,6 +9,7 @@ const RecentlyViewedRoute = require("./recentlyViewedRoute");
 const CateProductRouter = require("./CateProductRoute");
 const BrandProductRouter = require("./BrandProductRoute");
 const CollectionsProductRouter = require("./CollectionsRouter");
+const NotificationRouter = require("./NotificationRoute");
 const routes = (app) => {
 	app.use("/api/user",UserRouter);
 	app.use("/api/product",ProductRouter);
@@ -20,6 +21,7 @@ const routes = (app) => {
 	app.use("/api/cate-product",CateProductRouter);
 	app.use("/api/brand-product",BrandProductRouter);
 	app.use("/api/collections",CollectionsProductRouter);
+	app.use("/api/notifications",NotificationRouter);
 	// app.use("/api/viewed",RecentlyViewedRoute);
 
 };
