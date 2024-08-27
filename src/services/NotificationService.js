@@ -1,5 +1,7 @@
 const Order = require('../models/OrderModel'); // Thay thế với đường dẫn đúng đến model Order
 let clients = [];
+let notificationQueue = [];
+let isSending = false;
 
 const streamOrderNotifications = async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -12,11 +14,16 @@ const streamOrderNotifications = async (req, res) => {
   // Khi client ngắt kết nối
   req.on('close', () => {
     clients = clients.filter(client => client !== res);
+    if (clients.length === 0) {
+      clearNotificationQueue(); // Xóa hàng đợi khi không còn client nào kết nối
+    }
   });
 
-  // Bắt đầu gửi thông báo sau 7 giây
+  // Thêm 7 giây delay trước khi gửi thông báo đầu tiên
   setTimeout(() => {
-    sendOrderNotifications();
+    if (!isSending) {
+      sendOrderNotifications();
+    }
   }, 7000);
 };
 
@@ -27,16 +34,8 @@ const sendOrderNotifications = async () => {
     // Nếu không có đơn hàng, không gửi thông báo
     if (!orders.length) return;
 
-    let index = 0;
-
-    const sendNotification = () => {
-      if (index >= orders.length) {
-        index = 0; // Quay lại vòng lặp nếu hết đơn hàng
-      }
-
-      const order = orders[index];
-
-      // Tạo thông báo đơn giản cho đơn hàng
+    // Đưa tất cả các đơn hàng vào hàng đợi thông báo
+    orders.forEach(order => {
       const notification = {
         fullName: order.shippingAddress.fullName,
         codeOrder: order.codeOrder,
@@ -46,29 +45,44 @@ const sendOrderNotifications = async () => {
           image: item.image[0] // Lấy hình ảnh đầu tiên trong mảng
         }))
       };
+      notificationQueue.push(notification);
+    });
 
-      // Gửi thông báo cho tất cả các client
-      clients.forEach(client => {
-        client.write(`data: ${JSON.stringify(notification)}\n\n`);
-      });
-
-      // Tăng chỉ số để lặp qua các đơn hàng
-      index++;
-
-      // Tạo thời gian ngẫu nhiên cho lần gửi thông báo tiếp theo
-      const minDelay = 10000; // 7 seconds
-      const maxDelay = 20000; // 20 seconds
-
-      const randomTime = Math.floor(Math.random() * (maxDelay - minDelay + 2)) + minDelay;
-
-      setTimeout(sendNotification, randomTime);
-    };
-
-    // Gửi thông báo đầu tiên sau delay
-    sendNotification();
+    // Bắt đầu gửi thông báo
+    if (!isSending) {
+      isSending = true;
+      sendNotification();
+    }
   } catch (error) {
     console.error('Error sending order notifications:', error);
   }
+};
+
+const sendNotification = () => {
+  if (!notificationQueue.length) {
+    isSending = false; // Dừng việc gửi nếu hàng đợi rỗng
+    return;
+  }
+
+  const notification = notificationQueue.shift(); // Lấy thông báo đầu tiên trong hàng đợi
+
+  // Gửi thông báo cho tất cả các client
+  clients.forEach(client => {
+    client.write(`data: ${JSON.stringify(notification)}\n\n`);
+  });
+
+  // Tạo thời gian ngẫu nhiên cho lần gửi thông báo tiếp theo
+  const minDelay = 5000; // 7 seconds
+  const maxDelay = 20000; // 15 seconds
+
+  const randomTime = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+
+  setTimeout(sendNotification, randomTime); // Tiếp tục gửi thông báo sau thời gian delay ngẫu nhiên
+};
+
+const clearNotificationQueue = () => {
+  notificationQueue = [];
+  isSending = false;
 };
 
 module.exports = {
