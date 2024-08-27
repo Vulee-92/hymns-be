@@ -407,6 +407,37 @@ const updateOrder = (id,data) => {
 		}
 	});
 };
+
+const updateOrderItemsWithSlug = async () => {
+	try {
+			// Lấy tất cả các đơn hàng
+			const orders = await Order.find({});
+
+			for (let order of orders) {
+					let isUpdated = false;
+
+					for (let item of order.orderItems) {
+							// Tìm sản phẩm tương ứng với product ID trong mỗi orderItem
+							const product = await Product.findById(item.product);
+							if (product && product.slug) {
+									item.slug = product.slug; // Thêm slug vào orderItem
+									isUpdated = true;
+							}
+					}
+
+					// Lưu lại nếu đã có sự thay đổi
+					if (isUpdated) {
+							await order.save();
+					}
+			}
+
+			console.log('Cập nhật slug cho các đơn hàng thành công.');
+	} catch (error) {
+			console.error('Có lỗi xảy ra:', error);
+	}
+};
+
+
 module.exports = {
 	createOrder,
 	getAllOrderDetails,
@@ -414,5 +445,6 @@ module.exports = {
 	cancelOrderDetails,
 	getAllOrder,
 	getDetailsOrder,
-	updateOrder
+	updateOrder,
+	updateOrderItemsWithSlug
 };

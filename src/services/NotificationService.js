@@ -14,8 +14,10 @@ const streamOrderNotifications = async (req, res) => {
     clients = clients.filter(client => client !== res);
   });
 
-  // Bắt đầu gửi thông báo
-  sendOrderNotifications();
+  // Bắt đầu gửi thông báo sau 7 giây
+  setTimeout(() => {
+    sendOrderNotifications();
+  }, 7000);
 };
 
 const sendOrderNotifications = async () => {
@@ -40,6 +42,7 @@ const sendOrderNotifications = async () => {
         codeOrder: order.codeOrder,
         orderItems: order.orderItems.map(item => ({
           name: item.name,
+          slug: item.slug,
           image: item.image[0] // Lấy hình ảnh đầu tiên trong mảng
         }))
       };
@@ -53,12 +56,15 @@ const sendOrderNotifications = async () => {
       index++;
 
       // Tạo thời gian ngẫu nhiên cho lần gửi thông báo tiếp theo
-      const randomTime = Math.floor(Math.random() * 8000) + 10000; // Ngẫu nhiên từ 10 đến 18 giây
+      const minDelay = 10000; // 7 seconds
+      const maxDelay = 20000; // 20 seconds
+
+      const randomTime = Math.floor(Math.random() * (maxDelay - minDelay + 2)) + minDelay;
 
       setTimeout(sendNotification, randomTime);
     };
 
-    // Gửi thông báo đầu tiên
+    // Gửi thông báo đầu tiên sau delay
     sendNotification();
   } catch (error) {
     console.error('Error sending order notifications:', error);

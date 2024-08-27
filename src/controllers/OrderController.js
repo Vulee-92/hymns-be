@@ -120,6 +120,22 @@ const getAllOrder = async (req,res) => {
 		});
 	}
 };
+const updateOrderItemsWithSlug = async (req, res) => {
+	try {
+			await OrderService.updateOrderItemsWithSlug(); // Gọi service để cập nhật slug
+			res.status(200).json({
+					status: 'OK',
+					message: 'Cập nhật slug cho các đơn hàng thành công.'
+			});
+	} catch (error) {
+			console.error('Có lỗi xảy ra:', error);
+			res.status(500).json({
+					status: 'ERR',
+					message: 'Có lỗi xảy ra khi cập nhật slug.',
+					error: error.message
+			});
+	}
+};
 const updateOrder = async (req,res) => {
 	try {
 		const orderId = req.params.id;
@@ -145,5 +161,6 @@ module.exports = {
 	getDetailsOrder,
 	cancelOrderDetails,
 	getAllOrder,
-	updateOrder
+	updateOrder,
+	updateOrderItemsWithSlug
 };

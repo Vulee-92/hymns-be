@@ -10,6 +10,7 @@ const orderSchema = new mongoose.Schema(
 				price: { type: Number,required: true },
 				fee: { type: Number,required: false },
 				type: { type: String,required: true },
+				slug: { type: String,required: true },
 				discount: { type: Number },
 				product: {
 					type: mongoose.Schema.Types.ObjectId,

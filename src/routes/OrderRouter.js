@@ -25,5 +25,6 @@ router.delete(
 );
 router.put("/update/:id",authUserMiddleWare,OrderController.updateOrder);
 router.get("/get-all-order",OrderController.getAllOrder);
+router.post("/update-all",OrderController.updateOrderItemsWithSlug);
 module.exports = router;
 
