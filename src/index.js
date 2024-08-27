@@ -15,7 +15,7 @@ const port = process.env.PORT || 3001;
 // CORS middleware
 app.use(
   cors({
-    origin: ["https://www.hymnscenter.com", "https://hymnscenter.online"], // Thay bằng domain ứng dụng React của bạn
+    origin: ["https://www.hymnscenter.com", "https://hymns-be.onrender.com"], // Thay bằng domain ứng dụng React của bạn
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // Cho phép gửi cookie và thông tin xác thực
   })
