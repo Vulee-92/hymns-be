@@ -36,8 +36,12 @@ const sendOrderNotifications = async () => {
 
       // Tạo thông báo đơn giản cho đơn hàng
       const notification = {
-        message: `New order placed: ${order.codeOrder} by ${order.shippingAddress.fullName}`,
-        order,
+        fullName: order.shippingAddress.fullName,
+        codeOrder: order.codeOrder,
+        orderItems: order.orderItems.map(item => ({
+          name: item.name,
+          image: item.image[0] // Lấy hình ảnh đầu tiên trong mảng
+        }))
       };
 
       // Gửi thông báo cho tất cả các client
@@ -49,7 +53,7 @@ const sendOrderNotifications = async () => {
       index++;
 
       // Tạo thời gian ngẫu nhiên cho lần gửi thông báo tiếp theo
-      const randomTime = Math.floor(Math.random() * 8000) + 10000; // Ngẫu nhiên từ 2 đến 10 giây
+      const randomTime = Math.floor(Math.random() * 8000) + 10000; // Ngẫu nhiên từ 10 đến 18 giây
 
       setTimeout(sendNotification, randomTime);
     };
