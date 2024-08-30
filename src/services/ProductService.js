@@ -190,13 +190,12 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
       appliedFilters,
       limit: limitNumber
     };
-
-    if (process.env.NODE_ENV === 'production') {
-      // Mã hóa dữ liệu trong môi trường production
+		if (process.env.NODE_ENV === 'production') {
+      console.log('Encrypting data for production environment');
       const encryptedData = encrypt(JSON.stringify(responseData));
       return { encryptedData };
     } else {
-      // Trả về dữ liệu không mã hóa trong môi trường development
+      console.log('Returning unencrypted data for non-production environment');
       return responseData;
     }
   } catch (error) {

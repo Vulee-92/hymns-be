@@ -6,10 +6,12 @@
   "engines": {
     "node": "20.x"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js"
-  },
+		"scripts": {
+			"test": "echo \"Error: no test specified\" && exit 1",
+			"start": "NODE_ENV=production node src/index.js",
+			"start:dev": "NODE_ENV=development nodemon src/index.js",
+			"start:prod": "NODE_ENV=production node src/index.js"
+		},
   "author": "",
   "license": "ISC",
   "dependencies": {
