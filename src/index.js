@@ -4,29 +4,57 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const cors = require("cors");
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
+const winston = require("winston");
 const routes = require("./routes");
 const OrderNotificationService = require("./services/OrderNotificationService");
 
 dotenv.config();
 
+// Cấu hình logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
+}
+
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
 // CORS middleware
-app.use(
-  cors({
-    origin: ["https://www.hymnscenter.com", "https://hymns-be.onrender.com"], // Thay bằng domain ứng dụng React của bạn
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true, // Cho phép gửi cookie và thông tin xác thực
-  })
-);
-app.options("*", cors()); // Kích hoạt preflight cho tất cả các route
+app.use(cors({
+  origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
+app.options("*", cors());
 
 // Sử dụng Helmet để thêm các header bảo mật
 app.use(helmet());
 
-// Sử dụng middleware để phân tích dữ liệu JSON (thay thế body-parser)
-app.use(express.json({ limit: "50mb" }));
+// Compression middleware
+app.use(compression());
+
+// Sử dụng middleware để phân tích dữ liệu JSON
+app.use(express.json({ limit: "10mb" }));
 
 // Thiết lập các route của ứng dụng
 routes(app);
@@ -36,42 +64,49 @@ const server = http.createServer(app);
 OrderNotificationService.initSocket(server);
 
 // Kết nối MongoDB
-mongoose
-  .connect(process.env.MONGO_DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to MongoDB database");
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB", err);
-  });
+mongoose.connect(process.env.MONGO_DB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => logger.info("Connected to MongoDB database"))
+.catch((err) => logger.error("Failed to connect to MongoDB", { error: err }));
 
-// Lắng nghe sự kiện thay đổi dữ liệu trong MongoDB và thông báo cho client qua Socket.IO
+// Lắng nghe sự kiện thay đổi dữ liệu trong MongoDB
 const db = mongoose.connection;
 db.once("open", () => {
   const collection = db.collection("comments");
   const changeStream = collection.watch();
   changeStream.on("change", (change) => {
-    console.log(change);
+    logger.info("Database change detected", { change });
     server.io.emit("change", change);
   });
 });
 
-// Thêm header Cache-Control vào phản hồi của máy chủ
+// Root route
 app.get("/", (req, res) => {
-  res.setHeader("Cache-Control", "no-store"); // Không lưu trữ bản sao của trang web trong bộ nhớ cache
+  res.setHeader("Cache-Control", "no-store");
   res.send("Hello world!");
 });
 
 // Xử lý lỗi toàn cục
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err.stack);
   res.status(500).send("Something broke!");
 });
 
-// Bắt đầu máy chủ và lắng nghe trên cổng đã chỉ định
+// Bắt đầu máy chủ
 server.listen(port, () => {
-  console.log("Server is running on port:", port);
+  logger.info(`Server is running on port: ${port}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    mongoose.connection.close(false, () => {
+      logger.info('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
 });
