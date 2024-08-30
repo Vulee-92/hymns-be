@@ -8,12 +8,9 @@ const { encrypt } = require('../utils/encryption');
 
 const handleResponse = (data) => {
   if (process.env.NODE_ENV === 'production') {
-    console.log('Encrypting data for production environment');
     return { encryptedData: encrypt(JSON.stringify(data)) };
-  } else {
-    console.log('Returning unencrypted data for non-production environment');
-    return data;
   }
+  return data;
 };
 
 const createProduct = async (newProduct) => {
@@ -57,47 +54,13 @@ const createProduct = async (newProduct) => {
   }
 };
 
-const deleteProduct = async (id) => {
-  try {
-    const product = await Product.findById(id);
-    if (!product) {
-      return handleResponse({
-        status: "ERR",
-        message: "Product not found",
-      });
-    }
-
-    await Product.findByIdAndDelete(id);
-    return handleResponse({
-      status: "OK",
-      message: "Product deleted successfully",
-    });
-  } catch (error) {
-    logger.error("Error deleting product:", error);
-    throw error;
-  }
-};
-
-const deleteManyProduct = async (ids) => {
-  try {
-    await Product.deleteMany({ _id: { $in: ids } });
-    return handleResponse({
-      status: "OK",
-      message: "Products deleted successfully",
-    });
-  } catch (error) {
-    logger.error("Error deleting multiple products:", error);
-    throw error;
-  }
-};
-
 const updateProduct = async (slug, data) => {
   try {
     const product = await Product.findOne({ slug });
     if (!product) {
       return handleResponse({
         status: "ERR",
-        message: "Product not found",
+        message: "The product is not defined",
       });
     }
 
@@ -109,7 +72,7 @@ const updateProduct = async (slug, data) => {
 
     return handleResponse({
       status: "OK",
-      message: "Product updated successfully",
+      message: "SUCCESS",
       data: updatedProduct,
     });
   } catch (error) {
@@ -118,33 +81,51 @@ const updateProduct = async (slug, data) => {
   }
 };
 
-const getDetailsProduct = async (slug) => {
+const getDetailsProduct = async (idSlug) => {
   try {
-    const product = await Product.findOne({ slug });
+    const product = await Product.findOne({ slug: idSlug });
     if (!product) {
       return handleResponse({
         status: "ERR",
-        message: "Product not found",
+        message: "The product is not defined",
       });
     }
     return handleResponse({
       status: 'OK',
-      message: 'Success',
+      message: 'SUCCESS',
       data: product,
     });
   } catch (error) {
-    logger.error("Error fetching product details:", error);
+    logger.error("Error getting product details:", error);
+    throw error;
+  }
+};
+
+const deleteProduct = async (id) => {
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      return handleResponse({
+        status: "ERR",
+        message: "The product is not defined",
+      });
+    }
+
+    await Product.findByIdAndDelete(id);
+    return handleResponse({
+      status: "OK",
+      message: "Delete product success",
+    });
+  } catch (error) {
+    logger.error("Error deleting product:", error);
     throw error;
   }
 };
 
 const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
   try {
-    const filter = {};
+    let filter = {};
     let collectionsFilter = [];
-
-    const limitNumber = parseInt(limit) || 10;
-    const pageNumber = parseInt(page) || 0;
 
     if (collections) {
       const collectionsSlug = await Collections.findOne({ slug: collections });
@@ -154,90 +135,99 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
       }
     }
 
-    if (vendor) {
-      const brandIds = await Brand.find({ slug: { $in: vendor.split(',') } }).distinct('brand_id');
+    if (vendor && vendor.length > 0) {
+      const brandArray = vendor.split(',');
+      const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('brand_id');
       filter.brand = { $in: brandIds };
     }
-
-    if (type) {
-      const categoryIds = await Category.find({ slug: { $in: type.split(',') } }).distinct('cate_id');
+    
+    if (type && type.length > 0) {
+      const categoryArray = type.split(',');
+      const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
       filter.category = { $in: categoryIds };
     }
+    
+    const sortOptions = sort ? { [sort]: -1 } : { createdAt: -1, updatedAt: -1 };
+    
+    const limitNumber = Number(limit) || 10;
+    const pageNumber = Number(page) || 0;
+    
+    const [allProduct, totalProduct] = await Promise.all([
+      Product.find(filter)
+        .sort(sortOptions)
+        .limit(limitNumber)
+        .skip(pageNumber * limitNumber),
+      Product.countDocuments(filter)
+    ]);
 
-    let sortQuery = { createdAt: -1, updatedAt: -1 };
-    if (sort) {
-      const [field, order] = sort.split('_');
-      sortQuery = { [field]: order === 'asc' ? 1 : -1 };
-    }
-
-    const totalProduct = await Product.countDocuments(filter);
-    const totalPage = Math.ceil(totalProduct / limitNumber);
-
-    const products = await Product.find(filter)
-      .sort(sortQuery)
-      .skip(pageNumber * limitNumber)
-      .limit(limitNumber);
-
-    const brandsFromCollections = await getBrandsFromCollections(filter);
-    const catesFromCollections = await getCategoriesFromCollections(filter);
-
-    const appliedFilters = {
-      type: type ? type.split(',') : [],
-      vendor: vendor ? vendor.split(',') : [],
-      collections: collections ? [collections] : []
-    };
+    const [brandsFromCollections, catesFromCollections] = await Promise.all([
+      getBrandsFromCollections(filter),
+      getCategoriesFromCollections(filter)
+    ]);
 
     return handleResponse({
       status: "OK",
       message: "Success",
-      data: products,
+      data: allProduct,
       total: totalProduct,
       pageCurrent: pageNumber + 1,
-      totalPage: totalPage,
+      totalPage: Math.ceil(totalProduct / limitNumber),
       brands: brandsFromCollections,
       categories: catesFromCollections,
-      collections: collectionsFilter,
-      appliedFilters,
-      limit: limitNumber
+      collections: collectionsFilter
     });
   } catch (error) {
-    logger.error("Error fetching all products:", error);
+    logger.error("Error getting all products:", error);
     throw error;
   }
 };
 
-const getBrandsFromCollections = async (filter) => {
-  if (!filter.collections) return [];
-  const productsInCollection = await Product.find({ collections: filter.collections });
-  const brandsId = [...new Set(productsInCollection.map(product => product.brand))];
-  const brandNames = await Brand.find({ brand_id: { $in: brandsId } });
-  return brandNames.map(item => ({ slug: item.slug, brand: item.brand, count: item.count }));
-};
-
-const getCategoriesFromCollections = async (filter) => {
-  if (!filter.collections) return [];
-  const productsInCollection = await Product.find({ collections: filter.collections });
-  const catesId = [...new Set(productsInCollection.map(product => product.category))];
-  const categoryNames = await Category.find({ cate_id: { $in: catesId } });
-  return categoryNames.map(item => ({ slug: item.slug, category: item.category, count: item.count }));
-};
-
-const searchProduct = async (filter) => {
+const deleteManyProduct = async (ids) => {
   try {
-    const keywords = filter.split(' ');
-    const regexArray = keywords.map(keyword => new RegExp(keyword, 'i'));
-    const combinedRegex = regexArray.map(regex => `(?=.*${regex.source})`).join('');
-    const searchResult = await Product.find({ name: { '$regex': `^${combinedRegex}.*$`, $options: 'i' } })
-      .sort({ createdAt: -1, updatedAt: -1 });
-
+    await Product.deleteMany({ _id: { $in: ids } });
     return handleResponse({
-      status: 'OK',
-      message: 'Success',
-      data: searchResult,
-      total: await Product.countDocuments(),
+      status: "OK",
+      message: "Delete products success",
     });
   } catch (error) {
-    logger.error("Error searching products:", error);
+    logger.error("Error deleting multiple products:", error);
+    throw error;
+  }
+};
+
+const getAllType = async (selectedTypes) => {
+  try {
+    let aggregationPipeline = [
+      {
+        $group: {
+          _id: "$type",
+          count: { $sum: 1 },
+        },
+      },
+    ];
+
+    if (selectedTypes && selectedTypes.length > 0) {
+      aggregationPipeline.unshift({
+        $match: {
+          type: { $in: selectedTypes },
+        },
+      });
+    }
+
+    const allType = await Product.aggregate(aggregationPipeline);
+
+    const result = allType.map((type) => ({
+      type: type._id,
+      count: type.count,
+    }));
+
+    return handleResponse({
+      status: "OK",
+      message: "Success",
+      data: result,
+    });
+  } catch (error) {
+    logger.error("Error getting all types:", error);
     throw error;
   }
 };
@@ -248,7 +238,9 @@ const getAllBrand = async (selectedTypes) => {
 
     if (selectedTypes && selectedTypes.length > 0) {
       aggregationPipeline.push({
-        $match: { type: { $in: selectedTypes } },
+        $match: {
+          type: { $in: selectedTypes },
+        },
       });
     }
 
@@ -272,21 +264,109 @@ const getAllBrand = async (selectedTypes) => {
 
     const allBrands = await Product.aggregate(aggregationPipeline);
 
+    const result = allBrands.map((brand) => ({
+      brand: brand._id,
+      count: brand.count,
+    }));
+
     return handleResponse({
       status: 'OK',
       message: 'Success',
-      data: allBrands.map(brand => ({
-        brand: brand._id,
-        count: brand.count,
-      })),
+      data: result,
     });
   } catch (error) {
-    logger.error("Error fetching all brands:", error);
+    logger.error("Error getting all brands:", error);
     throw error;
   }
 };
 
-// Thêm các hàm khác như getAllType, getAllProductAllowBrand ở đây nếu cần
+const searchProduct = async (filter) => {
+  try {
+    const keywords = filter.split(' ');
+    const regexArray = keywords.map(keyword => new RegExp(keyword, 'i'));
+    const combinedRegex = regexArray.map(regex => `(?=.*${regex.source})`).join('');
+    const searchResult = await Product.find({ name: { '$regex': `^${combinedRegex}.*$`, $options: 'i' } })
+      .sort({ createdAt: -1, updatedAt: -1 });
+
+    return handleResponse({
+      status: 'OK',
+      message: 'Success',
+      data: searchResult,
+      total: await Product.countDocuments(),
+    });
+  } catch (error) {
+    logger.error("Error searching products:", error);
+    throw error;
+  }
+};
+
+const getAllProductAllowBrand = async (limit, page, sort, type, brand) => {
+  try {
+    let filter = {};
+    let BrandFilter = [];
+
+    if (brand) {
+      const brandSlug = await Brand.findOne({ slug: brand });
+      if (brandSlug) {
+        filter.brand = brandSlug.brand_id;
+        BrandFilter = [{ name: brandSlug.brand }];
+      }
+    }
+
+    if (type && type.length > 0) {
+      const categoryArray = type.split(',');
+      const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
+      filter.category = { $in: categoryIds };
+    }
+
+    const sortOptions = sort ? { [sort]: -1 } : { createdAt: -1, updatedAt: -1 };
+    
+    const limitNumber = Number(limit) || 10;
+    const pageNumber = Number(page) || 0;
+
+    const [allProduct, totalProduct] = await Promise.all([
+      Product.find(filter)
+        .sort(sortOptions)
+        .limit(limitNumber)
+        .skip(pageNumber * limitNumber),
+      Product.countDocuments(filter)
+    ]);
+
+    const catesFromCollections = await getCategoriesFromCollections(filter);
+
+    return handleResponse({
+      status: "OK",
+      message: "Success",
+      data: allProduct,
+      total: totalProduct,
+      pageCurrent: pageNumber + 1,
+      totalPage: Math.ceil(totalProduct / limitNumber),
+      categories: catesFromCollections,
+      brand: BrandFilter
+    });
+  } catch (error) {
+    logger.error("Error getting all products allowed by brand:", error);
+    throw error;
+  }
+};
+
+// Helper functions
+const getBrandsFromCollections = async (filter) => {
+  if (!filter.collections) return [];
+  const productsInCollection = await Product.find({ collections: filter.collections });
+  const brandsId = [...new Set(productsInCollection.map(product => product.brand))];
+  const brandNames = await Brand.find({ brand_id: { $in: brandsId } });
+  return brandNames.map(item => ({ slug: item.slug, brand: item.brand, count: item.count }));
+};
+
+const getCategoriesFromCollections = async (filter) => {
+  if (!filter.collections && !filter.brand) return [];
+  const query = filter.collections ? { collections: filter.collections } : { brand: filter.brand };
+  const productsInCollection = await Product.find(query);
+  const catesId = [...new Set(productsInCollection.map(product => product.category))];
+  const categoryNames = await Category.find({ cate_id: { $in: catesId } });
+  return categoryNames.map(item => ({ slug: item.slug, category: item.category, count: item.count }));
+};
 
 module.exports = {
   createProduct,
@@ -295,7 +375,8 @@ module.exports = {
   deleteProduct,
   getAllProduct,
   deleteManyProduct,
+  getAllType,
   getAllBrand,
   searchProduct,
-  // Thêm các hàm khác vào đây nếu cần
+  getAllProductAllowBrand
 };
