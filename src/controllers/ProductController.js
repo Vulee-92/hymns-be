@@ -1,5 +1,14 @@
 const ProductService = require("../services/ProductService");
-const logger = require("../utils/logger"); // Giả sử bạn đã cài đặt một hệ thống logging
+const logger = require("../utils/logger");
+const { encrypt, decrypt } = require("../utils/encryption");
+
+const handleResponse = (res, data, statusCode = 200) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.status(statusCode).json({ encryptedData: encrypt(JSON.stringify(data)) });
+  } else {
+    res.status(statusCode).json(data);
+  }
+};
 
 const createProduct = async (req, res) => {
   try {
@@ -17,13 +26,13 @@ const createProduct = async (req, res) => {
 
     const response = await ProductService.createProduct(req.body);
     logger.info(`Product created: ${name}`);
-    return res.status(201).json(response);
+    handleResponse(res, response, 201);
   } catch (e) {
     logger.error('Error in createProduct:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
@@ -40,13 +49,13 @@ const updateProduct = async (req, res) => {
 
     const response = await ProductService.updateProduct(productIdSlug, data);
     logger.info(`Product updated: ${productIdSlug}`);
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in updateProduct:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
@@ -60,13 +69,13 @@ const getDetailsProduct = async (req, res) => {
       });
     }
     const response = await ProductService.getDetailsProduct(productIdSlug);
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in getDetailsProduct:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
@@ -81,13 +90,13 @@ const deleteProduct = async (req, res) => {
     }
     const response = await ProductService.deleteProduct(productId);
     logger.info(`Product deleted: ${productId}`);
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in deleteProduct:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
@@ -102,17 +111,16 @@ const deleteMany = async (req, res) => {
     }
     const response = await ProductService.deleteManyProduct(ids);
     logger.info(`Multiple products deleted: ${ids.join(', ')}`);
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in deleteMany:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
-// Trong ProductController.js
 const getAllProduct = async (req, res) => {
   try {
     const result = await ProductService.getAllProduct(
@@ -123,16 +131,10 @@ const getAllProduct = async (req, res) => {
       req.query.type,
       req.params.collections
     );
-
-    if (result.encryptedData) {
-      // Dữ liệu đã được mã hóa (môi trường production)
-      res.json({ encryptedData: result.encryptedData });
-    } else {
-      // Dữ liệu không được mã hóa (môi trường development)
-      res.json(result);
-    }
+    handleResponse(res, result);
   } catch (error) {
-    res.status(500).json({ status: "ERR", message: error.message });
+    logger.error('Error in getAllProduct:', error);
+    handleResponse(res, { status: "ERR", message: error.message }, 500);
   }
 };
 
@@ -157,52 +159,52 @@ const getAllProductAllowBrand = async (req, res) => {
       type,
       brand
     );
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in getAllProductAllowBrand:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
 const getAllType = async (req, res) => {
   try {
     const response = await ProductService.getAllType();
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in getAllType:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
 const getAllBrand = async (req, res) => {
   try {
     const response = await ProductService.getAllBrand();
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in getAllBrand:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
 const getAllCategory = async (req, res) => {
   try {
     const response = await ProductService.getAllCategory();
-    return res.status(200).json(response);
+    handleResponse(res, response);
   } catch (e) {
     logger.error('Error in getAllCategory:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
   }
 };
 
@@ -218,13 +220,24 @@ const searchProduct = async (req, res) => {
     }
 
     const searchResult = await ProductService.searchProduct(filter);
-    return res.status(200).json(searchResult);
+    handleResponse(res, searchResult);
   } catch (e) {
     logger.error('Error in searchProduct:', e);
-    return res.status(500).json({
+    handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
-    });
+    }, 500);
+  }
+};
+
+const decryptData = (req, res) => {
+  try {
+    const { encryptedData } = req.body;
+    const decryptedData = decrypt(encryptedData);
+    res.json(JSON.parse(decryptedData));
+  } catch (error) {
+    logger.error('Error in decryptData:', error);
+    res.status(400).json({ status: "ERR", message: 'Decryption failed' });
   }
 };
 
@@ -239,5 +252,6 @@ module.exports = {
   getAllType,
   getAllBrand,
   getAllCategory,
-  searchProduct
+  searchProduct,
+  decryptData
 };

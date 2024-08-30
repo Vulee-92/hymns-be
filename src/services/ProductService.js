@@ -4,7 +4,18 @@ const Brand = require("../models/BrandProductModel");
 const Collections = require("../models/CollectionsModel");
 const slugify = require('slugify');
 const logger = require('../utils/logger');
-const { encrypt, decrypt } = require('../utils/encryption');
+const { encrypt } = require('../utils/encryption');
+
+const handleResponse = (data) => {
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Encrypting data for production environment');
+    return { encryptedData: encrypt(JSON.stringify(data)) };
+  } else {
+    console.log('Returning unencrypted data for non-production environment');
+    return data;
+  }
+};
+
 const createProduct = async (newProduct) => {
   try {
     const { name, image, countInStock, price, rating, description, discount, fee, category, brand, collections } = newProduct;
@@ -34,11 +45,11 @@ const createProduct = async (newProduct) => {
         Category.updateOne({ cate_id: category }, { $inc: { count: 1 } })
       ]);
 
-      return {
+      return handleResponse({
         status: 'OK',
         message: 'SUCCESS',
         data: createdProduct,
-      };
+      });
     }
   } catch (error) {
     logger.error("Error creating product:", error);
@@ -50,17 +61,17 @@ const deleteProduct = async (id) => {
   try {
     const product = await Product.findById(id);
     if (!product) {
-      return {
+      return handleResponse({
         status: "ERR",
         message: "Product not found",
-      };
+      });
     }
 
     await Product.findByIdAndDelete(id);
-    return {
+    return handleResponse({
       status: "OK",
       message: "Product deleted successfully",
-    };
+    });
   } catch (error) {
     logger.error("Error deleting product:", error);
     throw error;
@@ -70,10 +81,10 @@ const deleteProduct = async (id) => {
 const deleteManyProduct = async (ids) => {
   try {
     await Product.deleteMany({ _id: { $in: ids } });
-    return {
+    return handleResponse({
       status: "OK",
       message: "Products deleted successfully",
-    };
+    });
   } catch (error) {
     logger.error("Error deleting multiple products:", error);
     throw error;
@@ -84,10 +95,10 @@ const updateProduct = async (slug, data) => {
   try {
     const product = await Product.findOne({ slug });
     if (!product) {
-      return {
+      return handleResponse({
         status: "ERR",
         message: "Product not found",
-      };
+      });
     }
 
     const updatedProduct = await Product.findOneAndUpdate(
@@ -96,11 +107,11 @@ const updateProduct = async (slug, data) => {
       { new: true }
     );
 
-    return {
+    return handleResponse({
       status: "OK",
       message: "Product updated successfully",
       data: updatedProduct,
-    };
+    });
   } catch (error) {
     logger.error("Error updating product:", error);
     throw error;
@@ -111,16 +122,16 @@ const getDetailsProduct = async (slug) => {
   try {
     const product = await Product.findOne({ slug });
     if (!product) {
-      return {
+      return handleResponse({
         status: "ERR",
         message: "Product not found",
-      };
+      });
     }
-    return {
+    return handleResponse({
       status: 'OK',
       message: 'Success',
       data: product,
-    };
+    });
   } catch (error) {
     logger.error("Error fetching product details:", error);
     throw error;
@@ -132,7 +143,6 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
     const filter = {};
     let collectionsFilter = [];
 
-    // Parse limit và page thành số
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 0;
 
@@ -154,7 +164,6 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
       filter.category = { $in: categoryIds };
     }
 
-    // Xây dựng query sort
     let sortQuery = { createdAt: -1, updatedAt: -1 };
     if (sort) {
       const [field, order] = sort.split('_');
@@ -177,7 +186,8 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
       vendor: vendor ? vendor.split(',') : [],
       collections: collections ? [collections] : []
     };
-		const responseData = {
+
+    return handleResponse({
       status: "OK",
       message: "Success",
       data: products,
@@ -189,15 +199,7 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
       collections: collectionsFilter,
       appliedFilters,
       limit: limitNumber
-    };
-		if (process.env.NODE_ENV === 'production') {
-      console.log('Encrypting data for production environment');
-      const encryptedData = encrypt(JSON.stringify(responseData));
-      return { encryptedData };
-    } else {
-      console.log('Returning unencrypted data for non-production environment');
-      return responseData;
-    }
+    });
   } catch (error) {
     logger.error("Error fetching all products:", error);
     throw error;
@@ -228,12 +230,12 @@ const searchProduct = async (filter) => {
     const searchResult = await Product.find({ name: { '$regex': `^${combinedRegex}.*$`, $options: 'i' } })
       .sort({ createdAt: -1, updatedAt: -1 });
 
-    return {
+    return handleResponse({
       status: 'OK',
       message: 'Success',
       data: searchResult,
       total: await Product.countDocuments(),
-    };
+    });
   } catch (error) {
     logger.error("Error searching products:", error);
     throw error;
@@ -270,14 +272,14 @@ const getAllBrand = async (selectedTypes) => {
 
     const allBrands = await Product.aggregate(aggregationPipeline);
 
-    return {
+    return handleResponse({
       status: 'OK',
       message: 'Success',
       data: allBrands.map(brand => ({
         brand: brand._id,
         count: brand.count,
       })),
-    };
+    });
   } catch (error) {
     logger.error("Error fetching all brands:", error);
     throw error;
