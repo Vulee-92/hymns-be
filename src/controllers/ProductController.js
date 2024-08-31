@@ -231,14 +231,15 @@ const searchProduct = async (req, res) => {
 };
 
 const decryptData = (req, res) => {
-  try {
-    const { encryptedData } = req.body;
-    const decryptedData = decrypt(encryptedData);
-    res.json(JSON.parse(decryptedData));
-  } catch (error) {
-    logger.error('Error in decryptData:', error);
-    res.status(400).json({ status: "ERR", message: 'Decryption failed' });
-  }
+	try {
+		const { encryptedData } = req.body;
+		const decryptedData = decrypt(encryptedData); // Sử dụng hàm decrypt của bạn
+		console.log('Decrypted data on backend:', decryptedData); // Log để kiểm tra
+		res.json(JSON.parse(decryptedData));
+	} catch (error) {
+		console.error('Error in decryptData:', error);
+		res.status(400).json({ error: 'Decryption failed' });
+	}
 };
 
 module.exports = {
