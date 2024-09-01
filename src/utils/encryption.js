@@ -13,6 +13,8 @@ function encrypt(text) {
 }
 
 function decrypt(text) {
+  const [ivHex, encryptedHex] = text.split(':');
+	
 	if (!text || typeof text !== 'string') {
     throw new Error('Invalid input for decryption');
   }
@@ -20,7 +22,6 @@ function decrypt(text) {
   if (!ivHex || !encryptedHex) {
     throw new Error('Invalid encrypted data format');
   }
-  const [ivHex, encryptedHex] = text.split(':');
   const iv = Buffer.from(ivHex, 'hex');
   const encryptedText = Buffer.from(encryptedHex, 'hex');
   // Sử dụng ENCRYPTION_KEY đã được định nghĩa ở trên, không cần chuyển đổi lại
