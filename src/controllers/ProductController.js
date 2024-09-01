@@ -231,15 +231,22 @@ const searchProduct = async (req, res) => {
 };
 
 const decryptData = (req, res) => {
-	try {
-		const { encryptedData } = req.body;
-		const decryptedData = decrypt(encryptedData); // Sử dụng hàm decrypt của bạn
-		console.log('Decrypted data on backend:', decryptedData); // Log để kiểm tra
-		res.json(JSON.parse(decryptedData));
-	} catch (error) {
-		console.error('Error in decryptData:', error);
-		res.status(400).json({ error: 'Decryption failed' });
-	}
+  try {
+    const { encryptedData } = req.body;
+    console.log('Received encrypted data:', encryptedData); // Thêm log này
+
+    if (!encryptedData) {
+      return res.status(400).json({ error: 'No encrypted data provided' });
+    }
+
+    const decryptedData = decrypt(encryptedData);
+    console.log('Decrypted data:', decryptedData); // Thêm log này
+
+    res.json(JSON.parse(decryptedData));
+  } catch (error) {
+    console.error('Error in decryptData:', error);
+    res.status(400).json({ error: 'Decryption failed', details: error.message });
+  }
 };
 
 module.exports = {
