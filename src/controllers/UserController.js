@@ -2,37 +2,6 @@ const UserService = require("../services/UserService");
 const JwtService = require("../services/JwtService");
 const User = require("../models/UserModel");
 
-// const createUser = async (req,res) => {
-// 	try {
-// 		const { name,email,password,confirmPassword,phone,verificationCode } =
-// 			req.body;
-// 		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
-// 		const isCheckEmail = reg.test(email);
-// 		if (!name || !email || !password || !confirmPassword) {
-// 			return res.status(200).json({
-// 				status: "ERR",
-// 				message: "The input is required",
-// 			});
-// 		} else if (!isCheckEmail) {
-// 			return res.status(200).json({
-// 				status: "ERR",
-// 				message: "The input is email",
-// 			});
-// 		} else if (password !== confirmPassword) {
-// 			return res.status(200).json({
-// 				status: "ERR",
-// 				message: "The password is equal confirmPassword",
-// 			});
-// 		}
-// 		const response = await UserService.createUser(req.body);
-
-// 		return res.status(200).json(response);
-// 	} catch (e) {
-// 		return res.status(404).json({
-// 			message: e,
-// 		});
-// 	}
-// };
 
 const createUser = async (req,res) => {
 	try {
@@ -91,46 +60,41 @@ const createContact = async (req,res) => {
 		});
 	}
 };
-
-const loginUser = async (req,res) => {
-	console.log("email,password",req,res)
+const loginUser = async (req, res) => {
 	try {
-		const { email,password } = req.body;
-		const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
-		const isCheckEmail = reg.test(email);
-		if (!email || !password) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The input is required",
-			});
-		} else if (!isCheckEmail) {
-			return res.status(200).json({
-				status: "ERR",
-				message: "The input is email",
-			});
-		}
-		const response = await UserService.loginUser(req.body);
-		const { refresh_token,...newReponse } = response;
-		const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Thiết lập thời gian hết hạn là 7 ngày sau khi đăng nhập
-		res.cookie("refresh_token",refresh_token,{
-			httpOnly: false,
-			secure: false,
-			sameSite: "Lax",
-			path: "/",
-			// domain: ".example.com", // Thay thế bằng miền của trang web của bạn
-			// expires,
+	  const { email, password } = req.body;
+	  const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+  
+	  if (!email || !password) {
+		return res.status(200).json({
+		  status: "ERR",
+		  message: "The input is required",
 		});
-		return res.status(200).json({ ...newReponse,refresh_token });
+	  } else if (email !== 'admin' && !reg.test(email)) {
+		return res.status(200).json({
+		  status: "ERR",
+		  message: "The input is email",
+		});
+	  }
+  
+	  const response = await UserService.loginUser(req.body);
+	  const { refresh_token, ...newResponse } = response;
+	  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Thiết lập thời gian hết hạn là 7 ngày sau khi đăng nhập
+	  res.cookie("refresh_token", refresh_token, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: "Lax",
+		path: "/",
+		expires,
+		// domain: ".example.com", // Thay thế bằng miền của trang web của bạn
+	  });
+	  return res.status(200).json({ ...newResponse, refresh_token });
 	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
+	  return res.status(404).json({
+		message: e,
+	  });
 	}
-};
-
-
-
-
+  };
 const deleteUser = async (req,res) => {
 	try {
 		const userId = req.params.id;

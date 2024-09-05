@@ -1,40 +1,39 @@
-const ProductService = require("../services/ProductService");
-const logger = require("../utils/logger");
-const { encrypt, decrypt } = require("../utils/encryption");
+const productService = require("../services/ProductService");
 
-const handleResponse = (res, data, statusCode = 200) => {
-  if (process.env.NODE_ENV === 'production') {
-    res.status(statusCode).json({ encryptedData: encrypt(JSON.stringify(data)) });
-  } else {
-    res.status(statusCode).json(data);
-  }
+
+const createProduct = async (req,res) => {
+	try {
+		const {
+			name,
+			mainImage, 
+			image, // Thay đổi tên trường
+			countInStock,
+			price,
+			collection,
+			rating,
+			discount,
+			category,brand,
+		} = req.body;
+
+		if (
+			!name || !mainImage
+
+		) {
+			return res.status(500).json({
+				status: "ERR",
+				message: "The input is required",
+			});
+		}
+		const response = await ProductService.createProduct(req.body);
+
+		return res.status(200).json(response);
+	} catch (e) {
+		return res.status(404).json({
+			message: e,
+		});
+	}
 };
 
-const createProduct = async (req, res) => {
-  try {
-    const { name, image, countInStock, price, collection, rating, discount, category, brand } = req.body;
-
-    const requiredFields = ['name', 'image', 'price', 'category', 'brand'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        status: "ERR",
-        message: `Missing required fields: ${missingFields.join(', ')}`,
-      });
-    }
-
-    const response = await ProductService.createProduct(req.body);
-    logger.info(`Product created: ${name}`);
-    handleResponse(res, response, 201);
-  } catch (e) {
-    logger.error('Error in createProduct:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
 
 const updateProduct = async (req, res) => {
   try {
@@ -100,25 +99,50 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const deleteMany = async (req, res) => {
+const ProductService = require("../services/ProductService");
+
+const getAllCategory = async (req, res) => {
   try {
-    const ids = req.body.ids;
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "Valid ids array is required",
-      });
-    }
-    const response = await ProductService.deleteManyProduct(ids);
-    logger.info(`Multiple products deleted: ${ids.join(', ')}`);
-    handleResponse(res, response);
+    const response = await ProductService.getAllCategory();
+    return res.status(200).json(response);
   } catch (e) {
-    logger.error('Error in deleteMany:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
+    return res.status(404).json({
+      message: e,
+    });
   }
+};
+
+const getAllBrand = async (req, res) => {
+  try {
+    const { selectedTypes } = req.query;
+    const typesArray = selectedTypes ? selectedTypes.split(',') : [];
+    const response = await ProductService.getAllBrand(typesArray);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+
+const searchProduct = async (req,res) => {
+	try {
+		const { filter } = req.query;
+
+		if (!filter) {
+			return res.status(400).json({
+				message: "Filter parameter is required",
+			});
+		}
+
+		const searchResult = await ProductService.searchProduct(filter);
+
+		return res.status(200).json(searchResult);
+	} catch (e) {
+		return res.status(500).json({
+			message: e.message || "Internal Server Error",
+		});
+	}
 };
 
 const getAllProduct = async (req, res) => {
@@ -182,53 +206,6 @@ const getAllType = async (req, res) => {
   }
 };
 
-const getAllBrand = async (req, res) => {
-  try {
-    const response = await ProductService.getAllBrand();
-    handleResponse(res, response);
-  } catch (e) {
-    logger.error('Error in getAllBrand:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
-
-const getAllCategory = async (req, res) => {
-  try {
-    const response = await ProductService.getAllCategory();
-    handleResponse(res, response);
-  } catch (e) {
-    logger.error('Error in getAllCategory:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
-
-const searchProduct = async (req, res) => {
-  try {
-    const { filter } = req.query;
-
-    if (!filter) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "Filter parameter is required",
-      });
-    }
-
-    const searchResult = await ProductService.searchProduct(filter);
-    handleResponse(res, searchResult);
-  } catch (e) {
-    logger.error('Error in searchProduct:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
 
 const decryptData = (req, res) => {
   try {
@@ -250,16 +227,14 @@ const decryptData = (req, res) => {
 };
 
 module.exports = {
-  createProduct,
-  updateProduct,
-  getDetailsProduct,
-  deleteProduct,
-  getAllProduct,
-  getAllProductAllowBrand,
-  deleteMany,
-  getAllType,
-  getAllBrand,
-  getAllCategory,
-  searchProduct,
-  decryptData
+	createProduct,
+	updateProduct,
+	getDetailsProduct,
+	deleteProduct,
+	getAllProduct,
+	getAllProductAllowBrand,
+	deleteMany,
+	getAllBrand,
+	getAllCategory,
+	searchProduct
 };
