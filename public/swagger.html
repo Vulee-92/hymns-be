@@ -1,43 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Swagger UI</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.52.5/swagger-ui.css">
-  <style>
-    .topbar { display: none; }
-  </style>
-</head>
+<html>
 <body>
-  <div>
-    <label for="serverSelect">Select Server:</label>
-    <select id="serverSelect">
-      <option value="http://localhost:3000">Local server</option>
-      <option value="http://hymnscenter.online">Development server</option>
-      <option value="http://prod.example.com">Production server</option>
-    </select>
-    <button id="loadSwagger">Load Swagger</button>
-  </div>
-  <div id="swagger-ui"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.52.5/swagger-ui-bundle.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.52.5/swagger-ui-standalone-preset.js"></script>
-  <script>
-    document.getElementById('loadSwagger').onclick = () => {
-      const serverUrl = document.getElementById('serverSelect').value;
-      const ui = SwaggerUIBundle({
-        url: `${serverUrl}/swagger.json`,
-        dom_id: '#swagger-ui',
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "StandaloneLayout"
-      });
+<h1>Order Notifications</h1>
+<div id="notifications"></div>
 
-      // Điều hướng về /api-docs/#/ sau khi tải Swagger UI
-      window.history.pushState({}, '', `${serverUrl}/api-docs/#/`);
-    };
-  </script>
+<script>
+const evtSource = new EventSource("http://localhost:3003/api/notifications");
+const notificationsDiv = document.getElementById("notifications");
+
+evtSource.onmessage = function(event) {
+  const notification = JSON.parse(event.data);
+  const p = document.createElement("p");
+  p.textContent = `New order from ${notification.fullName}, Order Code: ${notification.codeOrder}`;
+  notificationsDiv.appendChild(p);
+};
+
+evtSource.onerror = function(err) {
+  console.error("EventSource failed:", err);
+};
+</script>
 </body>
 </html>

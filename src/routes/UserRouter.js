@@ -48,15 +48,24 @@ router.post('/sign-up', userController.createUser);
  *             properties:
  *               email:
  *                 type: string
- *                 description: Email người dùng
  *               password:
  *                 type: string
- *                 description: Mật khẩu người dùng
  *     responses:
  *       200:
  *         description: Đăng nhập thành công
- *       400:
- *         description: Lỗi khi đăng nhập
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 access_token:
+ *                   type: string
+ *                 refresh_token:
+ *                   type: string
  */
 router.post('/sign-in', userController.loginUser);
 
@@ -150,7 +159,7 @@ router.delete('/delete-user/:id', authMiddleWare, userController.deleteUser);
  *       400:
  *         description: Lỗi khi lấy danh sách
  */
-router.get('/getAll', authMiddleWare, userController.getAllUser);
+router.get('/getAll',  userController.getAllUser);
 
 /**
  * @swagger

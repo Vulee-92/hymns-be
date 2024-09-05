@@ -109,16 +109,20 @@ const cancelOrderDetails = async (req,res) => {
 	}
 };
 
-const getAllOrder = async (req,res) => {
-	try {
-		const data = await OrderService.getAllOrder();
-		return res.status(200).json(data);
-	} catch (e) {
-		// console.log(e)
-		return res.status(404).json({
-			message: e,
-		});
-	}
+const getAllOrder = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Mặc định là trang 1 nếu không có tham số
+    const pageSize = parseInt(req.query.pageSize) || 10; // Mặc định là 10 items mỗi trang
+
+    const data = await OrderService.getAllOrder(page, pageSize);
+    return res.status(200).json(data);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "ERR",
+      message: "An error occurred while fetching orders",
+    });
+  }
 };
 const updateOrderItemsWithSlug = async (req, res) => {
 	try {
@@ -155,6 +159,39 @@ const updateOrder = async (req,res) => {
 		});
 	}
 };
+
+
+const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await OrderService.deleteOrder(id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      status: "ERR",
+      message: e.message,
+    });
+  }
+};
+
+const deleteMultipleOrders = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Invalid input: ids must be a non-empty array",
+      });
+    }
+    const response = await OrderService.deleteMultipleOrders(ids);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: e.message,
+    });
+  }
+};
 module.exports = {
 	createOrder,
 	getAllOrderDetails,
@@ -162,5 +199,7 @@ module.exports = {
 	cancelOrderDetails,
 	getAllOrder,
 	updateOrder,
-	updateOrderItemsWithSlug
+	updateOrderItemsWithSlug,
+	deleteOrder,
+  deleteMultipleOrders
 };

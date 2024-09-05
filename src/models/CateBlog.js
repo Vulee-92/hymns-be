@@ -1,19 +1,23 @@
-const mongoose = require("mongoose"); // Erase if already required
+const mongoose = require("mongoose");
 
-// Declare the Schema of the Mongo model
-var blogcategorySchema = new mongoose.Schema(
+const blogCategorySchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
-      // unique: true,
-      // index: true,
+      unique: true,
+    },
+    description: {
+      type: String,
+    },
+    slug: {
+      type: String,
+      unique: true,
     },
   },
-  // {
-  //   timestamps: true,
-  // }
+  {
+    timestamps: true,
+  }
 );
 
-//Export the model
-module.exports = mongoose.model("Category", blogcategorySchema);
+module.exports = mongoose.model("BlogCategory", blogCategorySchema);

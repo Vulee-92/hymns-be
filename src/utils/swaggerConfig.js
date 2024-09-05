@@ -2,7 +2,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const localServerUrl = process.env.LOCAL_SERVER_URL || 'http://localhost:3000';
+const localServerUrl = 'http://localhost:3003';
 const devServerUrl = process.env.DEV_SERVER_URL || 'http://dev.example.com';
 const prodServerUrl = process.env.PROD_SERVER_URL || 'http://prod.example.com';
 
@@ -15,10 +15,6 @@ const options = {
       description: 'API documentation for your project',
     },
     servers: [
-      {
-        url: localServerUrl, // URL server local
-        description: 'Local server'
-      },
       {
         url: devServerUrl, // URL server development
         description: 'Development server'

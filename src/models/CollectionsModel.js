@@ -14,6 +14,7 @@ var productCollectionsSchema = new mongoose.Schema(
 		description: { type: String },
 
 		image: { type: String,required: false },
+		backgroundImage: { type: String, required: false }, 
 		count: {
 			type: Number,
 			required: false,

@@ -217,15 +217,31 @@ const cancelOrderDetails = async (id, data) => {
   }
 };
 
-const getAllOrder = async () => {
+const getAllOrder = async (page, pageSize) => {
   try {
-    const allOrder = await Order.find().sort({
-      createdAt: -1,
-      updatedAt: -1,
-    });
-    return handleSuccess(allOrder, 'Lấy danh sách đơn hàng thành công');
+    const skip = (page - 1) * pageSize;
+    
+    const orders = await Order.find()
+      .sort({ createdAt: -1 }) // Sắp xếp theo thời gian tạo, mới nhất trước
+      .skip(skip)
+      .limit(pageSize);
+
+    const totalOrders = await Order.countDocuments();
+    const totalPages = Math.ceil(totalOrders / pageSize);
+
+    return {
+      status: "OK",
+      message: "Success",
+      data: orders,
+      pagination: {
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: totalPages,
+        totalItems: totalOrders
+      }
+    };
   } catch (error) {
-    return handleError(error, 'Lỗi khi lấy danh sách đơn hàng');
+    throw new Error("Error getting all orders: " + error.message);
   }
 };
 
@@ -271,6 +287,29 @@ const updateOrderItemsWithSlug = async () => {
     console.error('Có lỗi xảy ra:', error);
   }
 };
+const deleteOrder = async (id) => {
+  try {
+    const deletedOrder = await Order.findByIdAndDelete(id);
+    if (!deletedOrder) {
+      throw new Error("Order not found");
+    }
+    return { status: "OK", message: "Order deleted successfully" };
+  } catch (error) {
+    throw new Error("Error deleting order: " + error.message);
+  }
+};
+
+const deleteMultipleOrders = async (ids) => {
+  try {
+    const result = await Order.deleteMany({ _id: { $in: ids } });
+    if (result.deletedCount === 0) {
+      throw new Error("No orders found with the given ids");
+    }
+    return { status: "OK", message: `${result.deletedCount} orders deleted successfully` };
+  } catch (error) {
+    throw new Error("Error deleting multiple orders: " + error.message);
+  }
+};
 
 module.exports = {
   createOrder,
@@ -279,5 +318,7 @@ module.exports = {
   cancelOrderDetails,
   getAllOrder,
   updateOrder,
-  updateOrderItemsWithSlug
+  updateOrderItemsWithSlug,
+	deleteOrder,
+  deleteMultipleOrders
 };

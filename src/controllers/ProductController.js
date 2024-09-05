@@ -1,6 +1,14 @@
 const productService = require("../services/ProductService");
 
-
+// Thêm hàm handleResponse
+const handleResponse = (res, data, statusCode = 200) => {
+  const success = statusCode >= 200 && statusCode < 300;
+  return res.status(statusCode).json({
+    success,
+    status: success ? "OK" : "ERR",
+    ...data
+  });
+};
 const createProduct = async (req,res) => {
 	try {
 		const {
@@ -100,6 +108,7 @@ const deleteProduct = async (req, res) => {
 };
 
 const ProductService = require("../services/ProductService");
+const logger = require("../utils/logger");
 
 const getAllCategory = async (req, res) => {
   try {
@@ -144,21 +153,37 @@ const searchProduct = async (req,res) => {
 		});
 	}
 };
-
 const getAllProduct = async (req, res) => {
   try {
-    const result = await ProductService.getAllProduct(
-      req.query.limit,
-      req.query.page,
-      req.query.sort,
-      req.query.vendor,
-      req.query.type,
-      req.params.collections
-    );
-    handleResponse(res, result);
+    const { 
+      collection_slug,
+      brand_slug,
+      category_slug,
+      sort,
+      page = 1,
+      pageSize = 10,
+      minPrice,
+      maxPrice
+    } = req.query;
+
+    const result = await ProductService.getAllProduct({
+      collection_slug,
+      brand_slug,
+      category_slug,
+      sort,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
+    });
+
+    return res.status(200).json(result);
   } catch (error) {
-    logger.error('Error in getAllProduct:', error);
-    handleResponse(res, { status: "ERR", message: error.message }, 500);
+    console.error('Error in getAllProduct controller:', error);
+    return res.status(500).json({
+      status: "ERR",
+      message: "Internal server error"
+    });
   }
 };
 

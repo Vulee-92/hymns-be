@@ -6,46 +6,41 @@ const helmet = require("helmet");
 const cors = require("cors");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
-const winston = require("winston");
+// const winston = require("winston");
 const routes = require("./routes");
 const OrderNotificationService = require("./services/OrderNotificationService");
+const logger = require("./utils/logger");
 
 dotenv.config();
 
-// Cấu hình logger
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
-  ],
-});
+// // Cấu hình logger
+// const logger = winston.createLogger({
+//   level: 'info',
+//   format: winston.format.json(),
+//   defaultMeta: { service: 'user-service' },
+//   transports: [
+//     new winston.transports.File({ filename: 'error.log', level: 'error' }),
+//     new winston.transports.File({ filename: 'combined.log' }),
+//   ],
+// });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   logger.add(new winston.transports.Console({
+//     format: winston.format.simple(),
+//   }));
+// }
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+app.use(cors());
 
 // CORS middleware
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
-}));
-app.options("*", cors());
+// app.use(cors({
+//   origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   credentials: true,
+// }));
 
 // Sử dụng Helmet để thêm các header bảo mật
 app.use(helmet());

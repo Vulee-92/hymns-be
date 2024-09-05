@@ -203,89 +203,167 @@ router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
 
 /**
  * @swagger
- * /api/product/get-all-brand:
- *   get:
- *     summary: Lấy tất cả thương hiệu sản phẩm
- *     tags: [Product]
- *     parameters:
- *       - in: query
- *         name: selectedTypes
- *         schema:
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         price:
+ *           type: number
+ *         description:
+ *           type: string
+ *         mainImage:
+ *           type: string
+ *         image:
  *           type: array
  *           items:
  *             type: string
- *         required: false
- *         description: Danh sách các loại sản phẩm cần lọc
- *     responses:
- *       200:
- *         description: Lấy danh sách thương hiệu sản phẩm thành công
- *       500:
- *         description: Lỗi khi lấy danh sách thương hiệu sản phẩm
- */
-router.get("/get-all-brand", ProductController.getAllBrand);
-/**
- * @swagger
- * /api/product/get-all-category:
+ *         countInStock:
+ *           type: number
+ *         rating:
+ *           type: number
+ *         discount:
+ *           type: number
+ *         fee:
+ *           type: number
+ *         brand:
+ *           $ref: '#/components/schemas/Brand'
+ *         category:
+ *           $ref: '#/components/schemas/Category'
+ *         collections:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Collection'
+ *     Brand:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ *     Category:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ *     Collection:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ * 
+ * /api/product/get-all:
  *   get:
- *     summary: Lấy tất cả danh mục sản phẩm
- *     tags: [Product]
- *     responses:
- *       200:
- *         description: Lấy danh sách danh mục sản phẩm thành công
- *       500:
- *         description: Lỗi khi lấy danh sách danh mục sản phẩm
- */
-router.get("/get-all-category", ProductController.getAllCategory);
-/**
- * @swagger
- * /api/product/get-all/{collections?}:
- *   get:
- *     summary: Lấy tất cả sản phẩm
+ *     summary: Lấy tất cả sản phẩm với các tùy chọn lọc và sắp xếp
  *     tags: [Product]
  *     parameters:
- *       - in: path
- *         name: collections
+ *       - in: query
+ *         name: collection_slug
  *         schema:
  *           type: string
- *         required: false
- *         description: Bộ sưu tập sản phẩm
+ *         description: Slug của bộ sưu tập
  *       - in: query
- *         name: limit
+ *         name: brand_slug
  *         schema:
- *           type: integer
- *         required: false
- *         description: Số lượng sản phẩm trên mỗi trang
+ *           type: string
+ *         description: Slug của thương hiệu
  *       - in: query
- *         name: page
+ *         name: category_slug
  *         schema:
- *           type: integer
- *         required: false
- *         description: Trang hiện tại
+ *           type: string
+ *         description: Slug của danh mục
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         required: false
- *         description: Sắp xếp sản phẩm
+ *           enum: [price_asc, price_desc, newest, oldest, best_selling]
+ *         description: Tùy chọn sắp xếp
  *       - in: query
- *         name: vendor
+ *         name: page
  *         schema:
- *           type: string
- *         required: false
- *         description: Nhà cung cấp sản phẩm
+ *           type: integer
+ *         description: Số trang (mặc định là 1)
  *       - in: query
- *         name: type
+ *         name: pageSize
  *         schema:
- *           type: string
- *         required: false
- *         description: Loại sản phẩm
+ *           type: integer
+ *         description: Số sản phẩm trên mỗi trang (mặc định là 10)
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Giá tối thiểu
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Giá tối đa
  *     responses:
  *       200:
  *         description: Lấy danh sách sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     pageSize:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *                 brands:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Brand'
+ *                 categories:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
  *       500:
  *         description: Lỗi khi lấy danh sách sản phẩm
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ERR
+ *                 message:
+ *                   type: string
  */
-router.get('/get-all/:collections?', ProductController.getAllProduct);
+router.get('/get-all', ProductController.getAllProduct);
+
 
 /**
  * @swagger

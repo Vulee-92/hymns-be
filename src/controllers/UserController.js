@@ -214,7 +214,7 @@ const logoutUser = async (req,res) => {
 		res.clearCookie("refresh_token",{
 			secure: false,
 			httpOnly: false,
-			domain: "http://localhost:3000", // Đảm bảo domain và path chính xác
+			domain: "http://localhost:3003", // Đảm bảo domain và path chính xác
 			expires: new Date(0),
 			path: '/' // Đảm bảo path chính xác
 		});

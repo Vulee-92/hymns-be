@@ -1,0 +1,20 @@
+version: '3'
+services:
+  hymns-api:
+    build: .
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - MONGO_DB=mongodb+srv://hymns:7K0QABHHQpwwkJPk@cluster0.nhxueut.mongodb.net/?retryWrites=true&w=majority
+      - ACCESS_TOKEN=access_token
+      - REFRESH_TOKEN=refresh_token
+      - RESET_TOKEN=reset_token
+      - CLIENT_ID=AYapfMIpMHFl9jMrrRRNJgFmor4WitTFycbNQkQIP8KDWjeLLa8MwmfZjWx07gPhW20biqtEDOQ9fqav
+      - MAIL_PASSWORD=efzy edrz rhca bwuz
+      - MAIL_ACCOUNT=hymnscenter@gmail.com
+      - FRONTEND_URL=https://hymnscenter.com
+      - BACKEND_URL=https://hymnscenter.online
+      - ENCRYPTION_KEY=3535aa8cf4cd9750f375c7fe95333fb751883253722b031ba7941d0adb4fe02f
+    restart: always
