@@ -205,12 +205,33 @@ const getAllProduct = async (limit, page, sort, vendor, type, collections) => {
 	  query = query.limit(limit).skip(page * limit);
 		}
   
-	  const allProduct = await query;
 
-		const totalProduct = await Product.count();
-		// Định nghĩa đối tượng để lưu trữ tổng số lượng sản phẩm cho từng thương hiệu và từng danh mục
+    if (vendor && vendor.length > 0) {
+      const brandArray = vendor.split(',');
+      const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('brand_id');
+      filter.brand = { $in: brandIds };
+    }
+    
+    if (type && type.length > 0) {
+      const categoryArray = type.split(',');
+      const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('cate_id');
+      filter.category = { $in: categoryIds };
+    }
+    
+    const sortOptions = sort ? { [sort]: -1 } : { createdAt: -1, updatedAt: -1 };
+    
+    const limitNumber = Number(limit) || 10;
+    const pageNumber = Number(page) || 0;
+    
+    const [allProduct, totalProduct] = await Promise.all([
+      Product.find(filter)
+        .sort(sortOptions)
+        .limit(limitNumber)
+        .skip(pageNumber * limitNumber),
+      Product.countDocuments(filter)
+    ]);
 
-		// Lấy danh sách các brand và cate từ collections (nếu có)
+
 
 		if (filter.collections && vendor) {
 			const productsInCollection = await Product.find({ collections: filter.collections,brand: filter.brand });
