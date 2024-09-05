@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 
 const basicAuthMiddleware = async (req, res, next) => {
   const user = auth(req);
-  console.log("user",user);
   if (!user) {
     res.set('WWW-Authenticate', 'Basic realm="example"');
     return res.status(401).send('Authentication required.');

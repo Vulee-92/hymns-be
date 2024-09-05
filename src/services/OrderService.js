@@ -12,7 +12,6 @@ const OrderNotificationService = require('./OrderNotificationService');
    const token = process.env.NODE_ENV === 'production' 
      ? process.env.TELEGRAM_TOKEN_PROD 
      : process.env.TELEGRAM_TOKEN_DEV;
-console.log("token",token);
 const bot = new TelegramBot(token, { polling: false });
 
 // Hàm tiện ích để xử lý lỗi

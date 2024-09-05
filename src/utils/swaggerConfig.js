@@ -2,9 +2,9 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const serverUrl = process.env.NODE_ENV === 'production' 
-  ? process.env.PROD_SERVER_URL 
-  : process.env.DEV_SERVER_URL;
+const localServerUrl = process.env.LOCAL_SERVER_URL || 'http://localhost:3000';
+const devServerUrl = process.env.DEV_SERVER_URL || 'http://dev.example.com';
+const prodServerUrl = process.env.PROD_SERVER_URL || 'http://prod.example.com';
 
 const options = {
   definition: {
@@ -16,7 +16,16 @@ const options = {
     },
     servers: [
       {
-        url: serverUrl, // Sử dụng URL server từ biến môi trường
+        url: localServerUrl, // URL server local
+        description: 'Local server'
+      },
+      {
+        url: devServerUrl, // URL server development
+        description: 'Development server'
+      },
+      {
+        url: prodServerUrl, // URL server production
+        description: 'Production server'
       },
     ],
     components: {

@@ -1,4 +1,6 @@
 const rateLimit = require('express-rate-limit');
+const express = require('express');
+const path = require('path');
 const UserRouter = require("./UserRouter");
 const ProductRouter = require("./ProductRouter");
 const OrderRouter = require("./OrderRouter");
@@ -15,6 +17,7 @@ const CloudinaryRoutes = require("./CloudinaryRoutes");
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../utils/swaggerConfig'); // Đảm bảo đường dẫn đúng
 const basicAuthMiddleware = require('../middleware/basicAuthMiddleware'); 
+
 const routes = (app) => {
   app.use("/api/user", UserRouter);
   app.use("/api/product", ProductRouter);
@@ -31,7 +34,16 @@ const routes = (app) => {
   // app.use("/api/viewed", RecentlyViewedRoute);
 
   // Đường dẫn để hiển thị tài liệu Swagger
-  app.use('/api-docs',basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api-docs', basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  
+  // Phục vụ thư mục public
+  app.use('/swagger-ui', express.static(path.join(__dirname, '../../public')));
+
+  // Phục vụ file swagger.json
+  app.get('/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 };
 
 module.exports = routes;
