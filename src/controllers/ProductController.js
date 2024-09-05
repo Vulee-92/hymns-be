@@ -1,10 +1,11 @@
-const ProductService = require("../services/ProductService");
+const productService = require("../services/ProductService");
 
 
 const createProduct = async (req,res) => {
 	try {
 		const {
 			name,
+			mainImage, 
 			image, // Thay đổi tên trường
 			countInStock,
 			price,
@@ -15,7 +16,7 @@ const createProduct = async (req,res) => {
 		} = req.body;
 
 		if (
-			!name
+			!name || !mainImage
 
 		) {
 			return res.status(500).json({
@@ -165,135 +166,32 @@ const getAllProductAllowBrand = async (req,res) => {
 	}
 };
 
-// const getAllProduct = async (req,res) => {
-// 	try {
-// 		const { limit,page,sort,filter } = req.query;
+const ProductService = require("../services/ProductService");
 
-// 		if ((limit && limit < 0) || (page && page < 0)) {
-// 			return res.status(400).json({
-// 				message: "Invalid limit or page value",
-// 			});
-// 		}
-
-// 		let filterValues = [];
-// 		if (Array.isArray(filter)) {
-// 			// Xử lý filter nếu là mảng
-// 			filterValues = filter.map(item => item.toLowerCase());
-// 		} else {
-// 			filterValues.push(filter.toLowerCase()); // Chuyển filter thành chuỗi và chuyển thành chữ thường, sau đó đưa vào mảng
-// 		}
-
-
-// 		const response = await ProductService.getAllProduct(
-// 			Number(limit) || null,
-// 			Number(page) || 0,
-// 			sort,
-// 			filterValues // Sử dụng filterValues như một mảng
-// 		);
-
-// 		return res.status(200).json(response);
-// 	} catch (e) {
-// 		return res.status(500).json({
-// 			message: e.message || "Internal Server Error",
-// 		});
-// 	}
-// };
-
-
-
-
-
-
-// const processFilter = (filter) => {
-// 	return filter.map((filterItem) => {
-// 		const [label,value] = filterItem.split(",");
-// 		return [label,value].join(",");
-// 	});
-// };
-
-
-const getAllType = async (req,res) => {
-	try {
-		const response = await ProductService.getAllType();
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
+const getAllCategory = async (req, res) => {
+  try {
+    const response = await ProductService.getAllCategory();
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
 };
-const getAllBrand = async (req,res) => {
-	try {
-		const response = await ProductService.getAllBrand();
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
+
+const getAllBrand = async (req, res) => {
+  try {
+    const { selectedTypes } = req.query;
+    const typesArray = selectedTypes ? selectedTypes.split(',') : [];
+    const response = await ProductService.getAllBrand(typesArray);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
 };
-const getAllCategory = async (req,res) => {
-	try {
-		const response = await ProductService.getAllCategory();
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
-};
-// const getAllProduct = async (req,res) => {
-// 	try {
-// 		const { limit,page,sort,category,brand,priceRange } = req.query;
-// 		if ((limit && limit < 0) || (page && page < 0)) {
-// 			return res.status(400).json({
-// 				message: "Invalid limit or page value",
-// 			});
-// 		}
 
-// 		const filters = {
-// 			category,
-// 			brand,
-// 			priceRange: priceRange, // Giả sử priceRange được gửi dưới dạng JSON từ client
-// 		};
-
-// 		const response = await ProductService.getAllProduct(
-// 			Number(limit) || null,
-// 			Number(page) || 0,
-// 			sort,
-// 			filters
-// 		);
-
-// 		return res.status(200).json(response);
-// 	} catch (e) {
-// 		return res.status(500).json({
-// 			message: e.message || "Internal Server Error",
-// 		});
-// 	}
-// };
-// const getAllProduct = async (req,res) => {
-// 	try {
-// 		const { limit,page,sort } = req.query;
-
-// 		if ((limit && limit < 0) || (page && page < 0)) {
-// 			return res.status(400).json({
-// 				message: "Invalid limit or page value",
-// 			});
-// 		}
-
-// 		const response = await ProductService.getAllProduct(
-// 			Number(limit) || null,
-// 			Number(page) || 0,
-// 			sort
-// 		);
-
-// 		return res.status(200).json(response);
-// 	} catch (e) {
-// 		return res.status(500).json({
-// 			message: e.message || "Internal Server Error",
-// 		});
-// 	}
-// };
 const searchProduct = async (req,res) => {
 	try {
 		const { filter } = req.query;
@@ -324,7 +222,6 @@ module.exports = {
 	getAllProduct,
 	getAllProductAllowBrand,
 	deleteMany,
-	getAllType,
 	getAllBrand,
 	getAllCategory,
 	searchProduct

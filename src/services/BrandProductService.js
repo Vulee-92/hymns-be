@@ -63,8 +63,95 @@ const getAllBrand = () => {
 		}
 	});
 };
+const deleteBrand = (brandId) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const result = await BrandProduct.findByIdAndDelete(brandId);
+			if (result) {
+				resolve({
+					status: "OK",
+					message: "Brand deleted successfully",
+				});
+			} else {
+				resolve({
+					status: "ERR",
+					message: "Brand not found",
+				});
+			}
+		} catch (e) {
+			reject(e);
+		}
+	});
+};
 
+const updateBrand = (brandId, updatedData) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const result = await BrandProduct.findByIdAndUpdate(brandId, updatedData, { new: true });
+			if (result) {
+				resolve({
+					status: "OK",
+					message: "Brand updated successfully",
+					data: result,
+				});
+			} else {
+				resolve({
+					status: "ERR",
+					message: "Brand not found",
+				});
+			}
+		} catch (e) {
+			reject(e);
+		}
+	});
+};
+const getBrandDetail = (brandId) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const brand = await BrandProduct.findById(brandId);
+			if (brand) {
+				resolve({
+					status: "OK",
+					message: "Success",
+					data: brand,
+				});
+			} else {
+				resolve({
+					status: "ERR",
+					message: "Brand not found",
+				});
+			}
+		} catch (e) {
+			reject(e);
+		}
+	});
+};
+const deleteMultipleBrands = (brandIds) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const result = await BrandProduct.deleteMany({ _id: { $in: brandIds } });
+			if (result.deletedCount > 0) {
+				resolve({
+					status: "OK",
+					message: "Brands deleted successfully",
+					deletedCount: result.deletedCount,
+				});
+			} else {
+				resolve({
+					status: "ERR",
+					message: "No brands found to delete",
+				});
+			}
+		} catch (e) {
+			reject(e);
+		}
+	});
+};
 module.exports = {
 	createBrandProduct,
-	getAllBrand
+	getAllBrand,
+	deleteBrand,
+	updateBrand,
+	getBrandDetail,
+	deleteMultipleBrands
 };

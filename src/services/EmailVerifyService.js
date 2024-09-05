@@ -4,6 +4,7 @@ dotenv.config();
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const { getMaxListeners } = require("../models/UserModel");
 const sendEmailVerify = async (name,email,hash,verificationCode,verificationLink) => {
+	console.log("verificationLink",verificationLink);
 	let transporter = nodemailer.createTransport({
 		host: "smtp.gmail.com",
 		port: 465,
@@ -912,7 +913,7 @@ body {
 		to: email, // list of receivers
 		subject: `Mã xác minh của bạn`, // Subject line
 		html: `${listItem} `,
-		// text: `Mã xác minh của bạn là ${verificationLink}`,
+		text: `Mã xác minh của bạn là ${verificationLink}`,
 	});
 };
 module.exports = {
