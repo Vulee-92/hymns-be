@@ -199,7 +199,7 @@ router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
  *       500:
  *         description: Lỗi khi xóa nhiều sản phẩm
  */
-router.post("/delete-many", ProductController.deleteMany);
+// router.post("/delete-many", ProductController.deleteMany);
 
 /**
  * @swagger

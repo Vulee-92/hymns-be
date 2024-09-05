@@ -233,7 +233,7 @@ module.exports = {
 	deleteProduct,
 	getAllProduct,
 	getAllProductAllowBrand,
-	deleteMany,
+	// deleteMany,
 	getAllBrand,
 	getAllCategory,
 	searchProduct
