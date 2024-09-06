@@ -1,5 +1,7 @@
-const productService = require("../services/ProductService");
-
+const ProductService = require("../services/ProductService");
+const Product = require("../models/ProductModel");
+const Notification = require('../models/NotificationProductModel');
+const { sendRegistrationNotification } = require("../services/EmailProductNotificationService");
 // Thêm hàm handleResponse
 const handleResponse = (res, data, statusCode = 200) => {
   const success = statusCode >= 200 && statusCode < 300;
@@ -55,10 +57,8 @@ const updateProduct = async (req, res) => {
     }
 
     const response = await ProductService.updateProduct(productIdSlug, data);
-    logger.info(`Product updated: ${productIdSlug}`);
     handleResponse(res, response);
   } catch (e) {
-    logger.error('Error in updateProduct:', e);
     handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
@@ -78,7 +78,6 @@ const getDetailsProduct = async (req, res) => {
     const response = await ProductService.getDetailsProduct(productIdSlug);
     handleResponse(res, response);
   } catch (e) {
-    logger.error('Error in getDetailsProduct:', e);
     handleResponse(res, {
       status: "ERR",
       message: e.message || "Internal Server Error",
@@ -107,8 +106,6 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const ProductService = require("../services/ProductService");
-const logger = require("../utils/logger");
 
 const getAllCategory = async (req, res) => {
   try {
@@ -250,6 +247,41 @@ const decryptData = (req, res) => {
     res.status(400).json({ error: 'Decryption failed', details: error.message });
   }
 };
+const registerNotification = async (req, res) => {
+  try {
+    const { email, productId } = req.body;
+    if (!email || !productId) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Email và productId là bắt buộc",
+      });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: "ERR",
+        message: "Không tìm thấy sản phẩm",
+      });
+    }
+    const notification = new Notification({ email, productId });
+    await notification.save();
+
+    // Gửi email thông báo đăng ký thành công
+    await sendRegistrationNotification(email, product.name);
+
+    return res.status(200).json({
+      status: "OK",
+      message: "Đăng ký nhận thông báo thành công",
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({
+      status: "ERR",
+      message: "Lỗi khi đăng ký nhận thông báo",
+    });
+  }
+};
 
 module.exports = {
 	createProduct,
@@ -261,5 +293,6 @@ module.exports = {
 	// deleteMany,
 	getAllBrand,
 	getAllCategory,
-	searchProduct
+	searchProduct,
+  registerNotification
 };

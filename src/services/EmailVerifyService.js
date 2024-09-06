@@ -829,13 +829,6 @@ body {
 																											<!-- <br>Để xác nhận email đăng ký, bạn vui lòng click vào nút "Xác thực".</p> -->
                                                 </td>
                                             </tr>
-																						 <tr>
-                                                <td align="left" class="esd-block-text es-p20">
-                                                    <h3 style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif; font-size: 35px;">Xin chào, ${name}</h3>
-                                                    <p><br></p>
-                                                    <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">Mật khẩu của bạn:${hash}
-                                                </td>
-                                            </tr>
 																						 <td align="left" class="esd-block-text es-p20">
                                                     <p style="font-family: 'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;">Để xác nhận email đăng ký, bạn vui lòng click vào nút "Xác thực".<br></p>
                                                 </td>

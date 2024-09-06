@@ -129,7 +129,7 @@ router.post("/create", authMiddleWare, ProductController.createProduct);
  *       404:
  *         description: Không tìm thấy sản phẩm
  */
-router.put("/update/:id", authMiddleWare, ProductController.updateProduct);
+router.put("/update/:id",  ProductController.updateProduct);
 /**
  * @swagger
  * /api/product/p/{id}:
@@ -429,5 +429,30 @@ router.get('/get-all/collections/:brand?', ProductController.getAllProductAllowB
  *         description: Lỗi khi tìm kiếm sản phẩm
  */
 router.get("/search", ProductController.searchProduct);
-
+/**
+* @swagger
+* /api/product/notify-when-available:
+*   post:
+*     summary: Đăng ký nhận thông báo khi sản phẩm có hàng trở lại
+*     tags: [Product]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               email:
+*                 type: string
+*                 description: Email của người dùng
+*               productId:
+*                 type: string
+*                 description: ID của sản phẩm
+*     responses:
+*       200:
+*         description: Đăng ký thành công
+*       400:
+*         description: Lỗi khi đăng ký
+*/
+router.post('/notify-when-available', ProductController.registerNotification);
 module.exports = router;

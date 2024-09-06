@@ -1,83 +1,55 @@
-const Order = require('../models/OrderModel');
-let clients = [];
-let notificationQueue = [];
-let isSending = false;
+const Notification = require('../models/NotificationModel');
 
-const streamOrderNotifications = async (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-
-  clients.push(res);
-
-  req.on('close', () => {
-    clients = clients.filter(client => client !== res);
-    if (clients.length === 0) {
-      clearNotificationQueue();
-    }
-  });
-
-  // Thêm delay trước khi gửi thông báo đầu tiên
-  setTimeout(() => {
-    if (!isSending) {
-      sendOrderNotifications();
-    }
-  }, 7000);
+const sendNotification = async (userId, message, data) => {
+  const notification = new Notification({ userId, message, data });
+  await notification.save();
+  return notification;
 };
 
-const sendOrderNotifications = async () => {
-  try {
-    const orders = await Order.find().sort({ createdAt: -1, updatedAt: -1 });
+const getNotificationsByUser = async (userId) => {
+  const notifications = await Notification.find({ userId });
+  return notifications;
+};
 
-    if (!orders.length) return;
-
-    orders.forEach(order => {
-      const notification = {
-        fullName: order.shippingAddress.fullName,
-        codeOrder: order.codeOrder,
-        orderItems: order.orderItems.map(item => ({
-          name: item.name,
-          slug: item.slug,
-          image: item.image[0]
-        }))
-      };
-      notificationQueue.push(notification);
-    });
-
-    if (!isSending && notificationQueue.length > 0) {
-      isSending = true;
-      sendNotification();
-    }
-  } catch (error) {
-    console.error('Error sending order notifications:', error);
+const markNotificationAsRead = async (notificationId) => {
+  const notification = await Notification.findByIdAndUpdate(notificationId, { read: true }, { new: true });
+  if (!notification) {
+    throw new Error('Notification not found');
   }
+  return notification;
 };
 
-const sendNotification = () => {
-  if (!notificationQueue.length) {
-    isSending = false;
-    return;
-  }
-
-  const notification = notificationQueue.shift();
-
-  clients.forEach(client => {
-    client.write(`data: ${JSON.stringify(notification)}\n\n`);
-  });
-
-  const minDelay = 7000; // 7 seconds
-  const maxDelay = 15000; // 15 seconds
-
-  const randomTime = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-
-  setTimeout(sendNotification, randomTime);
+// Thêm các hàm gửi thông báo chi tiết cho các sự kiện khác nhau
+const sendOrderCreatedNotification = async (userId, orderId, orderCode) => {
+  const message = `Đơn hàng mới với mã ${orderCode} đã được tạo thành công.`;
+  const data = { orderId, orderCode };
+  return sendNotification(userId, message, data);
 };
 
-const clearNotificationQueue = () => {
-  notificationQueue = [];
-  isSending = false;
+const sendOrderStatusUpdatedNotification = async (userId, orderId, orderCode, status) => {
+  const message = `Trạng thái đơn hàng ${orderCode} đã được cập nhật thành ${status}.`;
+  const data = { orderId, orderCode, status };
+  return sendNotification(userId, message, data);
+};
+
+const sendNewProductNotification = async (userId, productId, productName, productImage) => {
+  const message = `Sản phẩm mới "${productName}" đã được đăng.`;
+  const data = { productId, productName, productImage };
+  return sendNotification(userId, message, data);
+};
+
+const sendProductRestockedNotification = async (userId, productId, productName, productImage) => {
+  const message = `Sản phẩm "${productName}" đã có hàng trở lại.`;
+  const data = { productId, productName, productImage };
+  return sendNotification(userId, message, data);
 };
 
 module.exports = {
-  streamOrderNotifications,
+  sendNotification,
+  getNotificationsByUser,
+  markNotificationAsRead,
+  sendOrderCreatedNotification,
+  sendOrderStatusUpdatedNotification,
+  sendNewProductNotification,
+  sendProductRestockedNotification,
 };

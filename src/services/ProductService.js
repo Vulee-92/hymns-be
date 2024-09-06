@@ -2,6 +2,9 @@ const Product = require("../models/ProductModel");
 const Category = require("../models/CateProductModel");
 const Brand = require("../models/BrandProductModel");
 const Collection = require('../models/CollectionsModel');
+const Notification = require('../models/NotificationProductModel');
+const { sendEmailNotification, sendRestockNotification } = require('./EmailProductNotificationService');
+const NotificationService= require('./NotificationService');
 
 const slugify = require('slugify');
 
@@ -102,6 +105,18 @@ const updateProduct = async (slug, data) => {
     );
     if (!updatedProduct) {
       return handleError(null, 'Không tìm thấy sản phẩm');
+    }
+
+    // Kiểm tra nếu countInStock > 0 và gửi email thông báo
+    if (data.countInStock > 0) {
+      const notifications = await Notification.find({ productId: updatedProduct._id, notified: false });
+      for (const notification of notifications) {
+        await sendRestockNotification(notification.email, updatedProduct.name);
+        notification.notified = true;
+        await notification.save();
+        // Gửi thông báo cho người dùng
+        await NotificationService.sendProductRestockedNotification(notification.userId, updatedProduct._id, updatedProduct.name, updatedProduct.mainImage);
+      }
     }
     return handleSuccess(updatedProduct, 'Cập nhật sản phẩm thành công');
   } catch (error) {
@@ -284,54 +299,6 @@ const getAllProduct = async ({
   } catch (error) {
     console.error('Error in getAllProduct service:', error);
     throw new Error("Error getting products: " + error.message);
-  }
-};
-
-
-
-
-const getAllProductAllowBrand = async (limit,page,sort,type,brand) => {
-	try {
-		let filter = {};
-		let BrandFilter = [];
-
-		// Lọc theo collections
-		if (brand) {
-			const brandSlug = await Brand.findOne({ slug: brand });
-			BrandFilter = [{ name: brandSlug?.brand }]
-			if (brandSlug) {
-				filter.brand = brandSlug.brand_id;
-			}
-		}
-		// Lấy danh sách các brand và cate từ collections (nếu có)
-		let catesFromCollections = [];
-		if (filter.brand) {
-			const productsInBrand = await Product.find({ brand: filter.brand });
-
-			const brandsId = [...new Set(productsInBrand.map(product => product.brand))];
-
-
-			catesId = [...new Set(productsInBrand.map(product => product.category))];
-			const [brandNames,categoryNames] = await Promise.all([
-        Brand.find({ brand_id: { $in: brandsId } }),
-        Category.find({ cate_id: { $in: catesId } })
-      ]);
-
-      brandsFromCollections = brandNames.map(item => ({ slug: item.slug, brand: item.brand, count: item.count }));
-      catesFromCollections = categoryNames.map(item => ({ slug: item.slug, category: item.category, count: item.count }));
-    }
-
-    return handleSuccess({
-      data: allProduct,
-      total: totalProduct,
-      pageCurrent: page + 1,
-      totalPage: Math.ceil(totalProduct / limit),
-      brands: brandsFromCollections,
-      categories: catesFromCollections,
-      collections: filter.collections ? [{ name: collectionsSlug.name, description: collectionsSlug.description }] : []
-    });
-  } catch (error) {
-    return handleError(error, 'Lỗi khi lấy danh sách sản phẩm');
   }
 };
 

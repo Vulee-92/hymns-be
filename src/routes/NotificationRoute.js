@@ -1,45 +1,70 @@
 const express = require('express');
-const notificationController = require('../controllers/NotificationController');
 const router = express.Router();
+const NotificationController = require('../controllers/NotificationController');
+const { authMiddleWare } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
- * /api/notifications:
- *   get:
- *     summary: Stream order notifications
+ * tags:
+ *   name: Notifications
+ *   description: API quản lý thông báo
+ */
+
+/**
+ * @swagger
+ * /api/notifications/user:
+ *   post:
+ *     summary: Lấy danh sách thông báo của người dùng
  *     tags: [Notifications]
- *     description: Establishes a Server-Sent Events connection to stream order notifications
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID của người dùng
+ *                 required: true
  *     responses:
  *       200:
- *         description: Successful connection established
- *         content:
- *           text/event-stream:
- *             schema:
- *               type: object
- *               properties:
- *                 fullName:
- *                   type: string
- *                   description: Full name of the customer
- *                 codeOrder:
- *                   type: string
- *                   description: Order code
- *                 orderItems:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                         description: Name of the product
- *                       slug:
- *                         type: string
- *                         description: Slug of the product
- *                       image:
- *                         type: string
- *                         description: URL of the product image
+ *         description: Danh sách thông báo của người dùng
+ *       401:
+ *         description: Không có token, quyền truy cập bị từ chối
  *       500:
- *         description: Server error
+ *         description: Lỗi khi lấy danh sách thông báo
  */
-router.get('/', notificationController.getOrderNotifications);
+router.post('/user', NotificationController.getNotificationsByUser);
+
+/**
+ * @swagger
+ * /api/notifications/mark-as-read:
+ *   post:
+ *     summary: Đánh dấu thông báo là đã đọc
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationId:
+ *                 type: string
+ *                 description: ID của thông báo
+ *     responses:
+ *       200:
+ *         description: Thông báo đã được đánh dấu là đã đọc
+ *       401:
+ *         description: Không có token, quyền truy cập bị từ chối
+ *       500:
+ *         description: Lỗi khi đánh dấu thông báo là đã đọc
+ */
+router.post('/mark-as-read',  NotificationController.markNotificationAsRead);
 
 module.exports = router;

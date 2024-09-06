@@ -14,12 +14,14 @@ const BrandProductRouter = require("./BrandProductRoute");
 const CollectionsProductRouter = require("./CollectionsRouter");
 const NotificationRouter = require("./NotificationRoute");
 const CloudinaryRoutes = require("./CloudinaryRoutes");
+const CartRouter = require("./CartRouter");
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../utils/swaggerConfig'); // Đảm bảo đường dẫn đúng
 const basicAuthMiddleware = require('../middleware/basicAuthMiddleware'); 
-
+const ReviewRouter = require('./ReviewRouter'); // Thêm dòng này
 const routes = (app) => {
   app.use("/api/user", UserRouter);
+  app.use('/api/cart', CartRouter); // Thêm dòng này
   app.use("/api/product", ProductRouter);
   app.use("/api/order", OrderRouter);
   app.use("/api/payment", PaymentRouter);
@@ -32,6 +34,7 @@ const routes = (app) => {
   app.use("/api/notifications", NotificationRouter);
   app.use("/api/image", CloudinaryRoutes);
   app.use('/api/recently-viewed', recentlyViewedRouter);
+  app.use('/api/reviews', ReviewRouter); // Thêm dòng này
 
   // Đường dẫn để hiển thị tài liệu Swagger
   app.use('/api-docs', basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
