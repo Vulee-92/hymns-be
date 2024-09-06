@@ -1,6 +1,7 @@
 const OrderService = require("../services/OrderService");
 const QRCode = require('qrcode');
 const config = require('../utils/config');
+const crc16 = require('crc').crc16xmodem;
 const createOrder = async (req,res) => {
 	try {
 		const {
@@ -194,9 +195,27 @@ const deleteMultipleOrders = async (req, res) => {
     });
   }
 };
-const generateVietQRData = (amount, orderId) => {
+const padLeft = (str, length) => {
+	return str.length >= length ? str : new Array(length - str.length + 1).join('0') + str;
+  };
+  
+  const generateVietQRData = (amount, orderId) => {
 	const { bankCode, accountNumber, accountName } = config;
-	const vietQRData = `00020101021138570010A00000072701230006970416${bankCode}0113${accountNumber}0213${accountName}520400005303704540${amount}5802VN5913${accountName}6007HANOI6304`;
+  
+	const payloadFormatIndicator = '000201';
+	const pointOfInitiationMethod = '010211';
+	const merchantAccountInformation = `38${padLeft(bankCode.length.toString(), 2)}${bankCode}${padLeft(accountNumber.length.toString(), 2)}${accountNumber}${padLeft(accountName.length.toString(), 2)}${accountName}`;
+	const merchantCategoryCode = '52040000';
+	const transactionCurrency = '5303704';
+	const transactionAmount = `54${padLeft(amount.toString().length.toString(), 2)}${amount}`;
+	const countryCode = '5802VN';
+	const merchantName = `59${padLeft(accountName.length.toString(), 2)}${accountName}`;
+	const merchantCity = '6007HANOI';
+  
+	const data = `${payloadFormatIndicator}${pointOfInitiationMethod}${merchantAccountInformation}${merchantCategoryCode}${transactionCurrency}${transactionAmount}${countryCode}${merchantName}${merchantCity}`;
+	const crc = crc16(data + '6304').toString(16).toUpperCase();
+	const vietQRData = `${data}6304${crc}`;
+  
 	return vietQRData;
   };
 const generatePaymentQRCode = async (req, res) => {
