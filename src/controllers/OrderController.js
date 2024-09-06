@@ -1,4 +1,6 @@
 const OrderService = require("../services/OrderService");
+const QRCode = require('qrcode');
+const config = require('../utils/config');
 const createOrder = async (req,res) => {
 	try {
 		const {
@@ -192,6 +194,25 @@ const deleteMultipleOrders = async (req, res) => {
     });
   }
 };
+const generateVietQRData = (amount, orderId) => {
+	const { bankCode, accountNumber, accountName } = config;
+	const vietQRData = `00020101021138570010A00000072701230006970416${bankCode}0113${accountNumber}0213${accountName}520400005303704540${amount}5802VN5913${accountName}6007HANOI6304`;
+	return vietQRData;
+  };
+const generatePaymentQRCode = async (req, res) => {
+	try {
+	  const { orderId, amount } = req.body;
+	  if (!orderId || !amount) {
+		return res.status(400).json({ message: 'Order ID và số tiền là bắt buộc' });
+	  }
+  
+	  const vietQRData = generateVietQRData(amount, orderId);
+	  const qrCodeData = await QRCode.toDataURL(vietQRData);
+	  res.status(200).json({ qrCodeData });
+	} catch (error) {
+	  res.status(500).json({ message: 'Lỗi khi tạo mã QR', error });
+	}
+  };
 module.exports = {
 	createOrder,
 	getAllOrderDetails,
@@ -201,5 +222,6 @@ module.exports = {
 	updateOrder,
 	updateOrderItemsWithSlug,
 	deleteOrder,
-  deleteMultipleOrders
+  deleteMultipleOrders,
+  generatePaymentQRCode
 };

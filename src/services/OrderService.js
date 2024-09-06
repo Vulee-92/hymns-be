@@ -310,6 +310,12 @@ const deleteMultipleOrders = async (ids) => {
     throw new Error("Error deleting multiple orders: " + error.message);
   }
 };
+const generateVietQRData = (amount, orderId) => {
+  const { bankCode, accountNumber, accountName } = config;
+  const vietQRData = `00020101021138570010A00000072701230006970416${bankCode}0113${accountNumber}0213${accountName}520400005303704540${amount}5802VN5913${accountName}6007HANOI6304`;
+  return vietQRData;
+};
+
 
 module.exports = {
   createOrder,
