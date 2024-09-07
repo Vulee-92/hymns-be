@@ -195,43 +195,80 @@ const deleteMultipleOrders = async (req, res) => {
     });
   }
 };
-const padLeft = (str, length) => {
-	return str.length >= length ? str : new Array(length - str.length + 1).join('0') + str;
-  };
-  
-  const generateVietQRData = (amount, orderId) => {
-	const { bankCode, accountNumber, accountName } = config;
-  
-	const payloadFormatIndicator = '000201';
-	const pointOfInitiationMethod = '010211';
-	const merchantAccountInformation = `38${padLeft(bankCode.length.toString(), 2)}${bankCode}${padLeft(accountNumber.length.toString(), 2)}${accountNumber}${padLeft(accountName.length.toString(), 2)}${accountName}`;
-	const merchantCategoryCode = '52040000';
-	const transactionCurrency = '5303704';
-	const transactionAmount = `54${padLeft(amount.toString().length.toString(), 2)}${amount}`;
-	const countryCode = '5802VN';
-	const merchantName = `59${padLeft(accountName.length.toString(), 2)}${accountName}`;
-	const merchantCity = '6007HANOI';
-  
-	const data = `${payloadFormatIndicator}${pointOfInitiationMethod}${merchantAccountInformation}${merchantCategoryCode}${transactionCurrency}${transactionAmount}${countryCode}${merchantName}${merchantCity}`;
-	const crc = crc16(data + '6304').toString(16).toUpperCase();
-	const vietQRData = `${data}6304${crc}`;
-  
-	return vietQRData;
-  };
+
+// Hàm format tiền theo yêu cầu (định dạng số tiền với dấu phẩy phân cách phần ngàn)
+const formatAmount = (amount) => {
+    return amount.toLocaleString('en-US');  // Tự động format theo chuẩn dấu phẩy
+};
+
+// Hàm tính CRC-16 theo chuẩn ISO/IEC 13239
+function calculateCRC(str) {
+    let crc = 0xFFFF; // Giá trị ban đầu FFFF
+    for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;  // Đa thức 1021
+            } else {
+                crc <<= 1;
+            }
+            crc &= 0xFFFF; // Giới hạn CRC trong 16 bit
+        }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+// Hàm tạo dữ liệu VietQR với số tiền và nội dung
+const generateVietQRData = (amount, orderId, content) => {
+    // Bước 1: Xây dựng các trường thông tin QR Code
+    const version = '000201';                      // Phiên bản QR
+    const method = '010212';                       // Phương thức QR tĩnh/dynamic
+    const transferInfo = `38630010A000000727013300069704360119QRGD0009986320932010208QRIBFTTA`;  // Thông tin tài khoản/ngân hàng
+    const currency = '5303704';   
+	const formattedAmount = formatAmount(amount);                 // Mã tiền tệ (VND)
+	console.log("length of formatted amount", formattedAmount.length)
+	const amountLength = formattedAmount.length;
+    // Bước 2: Kiểm tra và xử lý số tiền
+    let numericAmount = parseFloat(amount);
+ let amountFormatted = `540${amountLength}${formattedAmount}`;
+    // if (numericAmount < 100000) {
+        // amountFormatted = `5405${formatAmount(numericAmount)}`;  // Với số tiền nhỏ hơn 100000
+    // } else {
+        // amountFormatted = `5407${formatAmount(numericAmount)}`;  // Số tiền >= 100000
+    // }  // Ví dụ: 600000 -> 5407600,000
+    const countryCode = '5802VN';                  // Mã quốc gia (VN)
+    
+    // Bước 3: Xử lý nội dung (orderId và nội dung thanh toán kết hợp)
+    const contentString = `${orderId} + ${content}`;  // Nội dung ví dụ: H3025 + 0986320932
+    const contentLength = contentString.length.toString().padStart(2, '0');
+    const additionalInfo = `622208${contentLength}${contentString}`;  // Mã nội dung: ví dụ: 6218H3025 + 0986320932
+
+    // Bước 4: Ghép tất cả các thành phần vào chuỗi QR Code
+    let rawData = version + method + transferInfo + currency + amountFormatted + countryCode + additionalInfo;
+
+    // Bước 5: Tính toán CRC
+    const crcValue = calculateCRC(rawData + "6304");  // Thêm '6304' trước khi tính CRC
+    rawData += `6304${crcValue}`;  // Thêm CRC vào cuối chuỗi
+
+    return rawData;  // Trả về chuỗi QR code hoàn chỉnh
+};
 const generatePaymentQRCode = async (req, res) => {
-	try {
-	  const { orderId, amount } = req.body;
-	  if (!orderId || !amount) {
-		return res.status(400).json({ message: 'Order ID và số tiền là bắt buộc' });
-	  }
-  
-	  const vietQRData = generateVietQRData(amount, orderId);
-	  const qrCodeData = await QRCode.toDataURL(vietQRData);
-	  res.status(200).json({ qrCodeData });
-	} catch (error) {
-	  res.status(500).json({ message: 'Lỗi khi tạo mã QR', error });
-	}
-  };
+    try {
+        const { amount, orderId, additionalInfo } = req.body;
+        if (!amount || !orderId || !additionalInfo) {
+            return res.status(400).json({ message: 'Số tiền, orderId và nội dung là bắt buộc' });
+        }
+        // Tạo dữ liệu VietQR
+        const vietQRData = generateVietQRData(amount, orderId, additionalInfo);
+
+        // Trả về chuỗi QR Code dạng text
+        res.status(200).json({ qrCodeString: vietQRData });
+    } catch (error) {
+        // Xử lý lỗi
+        res.status(500).json({ message: 'Lỗi khi tạo mã QR', error });
+    }
+};
+
 module.exports = {
 	createOrder,
 	getAllOrderDetails,

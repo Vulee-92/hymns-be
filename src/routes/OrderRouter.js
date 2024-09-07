@@ -292,11 +292,13 @@ router.delete("/:id", authUserMiddleWare, OrderController.deleteOrder);
  *         description: Server error
  */
 router.post("/delete-multiple", authUserMiddleWare, OrderController.deleteMultipleOrders);
+
 /**
  * @swagger
  * /api/order/qr-code:
  *   post:
- *     summary: Tạo mã QR cho thanh toán
+ *     summary: Tạo mã QR thanh toán
+ *     description: Tạo mã QR thanh toán cho đơn hàng
  *     tags: [Order]
  *     requestBody:
  *       required: true
@@ -311,6 +313,9 @@ router.post("/delete-multiple", authUserMiddleWare, OrderController.deleteMultip
  *               amount:
  *                 type: number
  *                 description: Số tiền cần thanh toán
+ *               additionalInfo:
+ *                 type: string
+ *                 description: Thông tin bổ sung
  *     responses:
  *       200:
  *         description: Mã QR được tạo thành công
