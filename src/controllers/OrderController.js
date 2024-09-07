@@ -1,7 +1,8 @@
 const OrderService = require("../services/OrderService");
 const QRCode = require('qrcode');
 const config = require('../utils/config');
-const crc16 = require('crc').crc16xmodem;
+const crc = require('crc');
+const VietQR = require('../utils/vietQR');
 const createOrder = async (req,res) => {
 	try {
 		const {
@@ -195,43 +196,66 @@ const deleteMultipleOrders = async (req, res) => {
     });
   }
 };
+
 const padLeft = (str, length) => {
-	return str.length >= length ? str : new Array(length - str.length + 1).join('0') + str;
-  };
-  
-  const generateVietQRData = (amount, orderId) => {
-	const { bankCode, accountNumber, accountName } = config;
-  
-	const payloadFormatIndicator = '000201';
-	const pointOfInitiationMethod = '010211';
-	const merchantAccountInformation = `38${padLeft(bankCode.length.toString(), 2)}${bankCode}${padLeft(accountNumber.length.toString(), 2)}${accountNumber}${padLeft(accountName.length.toString(), 2)}${accountName}`;
-	const merchantCategoryCode = '52040000';
-	const transactionCurrency = '5303704';
-	const transactionAmount = `54${padLeft(amount.toString().length.toString(), 2)}${amount}`;
-	const countryCode = '5802VN';
-	const merchantName = `59${padLeft(accountName.length.toString(), 2)}${accountName}`;
-	const merchantCity = '6007HANOI';
-  
-	const data = `${payloadFormatIndicator}${pointOfInitiationMethod}${merchantAccountInformation}${merchantCategoryCode}${transactionCurrency}${transactionAmount}${countryCode}${merchantName}${merchantCity}`;
-	const crc = crc16(data + '6304').toString(16).toUpperCase();
-	const vietQRData = `${data}6304${crc}`;
-  
-	return vietQRData;
-  };
+  return str.length >= length ? str : '0'.repeat(length - str.length) + str;
+};
+
+const generateVietQRData = (amount) => {
+  // Static information based on VietQR specification
+  const payloadFormatIndicator = '00020101021238';
+  const merchantAccountInformation = '630010A000000727013300069704360119';
+  const accountNumber = 'QRGD0009986320932';
+  const merchantCategoryCode = '010208QRIBFTTA';
+  const transactionCurrency = '5303704';
+  const countryCode = '5802VN';
+
+  // Convert amount to a properly formatted string with a dot as decimal separator
+  const amountStr = parseFloat(amount).toFixed(3).replace(/\.0*$/, '');
+  const transactionAmount = '54' + padLeft(amountStr.length.toString(), 2) + amountStr;
+
+  // Combine parts to create the QR data string
+  const qrData = 
+    payloadFormatIndicator +
+    merchantAccountInformation +
+    accountNumber +
+    merchantCategoryCode +
+    transactionCurrency +
+    transactionAmount +
+    countryCode +
+    '6304';
+
+  // Calculate CRC-16 and append it
+  const crcValue = crc.crc16xmodem(qrData).toString(16).toUpperCase().padStart(4, '0');
+  return qrData + crcValue;
+};
+
 const generatePaymentQRCode = async (req, res) => {
-	try {
-	  const { orderId, amount } = req.body;
-	  if (!orderId || !amount) {
-		return res.status(400).json({ message: 'Order ID và số tiền là bắt buộc' });
-	  }
-  
-	  const vietQRData = generateVietQRData(amount, orderId);
-	  const qrCodeData = await QRCode.toDataURL(vietQRData);
-	  res.status(200).json({ qrCodeData });
-	} catch (error) {
-	  res.status(500).json({ message: 'Lỗi khi tạo mã QR', error });
-	}
-  };
+  try {
+    const { amount, orderId } = req.body;
+    if (!amount) {
+      return res.status(400).json({ message: 'Số tiền là bắt buộc' });
+    }
+
+    const vietQR = new VietQR();
+    vietQR
+      .setBeneficiaryOrganization("970436", "9986320932") // Thay thế bằng mã ngân hàng và số tài khoản của bạn
+      .setTransactionAmount(amount.toString().replace(/[.,]/g, ''))
+      // .setAdditionalDataFieldTemplate(orderId || ''); // Sử dụng orderId nếu có
+
+    const vietQRData = vietQR.build();
+    const qrCodeData = await QRCode.toDataURL(vietQRData);
+
+    res.status(200).json({ qrCodeData, rawData: vietQRData });
+  } catch (error) {
+    console.error('Error in generatePaymentQRCode:', error);
+    res.status(500).json({ message: 'Lỗi khi tạo mã QR', error: error.message });
+  }
+};
+
+
+
+	
 module.exports = {
 	createOrder,
 	getAllOrderDetails,
