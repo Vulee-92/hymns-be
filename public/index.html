@@ -1,19 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Display</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> <!-- Thư viện QR Code -->
 </head>
 <body>
-  <h1>QR Code</h1>
-  <img id="qrCode" alt="QR Code" />
-  <script>
-    // Dữ liệu base64 của mã QR
-    const qrCodeData = "data:image/png;base64,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";
+    <h1>QR Code Generator</h1>
+    
+    <!-- Ô input để nhập chuỗi QR code -->
+    <label for="qrInput">Nhập chuỗi QR Code:</label>
+    <input type="text" id="qrInput" placeholder="Nhập chuỗi vào đây" style="width: 300px;">
+    <button onclick="generateQRCode()">Tạo QR Code</button>
+    
+    <!-- Vùng hiển thị QR Code -->
+    <canvas id="qrcodeCanvas" style="margin-top: 20px;"></canvas>
 
-    // Gán dữ liệu base64 vào thẻ img
-    document.getElementById('qrCode').src = qrCodeData;
-  </script>
+    <script>
+        // Hàm render QR code
+        const generateQRCode = () => {
+            // Lấy giá trị từ ô input
+            const qrString = document.getElementById('qrInput').value;
+            
+            // Kiểm tra nếu chuỗi không rỗng
+            if (qrString.trim() === "") {
+                alert("Vui lòng nhập chuỗi để tạo mã QR!");
+                return;
+            }
+            
+            // Render QR code từ chuỗi đã nhập vào thẻ canvas
+            QRCode.toCanvas(document.getElementById('qrcodeCanvas'), qrString, function (error) {
+                if (error) console.error(error);
+                console.log('QR Code render thành công!');
+            });
+        };
+    </script>
 </body>
 </html>

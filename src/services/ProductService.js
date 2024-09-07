@@ -267,7 +267,7 @@ const getAllProduct = async ({
 			Collection.find({ $or: [
         { collection_id: { $in: uniqueCollectionIds.filter(id => typeof id === 'number') } },
         { _id: { $in: uniqueCollectionIds.filter(id => typeof id === 'object') } }
-      ]}).select('collection slug description backgroundImage')
+      ]}).select('name collection slug description backgroundImage')
     ]);
 
 
