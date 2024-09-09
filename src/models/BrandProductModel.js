@@ -16,6 +16,7 @@ var productBrandSchema = new mongoose.Schema(
 			required: true,
 			default: 0
 		},
+		description: { type: String },
 		image: { type: String,required: false }, // Mảng chứa nhiều hình ảnh
 
 		slug: { type: String },

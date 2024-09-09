@@ -7,6 +7,7 @@ const Product = require("../models/ProductModel");
 const EmailService = require("../services/EmailService");
 const EmailServiceIsPaid = require("../services/EmailServiceIsPaid");
 const OrderNotificationService = require('./OrderNotificationService');
+const { log } = require('console');
 
 // Chọn token dựa trên môi trường
    const token = process.env.NODE_ENV === 'production' 
@@ -24,7 +25,84 @@ const handleError = (error, message = 'Đã xảy ra lỗi') => {
 const handleSuccess = (data, message = 'Thành công') => {
   return { status: 'OK', message, data };
 };
+// Hàm format tiền theo yêu cầu (định dạng số tiền với dấu phẩy phân cách phần ngàn)
+const formatAmount = (amount) => {
+	return amount.toLocaleString('en-US');  // Tự động format theo chuẩn dấu phẩy
+};
 
+// Hàm tính CRC-16 theo chuẩn ISO/IEC 13239
+function calculateCRC(str) {
+	let crc = 0xFFFF; // Giá trị ban đầu FFFF
+	for (let i = 0; i < str.length; i++) {
+			crc ^= str.charCodeAt(i) << 8;
+			for (let j = 0; j < 8; j++) {
+					if (crc & 0x8000) {
+							crc = (crc << 1) ^ 0x1021;  // Đa thức 1021
+					} else {
+							crc <<= 1;
+					}
+					crc &= 0xFFFF; // Giới hạn CRC trong 16 bit
+			}
+	}
+	return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+// Hàm tạo dữ liệu VietQR với số tiền và nội dung
+const generateVietQRData = (amount, orderId, content) => {
+	console.log("amount, orderId, content",amount, orderId, content);
+	// Bước 1: Xây dựng các trường thông tin QR Code
+	const version = '000201';                      // Phiên bản QR
+	const method = '010212';                       // Phương thức QR tĩnh/dynamic
+	const transferInfo = `38630010A000000727013300069704360119QRGD0009986320932010208QRIBFTTA`;  // Thông tin tài khoản/ngân hàng
+	const currency = '5303704';   
+const formattedAmount = formatAmount(amount);                 // Mã tiền tệ (VND)
+console.log("length of formatted amount", formattedAmount.length)
+const amountLength = formattedAmount.length;
+	// Bước 2: Kiểm tra và xử lý số tiền
+	let numericAmount = parseFloat(amount);
+let amountFormatted = `540${amountLength}${formattedAmount}`;
+	// if (numericAmount < 100000) {
+			// amountFormatted = `5405${formatAmount(numericAmount)}`;  // Với số tiền nhỏ hơn 100000
+	// } else {
+			// amountFormatted = `5407${formatAmount(numericAmount)}`;  // Số tiền >= 100000
+	// }  // Ví dụ: 600000 -> 5407600,000
+	const countryCode = '5802VN';                  // Mã quốc gia (VN)
+	
+	// Bước 3: Xử lý nội dung (orderId và nội dung thanh toán kết hợp)
+	const contentString = `${orderId} + ${content}`;  // Nội dung ví dụ: H3025 + 0986320932
+	const contentLength = contentString.length.toString().padStart(2, '0');
+	const additionalInfo = `622208${contentLength}${contentString}`;  // Mã nội dung: ví dụ: 6218H3025 + 0986320932
+
+	// Bước 4: Ghép tất cả các thành phần vào chuỗi QR Code
+	let rawData = version + method + transferInfo + currency + amountFormatted + countryCode + additionalInfo;
+
+	// Bước 5: Tính toán CRC
+	const crcValue = calculateCRC(rawData + "6304");  // Thêm '6304' trước khi tính CRC
+	rawData += `6304${crcValue}`;  // Thêm CRC vào cuối chuỗi
+
+	return rawData;  // Trả về chuỗi QR code hoàn chỉnh
+};
+const generatePaymentQRCode = async (amount, orderId, additionalInfo) => {
+  try {
+    // Chuyển đổi số điện thoại
+    // const formattedPhone = additionalInfo.replace(/\D/g, ''); 
+    // console.log("formattedPhone", formattedPhone); // Kết quả sẽ là 0986320932
+
+    // Kiểm tra các tham số đầu vào
+    // if (!amount || !orderId || !formattedPhone) {
+    //   throw new Error('Số tiền, orderId và nội dung là bắt buộc');
+    // }
+
+    // Tạo dữ liệu VietQR
+    const vietQRData = generateVietQRData(amount, orderId, additionalInfo);
+		console.log("vietQRData",vietQRData);
+    // Trả về chuỗi QR Code dạng text
+    return { qrCodeString: vietQRData };
+  } catch (error) {
+    // Xử lý lỗi
+    throw new Error('Lỗi khi tạo mã QR: ' + error.message);
+  }
+};
 const createOrder = async (newOrder) => {
   try {
     const {
@@ -47,6 +125,7 @@ const createOrder = async (newOrder) => {
       paidAt,
       email,
     } = newOrder;
+		console.log("newOrder", newOrder);
     const codeOrder = `H-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const promises = orderItems.map(async (order) => {
@@ -111,7 +190,12 @@ const createOrder = async (newOrder) => {
         paidAt,
         orderStatus
       });
-
+			console.log("createdOrder",createdOrder);
+  // Tạo mã QR code
+	const qrCodeData = await generatePaymentQRCode(createdOrder?.totalPrice,createdOrder.codeOrder, createdOrder?.shippingAddress?.phone );
+  // Lưu mã QR vào đơn hàng
+	createdOrder.qrCode = qrCodeData.qrCodeString; // L
+	await createdOrder.save(); 
       // Lấy id của đơn hàng vừa tạo
       const orderId = createdOrder._id;
       if (createdOrder) {
@@ -136,7 +220,11 @@ const createOrder = async (newOrder) => {
         await EmailService.sendEmailCreateOrder(email, createdOrder);
         OrderNotificationService.sendNewOrderNotification(orderId);
 
-        return handleSuccess({ id: orderId }, 'Tạo đơn hàng thành công');
+				return handleSuccess({
+					id: createdOrder._id,
+					order: createdOrder,
+					qrCode: qrCodeData // Giả sử qrCodeData trả về có trường qrCodeString
+				}, 'Tạo đơn hàng thành công');
       }
     }
   } catch (error) {
@@ -155,14 +243,28 @@ const getAllOrderDetails = async (email) => {
     return handleError(error, 'Lỗi khi lấy thông tin đơn hàng');
   }
 };
-
 const getDetailsOrder = async (id) => {
   try {
     const order = await Order.findById(id);
+    
+    // Kiểm tra xem đơn hàng có tồn tại không
     if (!order) {
       return handleError(null, 'Không tìm thấy đơn hàng');
     }
-    return handleSuccess(order, 'Lấy thông tin đơn hàng thành công');
+
+    // Chuyển đổi số điện thoại
+    const formattedPhone = order.shippingAddress.phone.replace(/\D/g, ''); 
+		const formattedOrderId =  order.codeOrder.replace('-', ''); 
+    // Tạo mã QR code
+    const qrCodeData = await generatePaymentQRCode(order.totalPrice, formattedOrderId, formattedPhone);
+
+    console.log("qrCodeData", qrCodeData);
+    
+    // Trả về thông tin đơn hàng và mã QR code
+    return handleSuccess({
+      data: order,
+      qrCode: qrCodeData.qrCodeString // Trả về mã QR code
+    }, 'Lấy thông tin đơn hàng thành công');
   } catch (error) {
     return handleError(error, 'Lỗi khi lấy thông tin đơn hàng');
   }

@@ -312,6 +312,12 @@ router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
  *         schema:
  *           type: number
  *         description: Giá tối đa
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Từ khóa tìm kiếm sản phẩm
  *     responses:
  *       200:
  *         description: Lấy danh sách sản phẩm thành công

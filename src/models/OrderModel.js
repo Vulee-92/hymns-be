@@ -41,6 +41,7 @@ const orderSchema = new mongoose.Schema(
 		codeOrder: { type: String },
 		isDelivered: { type: Boolean,default: false },
 		deliveredAt: { type: Date },
+		qrCode: { type: String } 
 	},
 	{
 		timestamps: true,

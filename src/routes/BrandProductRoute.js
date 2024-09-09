@@ -24,6 +24,9 @@ const BrandProductController = require("../controllers/BrandProductController");
  *               slug:
  *                 type: string
  *                 description: Slug của thương hiệu
+ *               description:
+ *                 type: string
+ *                 description: Mô tả bộ sưu tập
  *     responses:
  *       200:
  *         description: Tạo thương hiệu sản phẩm thành công
@@ -134,9 +137,15 @@ router.delete("/delete-multiple", BrandProductController.deleteMultipleBrands);
  *               brand:
  *                 type: string
  *                 description: Tên thương hiệu
+ *               image:
+ *                 type: string
+ *                 description: Hình ảnh của thương hiệu
  *               slug:
  *                 type: string
  *                 description: Slug của thương hiệu
+ *               description:
+ *                 type: string
+ *                 description: Mô tả bộ sưu tập
  *     responses:
  *       200:
  *         description: Cập nhật thương hiệu sản phẩm thành công

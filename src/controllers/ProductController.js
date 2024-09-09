@@ -160,7 +160,8 @@ const getAllProduct = async (req, res) => {
       page = 1,
       pageSize = 10,
       minPrice,
-      maxPrice
+      maxPrice,
+			keyword
     } = req.query;
 
     const result = await ProductService.getAllProduct({
@@ -171,7 +172,8 @@ const getAllProduct = async (req, res) => {
       page: parseInt(page),
       pageSize: parseInt(pageSize),
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+			keyword 
     });
 
     return res.status(200).json(result);
