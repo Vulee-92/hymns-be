@@ -5,6 +5,7 @@ const cartItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
     required: true,
+    index: true
   },
   quantity: {
     type: Number,
@@ -14,11 +15,6 @@ const cartItemSchema = new mongoose.Schema({
 });
 
 const cartSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
   items: [cartItemSchema],
 }, { timestamps: true });
 

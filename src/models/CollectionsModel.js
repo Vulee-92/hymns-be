@@ -1,32 +1,19 @@
-const mongoose = require("mongoose"); // Erase if already required
+const mongoose = require("mongoose");
 
-// Declare the Schema of the Mongo model
-var productCollectionsSchema = new mongoose.Schema(
-	{
-		name: {
-			type: String,
-			required: true,
-		},
-		collection_id: {
-			type: Number,
-			required: true,
-		},
-		description: { type: String },
-
-		image: { type: String,required: false },
-		backgroundImage: { type: String, required: false }, 
-		count: {
-			type: Number,
-			required: false,
-		},
-		slug: { type: String },
-	},
-	{
-		timestamps: true,
-	}
+const productCollectionsSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String },
+    image: { type: String, required: false },
+    backgroundImage: { type: String, required: false },
+    slug: { type: String, required: true, unique: true },
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // Liên kết với các sản phẩm
+  },
+  {
+    timestamps: true,
+  }
 );
 
-//Export the model
-const Collections = mongoose.model('Collections',productCollectionsSchema);
+const Collections = mongoose.model('Collections', productCollectionsSchema);
 
 module.exports = Collections;

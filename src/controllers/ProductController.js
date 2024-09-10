@@ -1,8 +1,8 @@
-const ProductService = require("../services/ProductService");
+const { sendRegistrationNotification } = require('../services/EmailProductNotificationService');
+const ProductService = require('../services/ProductService');
 const Product = require("../models/ProductModel");
-const Notification = require('../models/NotificationProductModel');
-const { sendRegistrationNotification } = require("../services/EmailProductNotificationService");
-// Thêm hàm handleResponse
+const NotificationProductModel = require('../models/NotificationProductModel');
+// Hàm tiện ích để xử lý phản hồi
 const handleResponse = (res, data, statusCode = 200) => {
   const success = statusCode >= 200 && statusCode < 300;
   return res.status(statusCode).json({
@@ -11,145 +11,16 @@ const handleResponse = (res, data, statusCode = 200) => {
     ...data
   });
 };
-const createProduct = async (req,res) => {
-	try {
-		const {
-			name,
-			mainImage, 
-			image, // Thay đổi tên trường
-			countInStock,
-			price,
-			collection,
-			rating,
-			discount,
-			category,brand,
-		} = req.body;
 
-		if (
-			!name || !mainImage
-
-		) {
-			return res.status(500).json({
-				status: "ERR",
-				message: "The input is required",
-			});
-		}
-		const response = await ProductService.createProduct(req.body);
-
-		return res.status(200).json(response);
-	} catch (e) {
-		return res.status(404).json({
-			message: e,
-		});
-	}
-};
-
-
-const updateProduct = async (req, res) => {
+const createProduct = async (req, res) => {
   try {
-    const productIdSlug = req.params.id;
-    const data = req.body;
-    if (!productIdSlug) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
-    }
-
-    const response = await ProductService.updateProduct(productIdSlug, data);
-    handleResponse(res, response);
-  } catch (e) {
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
-
-const getDetailsProduct = async (req, res) => {
-  try {
-    const productIdSlug = req.params.id;
-    if (!productIdSlug) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
-    }
-    const response = await ProductService.getDetailsProduct(productIdSlug);
-    handleResponse(res, response);
-  } catch (e) {
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
-
-const deleteProduct = async (req, res) => {
-  try {
-    const productId = req.params.id;
-    if (!productId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
-    }
-    const response = await ProductService.deleteProduct(productId);
-    logger.info(`Product deleted: ${productId}`);
-    handleResponse(res, response);
-  } catch (e) {
-    logger.error('Error in deleteProduct:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
-  }
-};
-
-
-const getAllCategory = async (req, res) => {
-  try {
-    const response = await ProductService.getAllCategory();
+    const response = await ProductService.createProduct(req.body);
     return res.status(200).json(response);
   } catch (e) {
-    return res.status(404).json({
-      message: e,
-    });
+    return res.status(500).json({ message: e.message });
   }
 };
 
-const getAllBrand = async (req, res) => {
-  try {
-    const { selectedTypes } = req.query;
-    const typesArray = selectedTypes ? selectedTypes.split(',') : [];
-    const response = await ProductService.getAllBrand(typesArray);
-    return res.status(200).json(response);
-  } catch (e) {
-    return res.status(404).json({
-      message: e,
-    });
-  }
-};
-
-const searchProduct = async (req,res) => {
-	try {
-		const { filter } = req.query;
-
-		if (!filter) {
-			return res.status(400).json({
-				message: "Filter parameter is required",
-			});
-		}
-
-		const searchResult = await ProductService.searchProduct(filter);
-
-		return res.status(200).json(searchResult);
-	} catch (e) {
-		return res.status(500).json({
-			message: e.message || "Internal Server Error",
-		});
-	}
-};
 const getAllProduct = async (req, res) => {
   try {
     const { 
@@ -161,7 +32,7 @@ const getAllProduct = async (req, res) => {
       pageSize = 10,
       minPrice,
       maxPrice,
-			keyword
+      keyword
     } = req.query;
 
     const result = await ProductService.getAllProduct({
@@ -173,7 +44,7 @@ const getAllProduct = async (req, res) => {
       pageSize: parseInt(pageSize),
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-			keyword 
+      keyword 
     });
 
     return res.status(200).json(result);
@@ -186,68 +57,60 @@ const getAllProduct = async (req, res) => {
   }
 };
 
-const getAllProductAllowBrand = async (req, res) => {
+const getProductDetail = async (req, res) => {
   try {
-    const { brand } = req.params;
-    const { limit, page, sort, type } = req.query;
-    const parsedLimit = Number(limit) || null;
-    const parsedPage = Number(page) || 0;
-
-    if ((parsedLimit && parsedLimit < 0) || (parsedPage < 0)) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "Invalid limit or page value",
-      });
-    }
-
-    const response = await ProductService.getAllProductAllowBrand(
-      parsedLimit,
-      parsedPage,
-      sort,
-      type,
-      brand
-    );
-    handleResponse(res, response);
+    const { slug } = req.params;
+    const response = await ProductService.getDetailsProduct(slug);
+    return res.status(200).json(response);
   } catch (e) {
-    logger.error('Error in getAllProductAllowBrand:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
+    return res.status(500).json({ message: e.message });
   }
 };
 
-const getAllType = async (req, res) => {
+const updateProduct = async (req, res) => {
   try {
-    const response = await ProductService.getAllType();
-    handleResponse(res, response);
+    const { slug } = req.params.id;
+    console.log("slug", slug);
+    const response = await ProductService.updateProduct(req.params.id, req.body);
+    return res.status(200).json(response);
   } catch (e) {
-    logger.error('Error in getAllType:', e);
-    handleResponse(res, {
-      status: "ERR",
-      message: e.message || "Internal Server Error",
-    }, 500);
+    return res.status(500).json({ message: e.message });
   }
 };
 
-
-const decryptData = (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
-    const { encryptedData } = req.body;
-    console.log('Received encrypted data:', encryptedData); // Thêm log này
-
-    if (!encryptedData) {
-      return res.status(400).json({ error: 'No encrypted data provided' });
-    }
-
-    const decryptedData = decrypt(encryptedData);
-    console.log('Decrypted data:', decryptedData); // Thêm log này
-
-    res.json(JSON.parse(decryptedData));
-  } catch (error) {
-    console.error('Error in decryptData:', error);
-    res.status(400).json({ error: 'Decryption failed', details: error.message });
+    const { id } = req.params;
+    const response = await ProductService.deleteProduct(id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
   }
+};
+
+const deleteManyProduct = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    const response = await ProductService.deleteManyProduct(ids);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+const searchProduct = async (req, res) => {
+  try {
+    const { filter } = req.query;
+    const response = await ProductService.searchProduct(filter);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+const updateAllProductsBrand = async (req, res) => {
+  const result = await ProductService.updateAllProductsBrand();
+  res.status(result.status === 'OK' ? 200 : 500).json(result);
 };
 const registerNotification = async (req, res) => {
   try {
@@ -266,7 +129,15 @@ const registerNotification = async (req, res) => {
         message: "Không tìm thấy sản phẩm",
       });
     }
-    const notification = new Notification({ email, productId });
+
+    if (product.countInStock > 0) {
+      return res.status(200).json({
+        status: "OK",
+        message: `${product.name} hiện vẫn còn hàng, có thể đặt hàng ngay`,
+      });
+    }
+
+    const notification = new NotificationProductModel({ email, productId });
     await notification.save();
 
     // Gửi email thông báo đăng ký thành công
@@ -284,17 +155,36 @@ const registerNotification = async (req, res) => {
     });
   }
 };
-
-module.exports = {
-	createProduct,
-	updateProduct,
-	getDetailsProduct,
-	deleteProduct,
-	getAllProduct,
-	getAllProductAllowBrand,
-	// deleteMany,
-	getAllBrand,
-	getAllCategory,
-	searchProduct,
-  registerNotification
+// Hàm lấy thông tin chi tiết sản phẩm
+const getDetailsProduct = async (req, res) => {
+  try {
+    const product = await ProductService.getDetailsProduct(req.params.id);
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi lấy thông tin sản phẩm', error: error.message });
+  }
 };
+
+// Hàm lấy tất cả sản phẩm theo thương hiệu
+const getAllProductAllowBrand = async (req, res) => {
+  try {
+    const { brand } = req.params;
+    const queryOptions = req.query;
+
+    const result = await ProductService.getAllProductAllowBrand(brand, queryOptions);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm', error: error.message });
+  }
+};
+
+module.exports = {  createProduct,
+  updateProduct,
+  getDetailsProduct,
+  deleteProduct,
+  deleteManyProduct,
+  getAllProduct,
+  getAllProductAllowBrand,
+  searchProduct,
+  registerNotification,
+  updateAllProductsBrand}

@@ -1,148 +1,101 @@
 const slugify = require('slugify');
 const Collections = require("../models/CollectionsModel");
 
-const createCollectionProduct = (newCollection) => {
-  return new Promise(async (resolve, reject) => {
-    const { name, description, image,   backgroundImage } = newCollection;
-    try {
-      const generateRandomId = Math.floor(100000 + Math.random() * 900000);
-      const checkNameCollection = await Collections.findOne({ name: name });
-      
-      if (checkNameCollection) {
-        resolve({
-          status: "ERR",
-          message: "The collection name already exists",
-        });
-      }
-      
-      const slug = slugify(name, { lower: true });
-      const newCollection = await Collections.create({
-        name,
-        collection_id: generateRandomId,
-        description,
-        image,
-				     backgroundImage,
-        slug
-      });
-      
-      if (newCollection) {
-        resolve({
-          status: "OK",
-          message: "SUCCESS",
-          data: newCollection,
-        });
-      }
-    } catch (e) {
-      reject(e);
+const createCollection = async (newCollection) => {
+  try {
+    const { name, description, image, backgroundImage, slug } = newCollection;
+
+    // Kiểm tra xem collection có tồn tại không
+    const checkNameCollection = await Collections.findOne({ name });
+    if (checkNameCollection) {
+      return { status: "ERR", message: "The name of collection is already" };
     }
-  });
+
+    // Tạo slug nếu không có
+    const collectionSlug = slug || slugify(name, { lower: true });
+
+    // Tạo mới collection
+    const newCollectionInstance = new Collections({
+      name,
+      description,
+      image,
+      backgroundImage,
+      slug: collectionSlug,
+    });
+
+    const createdCollection = await newCollectionInstance.save();
+    return { status: "OK", message: "SUCCESS", data: createdCollection };
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const getAllCollections = () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const allCollections = await Collections.find().sort({ createdAt: -1, updatedAt: -1 });
-      resolve({
-        status: "OK",
-        message: "Success",
-        data: allCollections,
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
+const getAllCollections = async () => {
+  try {
+    const allCollections = await Collections.find().sort({ createdAt: -1, updatedAt: -1 });
+    return { status: "OK", message: "Success", data: allCollections };
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const getCollectionDetail = (id) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const collection = await Collections.findById(id);
-      if (collection) {
-        resolve({
-          status: "OK",
-          message: "SUCCESS",
-          data: collection,
-        });
-      } else {
-        resolve({
-          status: "ERR",
-          message: "The collection does not exist",
-        });
-      }
-    } catch (e) {
-      reject(e);
+const deleteCollection = async (collectionId) => {
+  try {
+    const result = await Collections.findByIdAndDelete(collectionId);
+    if (result) {
+      return { status: "OK", message: "Collection deleted successfully" };
+    } else {
+      return { status: "ERR", message: "Collection not found" };
     }
-  });
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const updateCollection = (id, data) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const checkCollection = await Collections.findOne({ _id: id });
-      if (checkCollection === null) {
-        resolve({
-          status: "ERR",
-          message: "The collection does not exist",
-        });
-      }
-
-      if (data.name) {
-        data.slug = slugify(data.name, { lower: true });
-      }
-
-      const updatedCollection = await Collections.findByIdAndUpdate(id, data, { new: true });
-      resolve({
-        status: "OK",
-        message: "SUCCESS",
-        data: updatedCollection,
-      });
-    } catch (e) {
-      reject(e);
+const updateCollection = async (collectionId, updatedData) => {
+  try {
+    const result = await Collections.findByIdAndUpdate(collectionId, updatedData, { new: true });
+    if (result) {
+      return { status: "OK", message: "Collection updated successfully", data: result };
+    } else {
+      return { status: "ERR", message: "Collection not found" };
     }
-  });
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const deleteCollection = (id) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const checkCollection = await Collections.findOne({ _id: id });
-      if (checkCollection === null) {
-        resolve({
-          status: "ERR",
-          message: "The collection does not exist",
-        });
-      }
-
-      await Collections.findByIdAndDelete(id);
-      resolve({
-        status: "OK",
-        message: "Delete collection success",
-      });
-    } catch (e) {
-      reject(e);
+const getCollectionDetail = async (collectionId) => {
+  try {
+    const collection = await Collections.findById(collectionId);
+    if (collection) {
+      return { status: "OK", message: "Success", data: collection };
+    } else {
+      return { status: "ERR", message: "Collection not found" };
     }
-  });
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const deleteMultipleCollections = (ids) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await Collections.deleteMany({ _id: { $in: ids } });
-      resolve({
-        status: "OK",
-        message: "Delete collections success",
-      });
-    } catch (e) {
-      reject(e);
+const deleteMultipleCollections = async (collectionIds) => {
+  try {
+    const result = await Collections.deleteMany({ _id: { $in: collectionIds } });
+    if (result.deletedCount > 0) {
+      return { status: "OK", message: "Collections deleted successfully", deletedCount: result.deletedCount };
+    } else {
+      return { status: "ERR", message: "No collections found to delete" };
     }
-  });
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
 module.exports = {
-  createCollectionProduct,
+  createCollection,
   getAllCollections,
-  getCollectionDetail,
-  updateCollection,
   deleteCollection,
+  updateCollection,
+  getCollectionDetail,
   deleteMultipleCollections
 };

@@ -4,7 +4,7 @@ const CateProductController = require("../controllers/CateProductController");
 
 /**
  * @swagger
- * /api/cate-product/create:
+ * /api/category-product/create:
  *   post:
  *     summary: Tạo danh mục sản phẩm mới
  *     tags: [CategoryProduct]
@@ -30,11 +30,11 @@ const CateProductController = require("../controllers/CateProductController");
  *       500:
  *         description: Lỗi khi tạo danh mục sản phẩm
  */
-router.post("/create", CateProductController.createCate);
+router.post("/create", CateProductController.createCategory);
 
 /**
  * @swagger
- * /api/cate-product/get-all:
+ * /api/category-product/get-all:
  *   get:
  *     summary: Lấy tất cả danh mục sản phẩm
  *     tags: [CategoryProduct]
@@ -44,11 +44,11 @@ router.post("/create", CateProductController.createCate);
  *       500:
  *         description: Lỗi khi lấy danh sách danh mục sản phẩm
  */
-router.get("/get-all", CateProductController.getAllCate);
+router.get("/get-all", CateProductController.getAllCategory);
 
 /**
  * @swagger
- * /api/cate-product/get/{id}:
+ * /api/category-product/get/{id}:
  *   get:
  *     summary: Lấy chi tiết danh mục sản phẩm
  *     tags: [CategoryProduct]
@@ -65,11 +65,11 @@ router.get("/get-all", CateProductController.getAllCate);
  *       500:
  *         description: Lỗi khi lấy chi tiết danh mục sản phẩm
  */
-router.get("/get/:id", CateProductController.getCateDetail);
+router.get("/get/:id", CateProductController.getCategoryDetail);
 
 /**
  * @swagger
- * /api/cate-product/delete/{id}:
+ * /api/category-product/delete/{id}:
  *   delete:
  *     summary: Xóa danh mục sản phẩm
  *     tags: [CategoryProduct]
@@ -86,11 +86,11 @@ router.get("/get/:id", CateProductController.getCateDetail);
  *       500:
  *         description: Lỗi khi xóa danh mục sản phẩm
  */
-router.delete("/delete/:id", CateProductController.deleteCate);
+router.delete("/delete/:id", CateProductController.deleteCategory);
 
 /**
  * @swagger
- * /api/cate-product/delete-multiple:
+ * /api/category-product/delete-multiple:
  *   delete:
  *     summary: Xóa nhiều danh mục sản phẩm
  *     tags: [CategoryProduct]
@@ -112,11 +112,11 @@ router.delete("/delete/:id", CateProductController.deleteCate);
  *       500:
  *         description: Lỗi khi xóa nhiều danh mục sản phẩm
  */
-router.delete("/delete-multiple", CateProductController.deleteMultipleCates);
+router.delete("/delete-multiple", CateProductController.deleteMultipleCategories);
 
 /**
  * @swagger
- * /api/cate-product/update/{id}:
+ * /api/category-product/update/{id}:
  *   put:
  *     summary: Cập nhật danh mục sản phẩm
  *     tags: [CategoryProduct]
@@ -149,6 +149,6 @@ router.delete("/delete-multiple", CateProductController.deleteMultipleCates);
  *       500:
  *         description: Lỗi khi cập nhật danh mục sản phẩm
  */
-router.put("/update/:id", CateProductController.updateCate);
+router.put("/update/:id", CateProductController.updateCategory);
 
 module.exports = router;

@@ -4,205 +4,6 @@ const ProductController = require("./../controllers/ProductController");
 const { authMiddleWare } = require("../middleware/authMiddleware");
 /**
  * @swagger
- * /api/product/create:
- *   post:
- *     summary: Tạo sản phẩm mới
- *     tags: [Product]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Tên sản phẩm
- *               mainImage:
- *                 type: string
- *                 description: Hình ảnh chính của sản phẩm
- *               image:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Danh sách hình ảnh của sản phẩm
- *               countInStock:
- *                 type: number
- *                 description: Số lượng sản phẩm trong kho
- *               price:
- *                 type: number
- *                 description: Giá sản phẩm
- *               rating:
- *                 type: number
- *                 description: Đánh giá sản phẩm
- *               description:
- *                 type: string
- *                 description: Mô tả sản phẩm
- *               discount:
- *                 type: number
- *                 description: Giảm giá sản phẩm
- *               fee:
- *                 type: number
- *                 description: Phí sản phẩm
- *               category:
- *                 type: number
- *                 description: Danh mục sản phẩm
- *               brand:
- *                 type: number
- *                 description: Thương hiệu sản phẩm
- *               collections:
- *                 type: number
- *                 description: Bộ sưu tập sản phẩm
- *     responses:
- *       200:
- *         description: Tạo sản phẩm thành công
- *       500:
- *         description: Lỗi khi tạo sản phẩm
- */
-router.post("/create", authMiddleWare, ProductController.createProduct);
-
-/**
- * @swagger
- * /api/product/update/{id}:
- *   put:
- *     summary: Cập nhật sản phẩm
- *     tags: [Product]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID của sản phẩm
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Tên sản phẩm
- *               mainImage:
- *                 type: string
- *                 description: Hình ảnh chính của sản phẩm
- *               image:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Danh sách hình ảnh của sản phẩm
- *               countInStock:
- *                 type: number
- *                 description: Số lượng sản phẩm trong kho
- *               price:
- *                 type: number
- *                 description: Giá sản phẩm
- *               rating:
- *                 type: number
- *                 description: Đánh giá sản phẩm
- *               description:
- *                 type: string
- *                 description: Mô tả sản phẩm
- *               discount:
- *                 type: number
- *                 description: Giảm giá sản phẩm
- *               fee:
- *                 type: number
- *                 description: Phí sản phẩm
- *               category:
- *                 type: number
- *                 description: Danh mục sản phẩm
- *               brand:
- *                 type: number
- *                 description: Thương hiệu sản phẩm
- *               collections:
- *                 type: number
- *                 description: Bộ sưu tập sản phẩm
- *     responses:
- *       200:
- *         description: Cập nhật sản phẩm thành công
- *       404:
- *         description: Không tìm thấy sản phẩm
- */
-router.put("/update/:id",  ProductController.updateProduct);
-/**
- * @swagger
- * /api/product/p/{id}:
- *   get:
- *     summary: Lấy thông tin chi tiết sản phẩm
- *     tags: [Product]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID của sản phẩm
- *     responses:
- *       200:
- *         description: Lấy thông tin sản phẩm thành công
- *       404:
- *         description: Không tìm thấy sản phẩm
- */
-router.get("/p/:id", ProductController.getDetailsProduct);
-
-/**
- * @swagger
- * /api/product/delete/{id}:
- *   delete:
- *     summary: Xóa sản phẩm
- *     tags: [Product]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID của sản phẩm
- *     responses:
- *       200:
- *         description: Xóa sản phẩm thành công
- *       404:
- *         description: Không tìm thấy sản phẩm
- */
-router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
-
-
-/**
- * @swagger
- * /api/product/delete-many:
- *   post:
- *     summary: Xóa nhiều sản phẩm
- *     tags: [Product]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               ids:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Mảng chứa các ID của sản phẩm cần xóa
- *     responses:
- *       200:
- *         description: Xóa nhiều sản phẩm thành công
- *       500:
- *         description: Lỗi khi xóa nhiều sản phẩm
- */
-// router.post("/delete-many", ProductController.deleteMany);
-
-/**
- * @swagger
  * components:
  *   schemas:
  *     Product:
@@ -265,7 +66,212 @@ router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
  *           type: string
  *         slug:
  *           type: string
- * 
+ */
+/**
+ * @swagger
+ * /api/product/create:
+ *   post:
+ *     summary: Tạo sản phẩm mới
+ *     tags: [Product]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Tên sản phẩm
+ *               mainImage:
+ *                 type: string
+ *                 description: Hình ảnh chính của sản phẩm
+ *               image:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Danh sách hình ảnh của sản phẩm
+ *               countInStock:
+ *                 type: number
+ *                 description: Số lượng sản phẩm trong kho
+ *               price:
+ *                 type: number
+ *                 description: Giá sản phẩm
+ *               rating:
+ *                 type: number
+ *                 description: Đánh giá sản phẩm
+ *               description:
+ *                 type: string
+ *                 description: Mô tả sản phẩm
+ *               discount:
+ *                 type: number
+ *                 description: Giảm giá sản phẩm
+ *               fee:
+ *                 type: number
+ *                 description: Phí sản phẩm
+ *               category:
+ *                 type: string
+ *                 description: Danh mục sản phẩm (ObjectId)
+ *               brand:
+ *                 type: string
+ *                 description: Thương hiệu sản phẩm (ObjectId)
+ *               collections:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Bộ sưu tập sản phẩm (ObjectId)
+ *     responses:
+ *       200:
+ *         description: Tạo sản phẩm thành công
+ *       500:
+ *         description: Lỗi khi tạo sản phẩm
+ */
+router.post("/create", authMiddleWare, ProductController.createProduct);
+
+/**
+ * @swagger
+ * /api/product/update/{id}:
+ *   put:
+ *     summary: Cập nhật sản phẩm
+ *     tags: [Product]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của sản phẩm
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Tên sản phẩm
+ *               mainImage:
+ *                 type: string
+ *                 description: Hình ảnh chính của sản phẩm
+ *               image:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Danh sách hình ảnh của sản phẩm
+ *               countInStock:
+ *                 type: number
+ *                 description: Số lượng sản phẩm trong kho
+ *               price:
+ *                 type: number
+ *                 description: Giá sản phẩm
+ *               rating:
+ *                 type: number
+ *                 description: Đánh giá sản phẩm
+ *               description:
+ *                 type: string
+ *                 description: Mô tả sản phẩm
+ *               discount:
+ *                 type: number
+ *                 description: Giảm giá sản phẩm
+ *               fee:
+ *                 type: number
+ *                 description: Phí sản phẩm
+ *               category:
+ *                 type: string
+ *                 description: Danh mục sản phẩm (ObjectId)
+ *               brand:
+ *                 type: string
+ *                 description: Thương hiệu sản phẩm (ObjectId)
+ *               collections:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Bộ sưu tập sản phẩm (ObjectId)
+ *     responses:
+ *       200:
+ *         description: Cập nhật sản phẩm thành công
+ *       404:
+ *         description: Không tìm thấy sản phẩm
+ */
+router.put("/update/:id",  ProductController.updateProduct);
+
+/**
+ * @swagger
+ * /api/product/p/{id}:
+ *   get:
+ *     summary: Lấy thông tin chi tiết sản phẩm
+ *     tags: [Product]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của sản phẩm
+ *     responses:
+ *       200:
+ *         description: Lấy thông tin sản phẩm thành công
+ *       404:
+ *         description: Không tìm thấy sản phẩm
+ */
+router.get("/p/:id", ProductController.getDetailsProduct);
+
+/**
+ * @swagger
+ * /api/product/delete/{id}:
+ *   delete:
+ *     summary: Xóa sản phẩm
+ *     tags: [Product]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của sản phẩm
+ *     responses:
+ *       200:
+ *         description: Xóa sản phẩm thành công
+ *       404:
+ *         description: Không tìm thấy sản phẩm
+ */
+router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
+
+/**
+ * @swagger
+ * /api/product/delete-many:
+ *   post:
+ *     summary: Xóa nhiều sản phẩm
+ *     tags: [Product]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Mảng chứa các ID của sản phẩm cần xóa
+ *     responses:
+ *       200:
+ *         description: Xóa nhiều sản phẩm thành công
+ *       500:
+ *         description: Lỗi khi xóa nhiều sản phẩm
+ */
+router.post("/delete-many", authMiddleWare, ProductController.deleteManyProduct);
+
+/**
+ * @swagger
  * /api/product/get-all:
  *   get:
  *     summary: Lấy tất cả sản phẩm với các tùy chọn lọc và sắp xếp
@@ -370,7 +376,6 @@ router.delete("/delete/:id", authMiddleWare, ProductController.deleteProduct);
  */
 router.get('/get-all', ProductController.getAllProduct);
 
-
 /**
  * @swagger
  * /api/product/get-all/collections/{brand?}:
@@ -415,6 +420,7 @@ router.get('/get-all', ProductController.getAllProduct);
  *         description: Lỗi khi lấy danh sách sản phẩm
  */
 router.get('/get-all/collections/:brand?', ProductController.getAllProductAllowBrand);
+
 /**
  * @swagger
  * /api/product/search:
@@ -435,30 +441,46 @@ router.get('/get-all/collections/:brand?', ProductController.getAllProductAllowB
  *         description: Lỗi khi tìm kiếm sản phẩm
  */
 router.get("/search", ProductController.searchProduct);
+
 /**
-* @swagger
-* /api/product/notify-when-available:
-*   post:
-*     summary: Đăng ký nhận thông báo khi sản phẩm có hàng trở lại
-*     tags: [Product]
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties:
-*               email:
-*                 type: string
-*                 description: Email của người dùng
-*               productId:
-*                 type: string
-*                 description: ID của sản phẩm
-*     responses:
-*       200:
-*         description: Đăng ký thành công
-*       400:
-*         description: Lỗi khi đăng ký
-*/
+ * @swagger
+ * /api/product/notify-when-available:
+ *   post:
+ *     summary: Đăng ký nhận thông báo khi sản phẩm có hàng trở lại
+ *     tags: [Product]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email của người dùng
+ *               productId:
+ *                 type: string
+ *                 description: ID của sản phẩm
+ *     responses:
+ *       200:
+ *         description: Đăng ký thành công
+ *       400:
+ *         description: Lỗi khi đăng ký
+ */
 router.post('/notify-when-available', ProductController.registerNotification);
+
+/**
+ * @swagger
+ * /api/product/update-all-brands:
+ *   put:
+ *     summary: Cập nhật tất cả sản phẩm chuyển đổi brand từ Number sang ObjectId
+ *     tags: [Product]
+ *     responses:
+ *       200:
+ *         description: Cập nhật tất cả sản phẩm thành công
+ *       500:
+ *         description: Lỗi khi cập nhật tất cả sản phẩm
+ */
+router.put('/update-all-brands', ProductController.updateAllProductsBrand);
+
 module.exports = router;

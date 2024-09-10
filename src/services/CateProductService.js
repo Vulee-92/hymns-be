@@ -1,160 +1,99 @@
-const CateProduct = require("../models/CateProductModel");
 const slugify = require('slugify');
+const CategoryProduct = require("../models/CateProductModel");
 
-const createCateProduct = (newCate) => {
-	return new Promise(async (resolve, reject) => {
-		const { category, image } = newCate;
-		try {
-			const generateRandomId = Math.floor(100000 + Math.random() * 900000);
+const createCategoryProduct = async (newCategory) => {
+  try {
+    const { category, slug, image } = newCategory;
 
-			const checkNameCate = await CateProduct.findOne({
-				category: category,
-			});
-			if (checkNameCate !== null) {
-				resolve({
-					status: "ERR",
-					message: "The category of product is already",
-				});
-			}
-			const slug = slugify(category, { lower: true });
+    // Kiểm tra xem category có tồn tại không
+    const checkNameCategory = await CategoryProduct.findOne({ category });
+    if (checkNameCategory) {
+      return { status: "ERR", message: "The name of category is already" };
+    }
 
-			// Tạo cate_id ngẫu nhiên và kiểm tra xem có trùng lặp không
-			const checkIdCate = await CateProduct.findOne({
-				cate_id: generateRandomId,
-			});
-			if (checkIdCate !== null) {
-				resolve({
-					status: "ERR",
-					message: "The checkIdCate of product is already",
-				});
-			}
+    // Tạo slug nếu không có
+    const categorySlug = slug || slugify(category, { lower: true });
 
-			const newCate = await CateProduct.create({
-				category,
-				cate_id: generateRandomId,
-				slug,
-				image
-			});
-			if (newCate) {
-				resolve({
-					status: "OK",
-					message: "SUCCESS",
-					data: newCate,
-				});
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
+    // Tạo mới category
+    const newCategoryInstance = new CategoryProduct({
+      category,
+      slug: categorySlug,
+      image,
+    });
+
+    const createdCategory = await newCategoryInstance.save();
+    return { status: "OK", message: "SUCCESS", data: createdCategory };
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const getAllCate = () => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const allCate = await CateProduct.find().sort({ createdAt: -1, updatedAt: -1 });
-			resolve({
-				status: "OK",
-				message: "Success",
-				data: allCate,
-			});
-		} catch (e) {
-			reject(e);
-		}
-	});
+const getAllCategory = async () => {
+  try {
+    const allCategory = await CategoryProduct.find().sort({ createdAt: -1, updatedAt: -1 });
+    return { status: "OK", message: "Success", data: allCategory };
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const getCateDetail = (cateId) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const cate = await CateProduct.findById(cateId);
-			if (cate) {
-				resolve({
-					status: "OK",
-					message: "Success",
-					data: cate,
-				});
-			} else {
-				resolve({
-					status: "ERR",
-					message: "Category not found",
-				});
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
+const deleteCategory = async (categoryId) => {
+  try {
+    const result = await CategoryProduct.findByIdAndDelete(categoryId);
+    if (result) {
+      return { status: "OK", message: "Category deleted successfully" };
+    } else {
+      return { status: "ERR", message: "Category not found" };
+    }
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const deleteCate = (cateId) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const result = await CateProduct.findByIdAndDelete(cateId);
-			if (result) {
-				resolve({
-					status: "OK",
-					message: "Category deleted successfully",
-				});
-			} else {
-				resolve({
-					status: "ERR",
-					message: "Category not found",
-				});
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
+const updateCategory = async (categoryId, updatedData) => {
+  try {
+    const result = await CategoryProduct.findByIdAndUpdate(categoryId, updatedData, { new: true });
+    if (result) {
+      return { status: "OK", message: "Category updated successfully", data: result };
+    } else {
+      return { status: "ERR", message: "Category not found" };
+    }
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const deleteMultipleCates = (cateIds) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const result = await CateProduct.deleteMany({ _id: { $in: cateIds } });
-			if (result.deletedCount > 0) {
-				resolve({
-					status: "OK",
-					message: "Categories deleted successfully",
-					deletedCount: result.deletedCount,
-				});
-			} else {
-				resolve({
-					status: "ERR",
-					message: "No categories found to delete",
-				});
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
+const getCategoryDetail = async (categoryId) => {
+  try {
+    const category = await CategoryProduct.findById(categoryId);
+    if (category) {
+      return { status: "OK", message: "Success", data: category };
+    } else {
+      return { status: "ERR", message: "Category not found" };
+    }
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
-const updateCate = (cateId, updatedData) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const result = await CateProduct.findByIdAndUpdate(cateId, updatedData, { new: true });
-			if (result) {
-				resolve({
-					status: "OK",
-					message: "Category updated successfully",
-					data: result,
-				});
-			} else {
-				resolve({
-					status: "ERR",
-					message: "Category not found",
-				});
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
+const deleteMultipleCategories = async (categoryIds) => {
+  try {
+    const result = await CategoryProduct.deleteMany({ _id: { $in: categoryIds } });
+    if (result.deletedCount > 0) {
+      return { status: "OK", message: "Categories deleted successfully", deletedCount: result.deletedCount };
+    } else {
+      return { status: "ERR", message: "No categories found to delete" };
+    }
+  } catch (e) {
+    return { status: "ERR", message: e.message };
+  }
 };
 
 module.exports = {
-	createCateProduct,
-	getAllCate,
-	getCateDetail,
-	deleteCate,
-	deleteMultipleCates,
-	updateCate
+  createCategoryProduct,
+  getAllCategory,
+  deleteCategory,
+  updateCategory,
+  getCategoryDetail,
+  deleteMultipleCategories
 };

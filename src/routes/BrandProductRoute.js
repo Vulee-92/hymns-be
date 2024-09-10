@@ -48,6 +48,7 @@ router.post("/create", BrandProductController.createBrand);
  *         description: Lỗi khi lấy danh sách thương hiệu sản phẩm
  */
 router.get("/get-all", BrandProductController.getAllBrand);
+
 /**
  * @swagger
  * /api/brand-product/get/{id}:
@@ -68,6 +69,7 @@ router.get("/get-all", BrandProductController.getAllBrand);
  *         description: Lỗi khi lấy chi tiết thương hiệu sản phẩm
  */
 router.get("/get/:id", BrandProductController.getBrandDetail);
+
 /**
  * @swagger
  * /api/brand-product/delete/{id}:
@@ -87,8 +89,8 @@ router.get("/get/:id", BrandProductController.getBrandDetail);
  *       500:
  *         description: Lỗi khi xóa thương hiệu sản phẩm
  */
-
 router.delete("/delete/:id", BrandProductController.deleteBrand);
+
 /**
  * @swagger
  * /api/brand-product/delete-multiple:
@@ -114,6 +116,7 @@ router.delete("/delete/:id", BrandProductController.deleteBrand);
  *         description: Lỗi khi xóa nhiều thương hiệu sản phẩm
  */
 router.delete("/delete-multiple", BrandProductController.deleteMultipleBrands);
+
 /**
  * @swagger
  * /api/brand-product/update/{id}:
@@ -153,4 +156,5 @@ router.delete("/delete-multiple", BrandProductController.deleteMultipleBrands);
  *         description: Lỗi khi cập nhật thương hiệu sản phẩm
  */
 router.put("/update/:id", BrandProductController.updateBrand);
+
 module.exports = router;
