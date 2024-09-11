@@ -42,7 +42,7 @@ const { authMiddleWare } = require('../middleware/authMiddleware');
  *       500:
  *         description: Lỗi khi thêm sản phẩm vào giỏ hàng
  */
-router.post('/add', authMiddleWare, CartController.addToCart);
+router.post('/add', CartController.addToCart);
 
 /**
  * @swagger

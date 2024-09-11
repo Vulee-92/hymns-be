@@ -1,6 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const BlogCateController = require("../controllers/BlogCateController");
+/**
+ * @swagger
+ * tags:
+ *   name: BlogCategory
+ *   description: API quản lý loại bài viết
+ */
 
 /**
  * @swagger

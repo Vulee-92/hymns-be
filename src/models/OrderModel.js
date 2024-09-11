@@ -19,17 +19,13 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
-    shippingAddress: {
-      fullName: { type: String, required: true },
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      phone: { type: String, required: true },
-      email: { type: String, required: true },
-      fee: { type: Number, required: false },
-      province: { type: String, required: true },
-      ward: { type: String, required: true },
+    // Tham chiếu trực tiếp đến ShippingModel cho địa chỉ giao hàng
+    shippingAddress: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Shipping', 
+      required: true 
     },
-    paymentMethod: { type: String, required: true },
+    paymentMethod: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentMethod', required: true },
     shippingMethod: { type: String, required: true },
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },
@@ -45,7 +41,8 @@ const orderSchema = new mongoose.Schema(
     codeOrder: { type: String },
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
-    qrCode: { type: String }
+    qrCode: { type: String },
+    shipping: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipping' } // Tham chiếu đến Shipping
   },
   {
     timestamps: true,

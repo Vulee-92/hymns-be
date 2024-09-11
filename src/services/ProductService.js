@@ -2,6 +2,7 @@ const Product = require("../models/ProductModel");
 const Category = require("../models/CateProductModel");
 const Brand = require("../models/BrandProductModel");
 const Collection = require('../models/CollectionsModel');
+const Combo = require('../models/ComboModel');
 const Notification = require('../models/NotificationProductModel');
 const { sendEmailNotification, sendRestockNotification } = require('./EmailProductNotificationService');
 const NotificationService = require('./NotificationService');
@@ -165,139 +166,167 @@ const getSortOption = (sort) => {
 	  count: counts[item[key]] || 0
 	}));
   };
-const getAllProduct = async ({
-  collection_slug,
-  brand_slug,
-  category_slug,
-  sort,
-  page,
-  pageSize,
-  minPrice,
-  maxPrice,
-  keyword
-}) => {
-  try {
-    let query = {};
-    let collectionsFilter = [];
 
-    // 1. Xử lý lọc theo collection
-    if (collection_slug) {
-      const collection = await Collection.findOne({ slug: collection_slug });
-      if (collection) {
-        query.collections = collection._id;
-        collectionsFilter = [{ name: collection.name, description: collection.description }];
-      }
-    }
-
-    // 2. Xử lý lọc theo brand
-    if (brand_slug) {
-      const brandArray = brand_slug.split(',');
-      const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('_id');
-      query.brand = { $in: brandIds };
-    }
-
-    // 3. Xử lý lọc theo category
-    if (category_slug) {
-      const categoryArray = category_slug.split(',');
-      const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('_id');
-      query.category = { $in: categoryIds };
-    }
-
-    // 4. Xử lý lọc theo giá
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      query.price = {};
-      if (minPrice !== undefined) query.price.$gte = minPrice;
-      if (maxPrice !== undefined) query.price.$lte = maxPrice;
-    }
-
-    // 5. Xử lý tìm kiếm theo keyword
-    if (keyword) {
-      const keywordRegex = keyword.split(' ').map(word => `(?=.*${word})`).join('');
-      query.name = { $regex: new RegExp(keywordRegex, 'i') };
-    }
-
-    // 6. Lấy sản phẩm theo query
-    const products = await Product.find(query)
-      .sort(getSortOption(sort))
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .populate('brand', 'brand slug')
-      .populate('category', 'category slug')
-      .populate('collections', 'name slug');
-
-    const totalProducts = await Product.countDocuments(query);
-
-    // 7. Lấy tất cả brand, category và collection nếu không có bộ lọc nào được áp dụng
-    let brandsData, categoriesData, collectionsData;
-    if (!collection_slug && !brand_slug && !category_slug && !keyword) {
-      [brandsData, categoriesData, collectionsData] = await Promise.all([
-        Brand.find().select('brand slug'),
-        Category.find().select('category slug'),
-        Collection.find().select('name slug description')
-      ]);
-    } else {
-      // Nếu có bộ lọc, chỉ lấy các giá trị liên quan
-      const productIds = products.map(p => p._id);
-      [brandsData, categoriesData, collectionsData] = await Promise.all([
-        Brand.find({ _id: { $in: products.map(p => p.brand) } }).select('brand slug'),
-        Category.find({ _id: { $in: products.map(p => p.category) } }).select('category slug'),
-        Collection.find({ _id: { $in: products.flatMap(p => p.collections) } }).select('name slug description image')
-      ]);
-    }
-
-    // 8. Tính toán số lượng sản phẩm cho mỗi brand, category và collection
-    const brandCounts = await getFilterCounts(query, 'brand');
-    const categoryCounts = await getFilterCounts(query, 'category');
-    const collectionCounts = await getFilterCounts(query, 'collections');
-
-    // 9. Kết hợp thông tin và số lượng
-    const brandsWithCount = combineWithCounts(brandsData, brandCounts, '_id');
-    const categoriesWithCount = combineWithCounts(categoriesData, categoryCounts, '_id');
-    const collectionsWithCount = combineWithCounts(collectionsData, collectionCounts, '_id');
-
-    // 10. Lấy từ khóa tìm kiếm phổ biến
-    const searchedKeywords = await getSearchedKeywords(keyword);
-
-    // 11. Trả về kết quả
-    return {
-      status: "OK",
-      message: "Success",
-      data: products,
-      pagination: {
-        currentPage: Number(page),
-        pageSize: Number(pageSize),
-        totalPages: Math.ceil(totalProducts / Number(pageSize)),
-        totalItems: totalProducts
-      },
-      collections: collectionsWithCount,
-      filters: [
-        {
-          id: "brand",
-          title: "Thương hiệu",
-          data: brandsWithCount
-        },
-        {
-          id: "category",
-          title: "Loại sản phẩm",
-          data: categoriesWithCount
-        },
-        {
-          id: "collection",
-          title: "Bộ sưu tập",
-          data: collectionsWithCount
-        },
-        {
-          id: "keyword",
-          title: "Từ khóa",
-          data: searchedKeywords
+  const getAllProduct = async ({
+    collection_slug,
+    brand_slug,
+    category_slug,
+    sort,
+    page,
+    pageSize,
+    minPrice,
+    maxPrice,
+    keyword
+  }) => {
+    try {
+      let productQuery = {};
+      let comboQuery = {};
+      let collectionsFilter = [];
+  
+      // 1. Xử lý lọc theo collection
+      if (collection_slug) {
+        const collection = await Collection.findOne({ slug: collection_slug });
+        if (collection) {
+          productQuery.collections = collection._id;
+          comboQuery.collection = collection._id;
+          collectionsFilter = [{ name: collection.name, description: collection.description }];
         }
-      ]
-    };
-  } catch (error) {
-    console.error('Error in getAllProduct service:', error);
-    throw new Error("Error getting products: " + error.message);
-  }
-};
+      }
+  
+      // 2. Xử lý lọc theo brand
+      if (brand_slug) {
+        const brandArray = brand_slug.split(',');
+        const brandIds = await Brand.find({ slug: { $in: brandArray } }).distinct('_id');
+        productQuery.brand = { $in: brandIds };
+        comboQuery.brand = { $in: brandIds };
+      }
+  
+      // 3. Xử lý lọc theo category
+      if (category_slug) {
+        const categoryArray = category_slug.split(',');
+        const categoryIds = await Category.find({ slug: { $in: categoryArray } }).distinct('_id');
+        productQuery.category = { $in: categoryIds };
+        comboQuery.category = { $in: categoryIds };
+      }
+  
+      // 4. Xử lý lọc theo giá
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        productQuery.price = {};
+        comboQuery.comboPrice = {};
+        if (minPrice !== undefined) {
+          productQuery.price.$gte = minPrice;
+          comboQuery.comboPrice.$gte = minPrice;
+        }
+        if (maxPrice !== undefined) {
+          productQuery.price.$lte = maxPrice;
+          comboQuery.comboPrice.$lte = maxPrice;
+        }
+      }
+  
+      // 5. Xử lý tìm kiếm theo keyword
+      if (keyword) {
+        const keywordRegex = keyword.split(' ').map(word => `(?=.*${word})`).join('');
+        productQuery.name = { $regex: new RegExp(keywordRegex, 'i') };
+        comboQuery.name = { $regex: new RegExp(keywordRegex, 'i') };
+      }
+  
+      // 6. Lấy sản phẩm theo query
+      const products = await Product.find(productQuery)
+        .sort(getSortOption(sort))
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .populate('brand', 'brand slug')
+        .populate('category', 'category slug')
+        .populate('collections', 'name slug');
+  
+      const totalProducts = await Product.countDocuments(productQuery);
+  
+      // 7. Lấy combo theo query
+      const combos = await Combo.find(comboQuery)
+        .sort(getSortOption(sort))
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .populate('products.product')
+        .populate('collections')
+        .populate('brand')
+        .populate('category');
+  
+      const totalCombos = await Combo.countDocuments(comboQuery);
+  
+      // 8. Kết hợp sản phẩm và combo
+      const combinedResults = [...products, ...combos];
+  
+      // 9. Lấy tất cả brand, category và collection nếu không có bộ lọc nào được áp dụng
+      let brandsData, categoriesData, collectionsData;
+      if (!collection_slug && !brand_slug && !category_slug && !keyword) {
+        [brandsData, categoriesData, collectionsData] = await Promise.all([
+          Brand.find().select('brand slug'),
+          Category.find().select('category slug'),
+          Collection.find().select('name slug description')
+        ]);
+      } else {
+        // Nếu có bộ lọc, chỉ lấy các giá trị liên quan
+        const productIds = products.map(p => p._id);
+        const comboIds = combos.map(c => c._id);
+        [brandsData, categoriesData, collectionsData] = await Promise.all([
+          Brand.find({ _id: { $in: products.map(p => p.brand) } }).select('brand slug'),
+          Category.find({ _id: { $in: products.map(p => p.category) } }).select('category slug'),
+          Collection.find({ _id: { $in: products.flatMap(p => p.collections) } }).select('name slug description image')
+        ]);
+      }
+  
+      // 10. Tính toán số lượng sản phẩm cho mỗi brand, category và collection
+      const brandCounts = await getFilterCounts(productQuery, 'brand');
+      const categoryCounts = await getFilterCounts(productQuery, 'category');
+      const collectionCounts = await getFilterCounts(productQuery, 'collections');
+  
+      // 11. Kết hợp thông tin và số lượng
+      const brandsWithCount = combineWithCounts(brandsData, brandCounts, '_id');
+      const categoriesWithCount = combineWithCounts(categoriesData, categoryCounts, '_id');
+      const collectionsWithCount = combineWithCounts(collectionsData, collectionCounts, '_id');
+  
+      // 12. Lấy từ khóa tìm kiếm phổ biến
+      const searchedKeywords = await getSearchedKeywords(keyword);
+  
+      // 13. Trả về kết quả
+      return {
+        status: "OK",
+        message: "Success",
+        data: combinedResults,
+        pagination: {
+          currentPage: Number(page),
+          pageSize: Number(pageSize),
+          totalPages: Math.ceil((totalProducts + totalCombos) / Number(pageSize)),
+          totalItems: totalProducts + totalCombos
+        },
+        collections: collectionsWithCount,
+        filters: [
+          {
+            id: "brand",
+            title: "Thương hiệu",
+            data: brandsWithCount
+          },
+          {
+            id: "category",
+            title: "Loại sản phẩm",
+            data: categoriesWithCount
+          },
+          {
+            id: "collection",
+            title: "Bộ sưu tập",
+            data: collectionsWithCount
+          },
+          {
+            id: "keyword",
+            title: "Từ khóa",
+            data: searchedKeywords
+          }
+        ]
+      };
+    } catch (error) {
+      return handleError(error, 'Lỗi khi lấy danh sách sản phẩm');
+    }
+  };
 
 // Hàm hỗ trợ để lấy từ khóa tìm kiếm phổ biến
 const getSearchedKeywords = async (keyword) => {

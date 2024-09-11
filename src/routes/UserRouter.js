@@ -82,7 +82,6 @@ router.post('/sign-in', userController.loginUser);
  *         description: Lỗi khi đăng xuất
  */
 router.post('/log-out', userController.logoutUser);
-
 /**
  * @swagger
  * /api/user/update-user/{id}:
@@ -114,6 +113,21 @@ router.post('/log-out', userController.logoutUser);
  *               password:
  *                 type: string
  *                 description: Mật khẩu người dùng
+ *               phone:
+ *                 type: string
+ *                 description: Số điện thoại
+ *               address:
+ *                 type: string
+ *                 description: Địa chỉ
+ *               city:
+ *                 type: string
+ *                 description: Thành phố
+ *               province:
+ *                 type: string
+ *                 description: Tỉnh
+ *               ward:
+ *                 type: string
+ *                 description: Phường
  *     responses:
  *       200:
  *         description: Cập nhật thành công
@@ -326,5 +340,164 @@ router.post('/forgot-password', userController.forgotPassword);
  *         description: Lỗi khi đặt lại mật khẩu
  */
 router.post('/reset-password/:id/:tokenReset', userController.resetPassword);
+/**
+ * @swagger
+ * /api/user/add-shipping-address:
+ *   post:
+ *     summary: Thêm địa chỉ giao hàng mới
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               fullName:
+ *                 type: string
+ *                 description: Tên đầy đủ
+ *               phone:
+ *                 type: string
+ *                 description: Số điện thoại
+ *               email:
+ *                 type: string
+ *                 description: Email
+ *               address:
+ *                 type: string
+ *                 description: Địa chỉ
+ *               city:
+ *                 type: string
+ *                 description: Thành phố
+ *               province:
+ *                 type: string
+ *                 description: Tỉnh
+ *               ward:
+ *                 type: string
+ *                 description: Phường
+ *               fee:
+ *                 type: number
+ *                 description: Phí
+ *     responses:
+ *       200:
+ *         description: Thêm địa chỉ giao hàng thành công
+ *       400:
+ *         description: Lỗi khi thêm địa chỉ giao hàng
+ */
+router.post('/add-shipping-address', authUserMiddleWare, userController.addShippingAddress);
 
+/**
+ * @swagger
+ * /api/user/update-shipping-address:
+ *   put:
+ *     summary: Cập nhật địa chỉ giao hàng
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               addressId:
+ *                 type: string
+ *                 description: ID của địa chỉ giao hàng
+ *               fullName:
+ *                 type: string
+ *                 description: Tên đầy đủ
+ *               phone:
+ *                 type: string
+ *                 description: Số điện thoại
+ *               email:
+ *                 type: string
+ *                 description: Email
+ *               address:
+ *                 type: string
+ *                 description: Địa chỉ
+ *               city:
+ *                 type: string
+ *                 description: Thành phố
+ *               province:
+ *                 type: string
+ *                 description: Tỉnh
+ *               ward:
+ *                 type: string
+ *                 description: Phường
+ *               fee:
+ *                 type: number
+ *                 description: Phí
+ *     responses:
+ *       200:
+ *         description: Cập nhật địa chỉ giao hàng thành công
+ *       400:
+ *         description: Lỗi khi cập nhật địa chỉ giao hàng
+ */
+router.put('/update-shipping-address', authUserMiddleWare, userController.updateShippingAddress);
+
+/**
+ * @swagger
+ * /api/user/delete-shipping-address:
+ *   delete:
+ *     summary: Xóa địa chỉ giao hàng
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               addressId:
+ *                 type: string
+ *                 description: ID của địa chỉ giao hàng
+ *     responses:
+ *       200:
+ *         description: Xóa địa chỉ giao hàng thành công
+ *       400:
+ *         description: Lỗi khi xóa địa chỉ giao hàng
+ */
+router.delete('/delete-shipping-address', authUserMiddleWare, userController.deleteShippingAddress);
+
+/**
+ * @swagger
+ * /api/user/set-default-shipping-address:
+ *   put:
+ *     summary: Đặt địa chỉ giao hàng mặc định
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               addressId:
+ *                 type: string
+ *                 description: ID của địa chỉ giao hàng
+ *     responses:
+ *       200:
+ *         description: Đặt địa chỉ giao hàng mặc định thành công
+ *       400:
+ *         description: Lỗi khi đặt địa chỉ giao hàng mặc định
+ */
+router.put('/set-default-shipping-address', authUserMiddleWare, userController.setDefaultShippingAddress);
 module.exports = router;

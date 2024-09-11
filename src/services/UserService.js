@@ -380,7 +380,121 @@ const resetPassword = async (id, token, data) => {
 	}
   });
 };
-
+const addShippingAddress = async (userId, address) => {
+	try {
+	  const user = await User.findById(userId);
+	  if (!user) {
+		return {
+		  status: "ERR",
+		  message: "User not found",
+		};
+	  }
+  
+	  user.shippingAddresses.push(address);
+	  await user.save();
+  
+	  return {
+		status: "OK",
+		message: "Shipping address added successfully",
+		data: user.shippingAddresses,
+	  };
+	} catch (error) {
+	  throw new Error(error);
+	}
+  };
+  
+  const updateShippingAddress = async (userId, addressId, address) => {
+	try {
+	  const user = await User.findById(userId);
+	  if (!user) {
+		return {
+		  status: "ERR",
+		  message: "User not found",
+		};
+	  }
+  
+	  const addressIndex = user.shippingAddresses.findIndex(
+		(addr) => addr._id.toString() === addressId
+	  );
+  
+	  if (addressIndex === -1) {
+		return {
+		  status: "ERR",
+		  message: "Address not found",
+		};
+	  }
+  
+	  user.shippingAddresses[addressIndex] = address;
+	  await user.save();
+  
+	  return {
+		status: "OK",
+		message: "Shipping address updated successfully",
+		data: user.shippingAddresses,
+	  };
+	} catch (error) {
+	  throw new Error(error);
+	}
+  };
+  
+  const deleteShippingAddress = async (userId, addressId) => {
+	try {
+	  const user = await User.findById(userId);
+	  if (!user) {
+		return {
+		  status: "ERR",
+		  message: "User not found",
+		};
+	  }
+  
+	  user.shippingAddresses = user.shippingAddresses.filter(
+		(addr) => addr._id.toString() !== addressId
+	  );
+	  await user.save();
+  
+	  return {
+		status: "OK",
+		message: "Shipping address deleted successfully",
+		data: user.shippingAddresses,
+	  };
+	} catch (error) {
+	  throw new Error(error);
+	}
+  };
+  
+  const setDefaultShippingAddress = async (userId, addressId) => {
+	try {
+	  const user = await User.findById(userId);
+	  if (!user) {
+		return {
+		  status: "ERR",
+		  message: "User not found",
+		};
+	  }
+  
+	  const address = user.shippingAddresses.find(
+		(addr) => addr._id.toString() === addressId
+	  );
+  
+	  if (!address) {
+		return {
+		  status: "ERR",
+		  message: "Address not found",
+		};
+	  }
+  
+	  user.defaultShippingAddress = address;
+	  await user.save();
+  
+	  return {
+		status: "OK",
+		message: "Default shipping address set successfully",
+		data: user.defaultShippingAddress,
+	  };
+	} catch (error) {
+	  throw new Error(error);
+	}
+  };
 module.exports = {
   createUser,
   loginUser,
@@ -393,5 +507,9 @@ module.exports = {
   verifyUser,
   forgotPassword,
   resetPassword,
-  generateResetToken
+  generateResetToken,
+  addShippingAddress,
+updateShippingAddress,
+deleteShippingAddress,
+setDefaultShippingAddress,
 };

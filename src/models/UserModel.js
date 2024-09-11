@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
 
+const addressSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  phone: { type: String, required: true },
+  email: { type: String, required: true },
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  province: { type: String, required: true },
+  ward: { type: String, required: true },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String },
@@ -17,7 +27,9 @@ const userSchema = new mongoose.Schema(
     ward: { type: String },
     slug: { type: String },
     isVerified: { type: Boolean, default: false },
-    cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' }
+    cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' },
+    shippingAddresses: [addressSchema], // Mảng lưu trữ nhiều địa chỉ giao hàng
+    defaultShippingAddress: addressSchema // Địa chỉ giao hàng mặc định
   },
   {
     timestamps: true,

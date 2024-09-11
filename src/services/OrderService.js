@@ -8,7 +8,7 @@ const EmailService = require("../services/EmailService");
 const EmailServiceIsPaid = require("../services/EmailServiceIsPaid");
 const OrderNotificationService = require('./OrderNotificationService');
 const { log } = require('console');
-
+const Shipping = require('../models/ShippingModel');
 // Chọn token dựa trên môi trường
    const token = process.env.NODE_ENV === 'production' 
      ? process.env.TELEGRAM_TOKEN_PROD 
@@ -56,19 +56,9 @@ const generateVietQRData = (amount, orderId, content) => {
 	const transferInfo = `38630010A000000727013300069704360119QRGD0009986320932010208QRIBFTTA`;  // Thông tin tài khoản/ngân hàng
 	const currency = '5303704';   
 const formattedAmount = formatAmount(amount);                 // Mã tiền tệ (VND)
-console.log("length of formatted amount", formattedAmount.length)
 const amountLength = formattedAmount.length;
-	// Bước 2: Kiểm tra và xử lý số tiền
-	let numericAmount = parseFloat(amount);
 let amountFormatted = `540${amountLength}${formattedAmount}`;
-	// if (numericAmount < 100000) {
-			// amountFormatted = `5405${formatAmount(numericAmount)}`;  // Với số tiền nhỏ hơn 100000
-	// } else {
-			// amountFormatted = `5407${formatAmount(numericAmount)}`;  // Số tiền >= 100000
-	// }  // Ví dụ: 600000 -> 5407600,000
-	const countryCode = '5802VN';                  // Mã quốc gia (VN)
-	
-	// Bước 3: Xử lý nội dung (orderId và nội dung thanh toán kết hợp)
+	const countryCode = '5802VN';                
 	const contentString = `${orderId} + ${content}`;  // Nội dung ví dụ: H3025 + 0986320932
 	const contentLength = contentString.length.toString().padStart(2, '0');
 	const additionalInfo = `622208${contentLength}${contentString}`;  // Mã nội dung: ví dụ: 6218H3025 + 0986320932
@@ -84,15 +74,6 @@ let amountFormatted = `540${amountLength}${formattedAmount}`;
 };
 const generatePaymentQRCode = async (amount, orderId, additionalInfo) => {
   try {
-    // Chuyển đổi số điện thoại
-    // const formattedPhone = additionalInfo.replace(/\D/g, ''); 
-    // console.log("formattedPhone", formattedPhone); // Kết quả sẽ là 0986320932
-
-    // Kiểm tra các tham số đầu vào
-    // if (!amount || !orderId || !formattedPhone) {
-    //   throw new Error('Số tiền, orderId và nội dung là bắt buộc');
-    // }
-
     // Tạo dữ liệu VietQR
     const vietQRData = generateVietQRData(amount, orderId, additionalInfo);
 		console.log("vietQRData",vietQRData);
@@ -103,6 +84,65 @@ const generatePaymentQRCode = async (amount, orderId, additionalInfo) => {
     throw new Error('Lỗi khi tạo mã QR: ' + error.message);
   }
 };
+const createShippingData = async (createdOrder, newOrder) => {
+  const shippingData = {
+    orderId: createdOrder._id,
+    trackingNumber: `TRK-${Math.floor(1000 + Math.random() * 9000)}`,
+    carrier: newOrder.carrier, // Tham chiếu đến Carrier
+    status: 'pending',
+    shippingAddress: {
+      street: newOrder.address,
+      city: newOrder.city,
+      state: newOrder.province,
+      postalCode: '000000', // Thêm mã bưu điện nếu có
+      country: 'VN' // Thêm quốc gia nếu có
+    }
+  };
+  return Shipping.create(shippingData);
+};
+const updateProductStock = async (orderItems) => {
+  const promises = orderItems.map(async (order) => {
+    const productData = await Product.findOneAndUpdate(
+      {
+        _id: order.product,
+        countInStock: { $gte: order.amount },
+      },
+      {
+        $inc: {
+          countInStock: -order.amount,
+          selled: +order.amount,
+        },
+      },
+      { new: true }
+    );
+
+    if (productData) {
+      return { status: "OK", message: "SUCCESS" };
+    } else {
+      return { status: "ERR", id: order.product };
+    }
+  });
+
+  return Promise.all(promises);
+};
+
+
+const sendOrderNotification = (createdOrder) => {
+  const chatId = '6749566951';
+  const message = `
+    🛵 🛒 - Đơn hàng mới
+    Ngày đặt: ${createdOrder.createdAt}
+    ${createdOrder.shippingAddress.city ? 'Đơn trong thành phố Tam Kỳ' : 'Đơn đi tỉnh'}
+    📞 ${createdOrder.shippingAddress.phone} 
+    (SNew) - Tên: ${createdOrder.shippingAddress.fullName} - Phiếu: ${createdOrder.codeOrder}
+    Sản phẩm:
+    ${createdOrder.orderItems.map(order => `+ ${order.name}: ${order.amount} x ${order.price}\n`).join('')}
+    Tổng tiền (đơn hàng & vận chuyển): ${createdOrder.totalPrice}
+    Địa chỉ giao hàng: ${createdOrder.shippingAddress.address},${createdOrder.shippingAddress.ward}, 
+    ${createdOrder.shippingAddress.city}, ${createdOrder.shippingAddress.province}`;
+  bot.sendMessage(chatId, message);
+};
+
 const createOrder = async (newOrder) => {
   try {
     const {
@@ -125,48 +165,14 @@ const createOrder = async (newOrder) => {
       paidAt,
       email,
     } = newOrder;
-		console.log("newOrder", newOrder);
     const codeOrder = `H-${Math.floor(1000 + Math.random() * 9000)}`;
+const results = await updateProductStock(orderItems);
+    const newData = results.filter((item) => item.status === "ERR");
 
-    const promises = orderItems.map(async (order) => {
-      const productData = await Product.findOneAndUpdate(
-        {
-          _id: order.product,
-          countInStock: { $gte: order.amount },
-        },
-        {
-          $inc: {
-            countInStock: -order.amount,
-            selled: +order.amount,
-          },
-        },
-        { new: true }
-      );
-
-      if (productData) {
-        return {
-          status: "OK",
-          message: "SUCCESS",
-        };
-      } else {
-        return {
-          status: "OK",
-          message: "ERR",
-          id: order.product,
-        };
-      }
-    });
-
-    const results = await Promise.all(promises);
-    const userId = user ? user : null;
-    const newData = results && results.filter((item) => item.id);
     if (newData.length) {
-      const arrId = [];
-      newData.forEach((item) => {
-        arrId.push(item.id);
-      });
-      return handleError(null, `San pham voi id: ${arrId.join(",")} khong du hang`);
-    } else {
+      const arrId = newData.map(item => item.id);
+      return handleError(null, `San pham voi id: ${arrId.join(",")} khong du hang`); 
+    }
       const createdOrder = await Order.create({
         orderItems,
         shippingAddress: {
@@ -185,51 +191,32 @@ const createOrder = async (newOrder) => {
         itemsPrice,
         shippingPrice,
         totalPrice,
-        user: userId,
+        user: user || null,
         isPaid,
         paidAt,
         orderStatus
       });
-			console.log("createdOrder",createdOrder);
-  // Tạo mã QR code
-	const qrCodeData = await generatePaymentQRCode(createdOrder?.totalPrice,createdOrder.codeOrder, createdOrder?.shippingAddress?.phone );
-  // Lưu mã QR vào đơn hàng
-	createdOrder.qrCode = qrCodeData.qrCodeString; // L
-	await createdOrder.save(); 
-      // Lấy id của đơn hàng vừa tạo
-      const orderId = createdOrder._id;
-      if (createdOrder) {
-        // Gửi thông báo đơn hàng mới khi tạo thành công
-        const chatId = '6749566951';
-        const message = `
-        🛵 🛒 - Đơn hàng mới
-        Ngày đặt: ${(
-          createdOrder?.createdAt
-        )}
-        ${createdOrder?.shippingAddress?.city ? 'Đơn trong thành phố Tam Kỳ' : 'Đơn đi tỉnh'}
-        📞 ${createdOrder?.shippingAddress?.phone} (SNew) - Tên: ${createdOrder?.shippingAddress?.fullName} - Phiếu: ${createdOrder?.codeOrder}
-        Sản phẩm:
-        ${createdOrder?.orderItems
-            ?.map((order) => {
-              return `+ ${order?.name}: ${order?.amount} x ${order?.price}\n`
-            })}
-        Tổng tiền (đơn hàng & vận chuyển): ${(createdOrder?.totalPrice)}
-        Địa chỉ giao hàng: ${createdOrder?.shippingAddress?.address},${createdOrder?.shippingAddress?.ward}, ${createdOrder?.shippingAddress?.city}, ${createdOrder?.shippingAddress?.province}`;
-        bot.sendMessage(chatId, message);
-
-        await EmailService.sendEmailCreateOrder(email, createdOrder);
-        OrderNotificationService.sendNewOrderNotification(orderId);
-
-				return handleSuccess({
-					id: createdOrder._id,
-					order: createdOrder,
-					qrCode: qrCodeData // Giả sử qrCodeData trả về có trường qrCodeString
-				}, 'Tạo đơn hàng thành công');
-      }
-    }
-  } catch (error) {
-    return handleError(error, 'Lỗi khi tạo đơn hàng');
-  }
+  
+      const qrCodeData = await generatePaymentQRCode(createdOrder.totalPrice, createdOrder.codeOrder, createdOrder.shippingAddress.phone);
+      createdOrder.qrCode = qrCodeData.qrCodeString;
+      await createdOrder.save();
+  
+      const createdShipping = await createShippingData(createdOrder, newOrder);
+      createdOrder.shipping = createdShipping._id;
+      await createdOrder.save();
+  
+      sendOrderNotification(createdOrder);
+      await EmailService.sendEmailCreateOrder(email, createdOrder);
+      OrderNotificationService.sendNewOrderNotification(createdOrder._id);
+  
+      return handleSuccess({
+        id: createdOrder._id,
+        order: createdOrder,
+        qrCode: qrCodeData.qrCodeString
+      }, 'Tạo đơn hàng thành công');
+    } catch (error) {
+      return handleError(error, 'Lỗi khi tạo đơn hàng');
+    }                                             
 };
 
 const getAllOrderDetails = async (email) => {

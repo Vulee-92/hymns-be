@@ -20,12 +20,18 @@ const recentlyViewedRouter = require("./recentlyViewedRoute");
 const CollectionsProductRouter = require("./CollectionsRouter");
 const basicAuthMiddleware = require('../middleware/basicAuthMiddleware'); 
 const DashboardRouter = require('./DashboardRouter'); 
+const ComboRouter = require('./ComboRouter'); 
 const HomeRouter = require("./HomeRouter");
+const ShippingRouter = require("./ShippingRouter"); 
+const CarrierRouter = require("./CarrierRouter"); 
+const PaymentMethodRouter = require("./PaymentMethodRouter");
 const routes = (app) => {
   app.use('/api/home', HomeRouter); 
   app.use("/api/blog", BlogRouter); 
   app.use("/api/user", UserRouter);
   app.use('/api/cart', CartRouter);
+  app.use('/api/combo', ComboRouter);
+  app.use('/api/shipping', ShippingRouter);
   app.use("/api/order", OrderRouter);
   app.use('/api/reviews', ReviewRouter); 
   app.use("/api/product", ProductRouter);
@@ -39,6 +45,8 @@ const routes = (app) => {
   app.use("/api/category-product", CateProductRouter);
   app.use("/api/collection", CollectionsProductRouter);
   app.use('/api/recently-viewed', recentlyViewedRouter);
+  app.use('/api/carrier', CarrierRouter); 
+  app.use('/api/payment-method', PaymentMethodRouter); 
 
   // Đường dẫn để hiển thị tài liệu Swagger
   app.use('/api-docs', basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));

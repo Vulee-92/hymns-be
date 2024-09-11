@@ -312,8 +312,53 @@ const verifyUser = async (req,res) => {
 		});
 	}
 };
-
-
+const addShippingAddress = async (req, res) => {
+	try {
+	  const { userId, address } = req.body;
+	  const response = await UserService.addShippingAddress(userId, address);
+	  return res.status(200).json(response);
+	} catch (e) {
+	  return res.status(500).json({
+		message: e.message || e,
+	  });
+	}
+  };
+  
+  const updateShippingAddress = async (req, res) => {
+	try {
+	  const { userId, addressId, address } = req.body;
+	  const response = await UserService.updateShippingAddress(userId, addressId, address);
+	  return res.status(200).json(response);
+	} catch (e) {
+	  return res.status(500).json({
+		message: e.message || e,
+	  });
+	}
+  };
+  
+  const deleteShippingAddress = async (req, res) => {
+	try {
+	  const { userId, addressId } = req.body;
+	  const response = await UserService.deleteShippingAddress(userId, addressId);
+	  return res.status(200).json(response);
+	} catch (e) {
+	  return res.status(500).json({
+		message: e.message || e,
+	  });
+	}
+  };
+  
+  const setDefaultShippingAddress = async (req, res) => {
+	try {
+	  const { userId, addressId } = req.body;
+	  const response = await UserService.setDefaultShippingAddress(userId, addressId);
+	  return res.status(200).json(response);
+	} catch (e) {
+	  return res.status(500).json({
+		message: e.message || e,
+	  });
+	}
+  };
 
 module.exports = {
 	createUser,
@@ -328,5 +373,9 @@ module.exports = {
 	createContact,
 	verifyUser,
 	forgotPassword,
-	resetPassword
+	resetPassword,
+	addShippingAddress,
+  updateShippingAddress,
+  deleteShippingAddress,
+  setDefaultShippingAddress
 };
