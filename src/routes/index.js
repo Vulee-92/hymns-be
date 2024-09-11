@@ -25,6 +25,7 @@ const HomeRouter = require("./HomeRouter");
 const ShippingRouter = require("./ShippingRouter"); 
 const CarrierRouter = require("./CarrierRouter"); 
 const PaymentMethodRouter = require("./PaymentMethodRouter");
+const RoleRouter = require("./RoleRouter");
 const routes = (app) => {
   app.use('/api/home', HomeRouter); 
   app.use("/api/blog", BlogRouter); 
@@ -47,6 +48,7 @@ const routes = (app) => {
   app.use('/api/recently-viewed', recentlyViewedRouter);
   app.use('/api/carrier', CarrierRouter); 
   app.use('/api/payment-method', PaymentMethodRouter); 
+  app.use('/api/role', RoleRouter); 
 
   // Đường dẫn để hiển thị tài liệu Swagger
   app.use('/api-docs', basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));

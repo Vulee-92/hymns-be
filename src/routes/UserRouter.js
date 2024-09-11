@@ -196,7 +196,7 @@ router.get('/getAll',  userController.getAllUser);
  *       400:
  *         description: Lỗi khi lấy thông tin
  */
-router.get('/get-details/:id', authUserMiddleWare, userController.getDetailsUser);
+router.get('/get-details/:id',  userController.getDetailsUser);
 
 /**
  * @swagger
@@ -388,7 +388,7 @@ router.post('/reset-password/:id/:tokenReset', userController.resetPassword);
  *       400:
  *         description: Lỗi khi thêm địa chỉ giao hàng
  */
-router.post('/add-shipping-address', authUserMiddleWare, userController.addShippingAddress);
+router.post('/add-shipping-address',  userController.addShippingAddress);
 
 /**
  * @swagger
@@ -493,11 +493,14 @@ router.delete('/delete-shipping-address', authUserMiddleWare, userController.del
  *               addressId:
  *                 type: string
  *                 description: ID của địa chỉ giao hàng
+ *               isDefault:
+ *                 type: boolean
+ *                 description: Đặt làm địa chỉ mặc định
  *     responses:
  *       200:
  *         description: Đặt địa chỉ giao hàng mặc định thành công
  *       400:
  *         description: Lỗi khi đặt địa chỉ giao hàng mặc định
  */
-router.put('/set-default-shipping-address', authUserMiddleWare, userController.setDefaultShippingAddress);
+router.put('/set-default-shipping-address', userController.setDefaultShippingAddress);
 module.exports = router;

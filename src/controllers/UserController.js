@@ -313,16 +313,36 @@ const verifyUser = async (req,res) => {
 	}
 };
 const addShippingAddress = async (req, res) => {
-	try {
-	  const { userId, address } = req.body;
-	  const response = await UserService.addShippingAddress(userId, address);
-	  return res.status(200).json(response);
-	} catch (e) {
-	  return res.status(500).json({
-		message: e.message || e,
-	  });
-	}
-  };
+  try {
+    const { 
+      userId, 
+      fullName, 
+      phone, 
+      email, 
+      address, 
+      city, 
+      province, 
+      ward 
+    } = req.body;
+
+    const newAddress = {
+      fullName,
+      phone,
+      email,
+      address,
+      city,
+      province,
+      ward
+    };
+
+    const response = await UserService.addShippingAddress(userId, newAddress);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(500).json({
+      message: e.message || e,
+    });
+  }
+};
   
   const updateShippingAddress = async (req, res) => {
 	try {
@@ -348,17 +368,17 @@ const addShippingAddress = async (req, res) => {
 	}
   };
   
-  const setDefaultShippingAddress = async (req, res) => {
-	try {
-	  const { userId, addressId } = req.body;
-	  const response = await UserService.setDefaultShippingAddress(userId, addressId);
-	  return res.status(200).json(response);
-	} catch (e) {
-	  return res.status(500).json({
-		message: e.message || e,
-	  });
-	}
-  };
+	const setDefaultShippingAddress = async (req, res) => {
+		try {
+			const { userId, addressId, isDefault } = req.body;
+			const response = await UserService.setDefaultShippingAddress(userId, addressId, isDefault);
+			return res.status(200).json(response);
+		} catch (e) {
+			return res.status(500).json({
+				message: e.message || e,
+			});
+		}
+	};
 
 module.exports = {
 	createUser,

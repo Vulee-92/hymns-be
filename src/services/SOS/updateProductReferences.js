@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Product = require('../../models/ProductModel');
+const UserService = require('../../services/UserService'); // Import UserService
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -12,35 +13,23 @@ const updateCollectionsForProducts = async () => {
     });
     console.log("Connected to MongoDB database");
 
-    // ObjectId mới cho collections
-    const newCollections = [
-      new mongoose.Types.ObjectId('6624ca51f7050a3691ed0f99'),
-      new mongoose.Types.ObjectId('65f55257cc61abbc2a1577fb')
-    ];
-
-    // Lấy tất cả sản phẩm
-    const products = await Product.find();
-    console.log(`${products.length} products found`);
-
-    // Duyệt qua từng sản phẩm và cập nhật trường collections
-    for (const product of products) {
-      // Cập nhật Product với collections mới
-      await Product.updateOne(
-        { _id: product._id },
-        { $set: { collections: newCollections } } // Thay collections bằng mảng ObjectId mới
-      );
-
-      console.log(`Updated product ${product._id} with collections ${newCollections}`);
-    }
-
+    // Gán role cho tất cả người dùng
+    await assignRoles();
   } catch (error) {
-    console.error('Error while updating collections for products:', error);
+    console.error("Error connecting to MongoDB:", error);
   } finally {
-    // Đóng kết nối MongoDB
-    await mongoose.disconnect();
-    console.log("Disconnected from MongoDB database");
+    mongoose.connection.close(); // Đảm bảo đóng kết nối
   }
 };
 
-// Gọi hàm để thực hiện cập nhật
+const assignRoles = async () => {
+  try {
+    await UserService.assignDefaultRoleToAllUsers();
+    console.log('Default role assigned to all users');
+  } catch (error) {
+    console.error("Error assigning roles:", error);
+  }
+};
+
+// Gọi hàm updateCollectionsForProducts
 updateCollectionsForProducts();

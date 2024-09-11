@@ -30,11 +30,17 @@ const doc = {
         scheme: 'bearer',
         bearerFormat: 'JWT',
       },
+			refreshTokenAuth: {
+				type: 'http',
+				scheme: 'bearer',
+				bearerFormat: 'JWT',
+			},
     },
   },
   security: [
     {
       bearerAuth: [],
+			refreshTokenAuth: [],
     },
   ],
 };

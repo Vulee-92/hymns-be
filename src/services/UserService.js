@@ -6,6 +6,8 @@ const dotenv = require("dotenv");
 const EmailVerifyService = require("../services/EmailVerifyService");
 const EmailResetPassword = require("../services/EmailResetPassword");
 const JwtService = require("../services/JwtService");
+const RoleService = require('../services/RoleService');
+
 dotenv.config();
 const nodemailer = require("nodemailer");
 
@@ -154,8 +156,7 @@ const loginUser = (userLogin) => {
   return new Promise(async (resolve, reject) => {
 	const { email, password } = userLogin;
 	try {
-	  const checkUser = await User.findOne({ email: email });
-	  console.log("checkUser",checkUser);
+	  const checkUser = await User.findOne({ email: email }).populate('roleId'); ;
 
 	  if (checkUser === null) {
 		resolve({
@@ -192,6 +193,10 @@ const loginUser = (userLogin) => {
 		message: "SUCCESS",
 		access_token,
 		refresh_token,
+		data: {
+			user: checkUser,
+			role: checkUser.roleId // Trả về thông tin role
+		}
 	  });
 	} catch (e) {
 	  reject(e);
@@ -380,28 +385,38 @@ const resetPassword = async (id, token, data) => {
 	}
   });
 };
-const addShippingAddress = async (userId, address) => {
-	try {
-	  const user = await User.findById(userId);
-	  if (!user) {
-		return {
-		  status: "ERR",
-		  message: "User not found",
-		};
-	  }
-  
-	  user.shippingAddresses.push(address);
-	  await user.save();
-  
-	  return {
-		status: "OK",
-		message: "Shipping address added successfully",
-		data: user.shippingAddresses,
-	  };
-	} catch (error) {
-	  throw new Error(error);
-	}
-  };
+const addShippingAddress = async (userId, newAddress) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return {
+        status: "ERR",
+        message: "User not found",
+      };
+    }
+
+    // Thêm địa chỉ mới
+    user.shippingAddresses.push(newAddress);
+    await user.save();
+
+    // Lấy địa chỉ vừa thêm (phần tử cuối cùng trong mảng)
+    const addedAddress = user.shippingAddresses[user.shippingAddresses.length - 1];
+
+    return {
+      status: "OK",
+      message: "SUCCESS",
+      data: {
+        ...user.toObject(),
+        shippingAddresses: user.shippingAddresses.map(address => ({
+          ...address.toObject(),
+          _id: address._id
+        }))
+      }
+    };
+  } catch (error) {
+    throw new Error(error);
+  }
+};
   
   const updateShippingAddress = async (userId, addressId, address) => {
 	try {
@@ -462,42 +477,60 @@ const addShippingAddress = async (userId, address) => {
 	}
   };
   
-  const setDefaultShippingAddress = async (userId, addressId) => {
-	try {
-	  const user = await User.findById(userId);
-	  if (!user) {
-		return {
-		  status: "ERR",
-		  message: "User not found",
-		};
-	  }
-  
-	  const address = user.shippingAddresses.find(
-		(addr) => addr._id.toString() === addressId
-	  );
-  
-	  if (!address) {
-		return {
-		  status: "ERR",
-		  message: "Address not found",
-		};
-	  }
-  
-	  user.defaultShippingAddress = address;
-	  await user.save();
-  
-	  return {
-		status: "OK",
-		message: "Default shipping address set successfully",
-		data: user.defaultShippingAddress,
-	  };
-	} catch (error) {
-	  throw new Error(error);
-	}
-  };
+	const setDefaultShippingAddress = async (userId, addressId, isDefault) => {
+		try {
+			const user = await User.findById(userId);
+			if (!user) {
+				return {
+					status: "ERR",
+					message: "User not found",
+				};
+			}
+			console.log("user", user);
+			
+	
+			// Tìm địa chỉ cần cập nhật
+			const addressIndex = user.shippingAddresses.findIndex(
+				(addr) => addr._id.toString() === addressId
+			);
+			console.log("addressIndex", addressIndex);
+			if (addressIndex === -1) {
+				return {
+					status: "ERR",
+					message: "Address not found",
+				};
+			}
+			console.log("	user.shippingAddresses[addressIndex].isDefault ", 	user.shippingAddresses[addressIndex].isDefault );
+	
+		  // Đặt địa chỉ được chọn thành mặc định
+			user.shippingAddresses[addressIndex].isDefault = true;
+
+			// Cập nhật địa chỉ mặc định
+			user.defaultShippingAddress = user.shippingAddresses[addressIndex];
+	
+			await user.save();
+	
+			return {
+				status: "OK",
+				message: "Shipping address default status updated successfully",
+				data: user.shippingAddresses.map(addr => ({
+					...addr.toObject(),
+					_id: addr._id.toString()
+				})),
+				defaultAddress: user.defaultShippingAddress
+			};
+		} catch (error) {
+			throw new Error(error);
+		}
+	};
+	const assignDefaultRoleToAllUsers = async () => {
+		const defaultRole = await RoleService.createDefaultRole(); // Tạo hoặc lấy role mặc định
+		await User.updateMany({}, { roleId: defaultRole._id }); // Gán role cho tất cả người dùng
+	};
+	
 module.exports = {
   createUser,
-  loginUser,
+  loginUser, assignDefaultRoleToAllUsers,
   updateUser,
   deleteUser,
   getAllUser,
