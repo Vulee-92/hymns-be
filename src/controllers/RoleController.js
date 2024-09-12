@@ -1,5 +1,6 @@
 const RoleService = require('../services/RoleService');
 
+// Tạo vai trò mới
 const createRole = async (req, res) => {
   try {
     const response = await RoleService.createRole(req.body);
@@ -9,6 +10,7 @@ const createRole = async (req, res) => {
   }
 };
 
+// Cập nhật vai trò theo ID
 const updateRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -19,6 +21,7 @@ const updateRole = async (req, res) => {
   }
 };
 
+// Xóa vai trò theo ID
 const deleteRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -29,6 +32,7 @@ const deleteRole = async (req, res) => {
   }
 };
 
+// Lấy tất cả vai trò
 const getAllRoles = async (req, res) => {
   try {
     const response = await RoleService.getAllRoles();
@@ -38,6 +42,7 @@ const getAllRoles = async (req, res) => {
   }
 };
 
+// Lấy vai trò theo ID
 const getRoleById = async (req, res) => {
   try {
     const { id } = req.params;

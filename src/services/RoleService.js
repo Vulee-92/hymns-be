@@ -1,20 +1,22 @@
 const Role = require('../models/RoleModel');
 
+// Tạo vai trò mới
 const createRole = async (roleData) => {
   try {
-    const newRole = new Role(roleData);
-    await newRole.save();
-    return { status: 'OK', message: 'Role created successfully', data: newRole };
+    const role = new Role(roleData);
+    const savedRole = await role.save();
+    return { status: 'OK', message: 'Role created successfully', data: savedRole };
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-const updateRole = async (roleId, updateData) => {
+// Cập nhật vai trò theo ID
+const updateRole = async (id, roleData) => {
   try {
-    const updatedRole = await Role.findByIdAndUpdate(roleId, updateData, { new: true });
+    const updatedRole = await Role.findByIdAndUpdate(id, roleData, { new: true });
     if (!updatedRole) {
-      return { status: 'ERR', message: 'Role not found' };
+      throw new Error('Role not found');
     }
     return { status: 'OK', message: 'Role updated successfully', data: updatedRole };
   } catch (error) {
@@ -22,34 +24,37 @@ const updateRole = async (roleId, updateData) => {
   }
 };
 
-const deleteRole = async (roleId) => {
+// Xóa vai trò theo ID
+const deleteRole = async (id) => {
   try {
-    const deletedRole = await Role.findByIdAndDelete(roleId);
+    const deletedRole = await Role.findByIdAndDelete(id);
     if (!deletedRole) {
-      return { status: 'ERR', message: 'Role not found' };
+      throw new Error('Role not found');
     }
-    return { status: 'OK', message: 'Role deleted successfully' };
+    return { status: 'OK', message: 'Role deleted successfully', data: deletedRole };
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
+// Lấy tất cả vai trò
 const getAllRoles = async () => {
   try {
-    const roles = await Role.find().populate('featurePermissions.feature');
-    return { status: 'OK', data: roles };
+    const roles = await Role.find();
+    return { status: 'OK', message: 'Roles retrieved successfully', data: roles };
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-const getRoleById = async (roleId) => {
+// Lấy vai trò theo ID
+const getRoleById = async (id) => {
   try {
-    const role = await Role.findById(roleId).populate('featurePermissions.feature');
+    const role = await Role.findById(id);
     if (!role) {
-      return { status: 'ERR', message: 'Role not found' };
+      throw new Error('Role not found');
     }
-    return { status: 'OK', data: role };
+    return { status: 'OK', message: 'Role retrieved successfully', data: role };
   } catch (error) {
     throw new Error(error.message);
   }

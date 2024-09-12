@@ -6,98 +6,91 @@ const Role = require('../models/RoleModel');
 dotenv.config();
 
 const authMiddleWare = async (req, res, next) => {
+  // Lấy access token và refresh token từ headers
   const accessToken = req.headers.authorization?.split(' ')[1];
   const refreshToken = req.headers['x-refresh-token'];
 
-  console.log("accessToken", accessToken);
-  console.log("refreshToken", refreshToken);
-
   if (!accessToken) {
-    console.log("No access token provided");
     return res.status(401).json({
-      message: 'Unauthorized',
+      message: 'Unauthorized - No access token',
       status: 'ERROR'
     });
   }
-
+	const decodedWithoutVerify = jwt.decode(accessToken);
+	console.log("Decoded without verify:", decodedWithoutVerify);
   try {
-    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-    console.log("decoded", decoded);
-    const user = await User.findById(decoded.id).populate('roleId');
-    if (!user) {
-      console.log("User not found");
+    // Xác thực access token
+		const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decoded.id).populate('role');
+
+    if (!user || !user.role) {
       return res.status(401).json({
-        message: 'Unauthorized',
+        message: 'Unauthorized - User or role not found',
         status: 'ERROR'
       });
     }
 
-    req.user = user;
-    next();
-  } catch (err) {
-    console.log("Error verifying access token:", err);
-    if (err.name === 'TokenExpiredError' && refreshToken) {
-      try {
-        const decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-        console.log("decodedRefresh", decodedRefresh);
-        const user = await User.findById(decodedRefresh.id).populate('roleId');
-        if (!user) {
-          console.log("User not found with refresh token");
-          return res.status(401).json({
-            message: 'Unauthorized',
-            status: 'ERROR'
-          });
-        }
+    req.user = user; // Gán đối tượng người dùng vào req
 
-        // Generate new access token
-        const newAccessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-        res.setHeader('x-access-token', newAccessToken);
-
-        req.user = user;
-        next();
-      } catch (refreshErr) {
-        console.log("Error verifying refresh token:", refreshErr);
+    // Kiểm tra xem token có hết hạn không và nếu có, kiểm tra refresh token
+    if (decoded.exp * 1000 < Date.now()) {
+      if (!refreshToken) {
         return res.status(401).json({
-          message: 'Unauthorized',
+          message: 'Unauthorized - Access token expired and no refresh token provided',
           status: 'ERROR'
         });
       }
-    } else {
-      return res.status(401).json({
-        message: 'Unauthorized',
-        status: 'ERROR'
-      });
+
+      // Xác thực refresh token
+      try {
+        const refreshDecoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const newAccessToken = jwt.sign({ id: refreshDecoded.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+        res.setHeader('Authorization', `Bearer ${newAccessToken}`);
+        req.user = await User.findById(refreshDecoded.id).populate('role');
+      } catch (refreshError) {
+        return res.status(401).json({
+          message: 'Unauthorized - Invalid refresh token',
+          status: 'ERROR'
+        });
+      }
     }
+
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      message: 'Unauthorized - Error verifying access token',
+      status: 'ERROR'
+    });
   }
 };
 
 const checkPermission = (action) => {
   return (req, res, next) => {
     const user = req.user;
-
-    if (!user || !user.roleId) {
+		console.log("userrrrr",user);
+    if (!user || !user.role) {
       return res.status(403).json({
-        message: 'Forbidden',
+        message: 'Forbidden - No role assigned',
         status: 'ERROR'
       });
     }
 
-    const { permissions } = user.roleId;
+    const { role } = user;
 
-    if (action === 'view' && !permissions.view) {
-      return res.status(403).json({ status: 'ERR', message: 'Bạn không có quyền truy cập' });
-    }
-    if (action === 'create' && !permissions.create) {
-      return res.status(403).json({ status: 'ERR', message: 'Bạn không có quyền tạo' });
-    }
-    if (action === 'edit' && !permissions.edit) {
-      return res.status(403).json({ status: 'ERR', message: 'Bạn không có quyền chỉnh sửa' });
-    }
-    if (action === 'delete' && !permissions.delete) {
-      return res.status(403).json({ status: 'ERR', message: 'Bạn không có quyền xoá' });
+    // Đối với admin, cho phép tất cả các quyền
+    if (role.isAdmin) {
+      return next();
     }
 
-    next();
+    // Kiểm tra quyền theo action
+    if (role.permissions[action] === false) {
+      return res.status(403).json({
+        message: `Forbidden - You do not have permission to ${action}`,
+        status: 'ERROR'
+      });
+    }
+
+    return next();
   };
 };
 

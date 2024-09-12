@@ -7,6 +7,7 @@ const EmailVerifyService = require("../services/EmailVerifyService");
 const EmailResetPassword = require("../services/EmailResetPassword");
 const JwtService = require("../services/JwtService");
 const RoleService = require('../services/RoleService');
+const Role = require('../models/RoleModel');
 
 dotenv.config();
 const nodemailer = require("nodemailer");
@@ -158,7 +159,7 @@ const loginUser = (userLogin) => {
 		console.log("email", email);
 		console.log("password", password);
 		try {
-			const checkUser = await User.findOne({ email: email }).populate('roleId');;
+			const checkUser = await User.findOne({ email: email }).populate('featurePackage').populate('role');
 			console.log("checkUser", checkUser);
 			if (checkUser === null) {
 				resolve({
@@ -182,14 +183,12 @@ const loginUser = (userLogin) => {
 			}
 			  const access_token = await genneralAccessToken({
 			id: checkUser.id,
-			role: checkUser.roleId,
+			role: checkUser.role,
 			  });
-			console.log("access_token", access_token);
 			  const refresh_token = await genneralRefreshToken({
 			id: checkUser.id,
-			role: checkUser.roleId,
+			role: checkUser.role,
 			  });
-			console.log("refresh_token", refresh_token);
 			resolve({
 				status: "OK",
 				message: "SUCCESS",
@@ -197,7 +196,6 @@ const loginUser = (userLogin) => {
 				refresh_token,
 				data: {
 					user: checkUser,
-					role: checkUser.roleId // Trả về thông tin role
 				}
 			});
 		} catch (e) {
@@ -261,7 +259,7 @@ const getAllUser = () => {
 const getDetailsUser = (id) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const user = await User.findOne({ _id: id }).populate('roleId');
+			const user = await User.findOne({ _id: id }).populate('role');
 			if (user === null) {
 				resolve({
 					status: "ERR",
@@ -314,42 +312,41 @@ const forgotPassword = async (email) => {
 		throw new Error(error);
 	}
 };
-
 const updateUser = (id, data) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const checkUser = await User.findOne({ _id: id });
+  return new Promise(async (resolve, reject) => {
+    try {
+      const checkUser = await User.findOne({ _id: id });
 
-			if (!checkUser) {
-				return resolve({
-					status: "ERR",
-					message: "The user is not defined",
-				});
-			}
+      if (!checkUser) {
+        return resolve({
+          status: "ERR",
+          message: "The user is not defined",
+        });
+      }
 
-			if (data.password) {
-				const hash = bcrypt.hashSync(data.password, 10);
-				data.password = hash;
-			}
+      if (data.password) {
+        const hash = bcrypt.hashSync(data.password, 10);
+        data.password = hash;
+      }
 
-			const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
 
-			if (!updatedUser) {
-				return resolve({
-					status: "ERR",
-					message: "Failed to update user",
-				});
-			}
+      if (!updatedUser) {
+        return resolve({
+          status: "ERR",
+          message: "Failed to update user",
+        });
+      }
 
-			resolve({
-				status: "OK",
-				message: "SUCCESS",
-				data: updatedUser,
-			});
-		} catch (e) {
-			reject(e);
-		}
-	});
+      resolve({
+        status: "OK",
+        message: "SUCCESS",
+        data: updatedUser,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 };
 
 const resetPassword = async (id, token, data) => {
@@ -479,8 +476,9 @@ const deleteShippingAddress = async (userId, addressId) => {
 	}
 };
 
-const setDefaultShippingAddress = async (userId, addressId, isDefault) => {
+const setDefaultShippingAddress = async (userId, addressId) => {
 	try {
+		// Tìm người dùng
 		const user = await User.findById(userId);
 		if (!user) {
 			return {
@@ -488,28 +486,31 @@ const setDefaultShippingAddress = async (userId, addressId, isDefault) => {
 				message: "User not found",
 			};
 		}
-		console.log("user", user);
-
 
 		// Tìm địa chỉ cần cập nhật
 		const addressIndex = user.shippingAddresses.findIndex(
 			(addr) => addr._id.toString() === addressId
 		);
-		console.log("addressIndex", addressIndex);
+
 		if (addressIndex === -1) {
 			return {
 				status: "ERR",
 				message: "Address not found",
 			};
 		}
-		console.log("	user.shippingAddresses[addressIndex].isDefault ", user.shippingAddresses[addressIndex].isDefault);
 
-		// Đặt địa chỉ được chọn thành mặc định
+		// Đặt tất cả địa chỉ khác thành không mặc định (isDefault: false)
+		user.shippingAddresses.forEach((addr) => {
+			addr.isDefault = false;
+		});
+
+		// Đặt địa chỉ mới thành mặc định (isDefault: true)
 		user.shippingAddresses[addressIndex].isDefault = true;
 
-		// Cập nhật địa chỉ mặc định
-		user.defaultShippingAddress = user.shippingAddresses[addressIndex];
+		// Cập nhật defaultShippingAddress với ID của địa chỉ mới
+		user.defaultShippingAddress = user.shippingAddresses[addressIndex]._id;
 
+		// Lưu người dùng sau khi cập nhật
 		await user.save();
 
 		return {
@@ -517,17 +518,22 @@ const setDefaultShippingAddress = async (userId, addressId, isDefault) => {
 			message: "Shipping address default status updated successfully",
 			data: user.shippingAddresses.map(addr => ({
 				...addr.toObject(),
-				_id: addr._id.toString()
+				_id: addr._id.toString() // Trả về ID dưới dạng string
 			})),
-			defaultAddress: user.defaultShippingAddress
+			defaultAddress: user.defaultShippingAddress.toString() // Trả về ID của địa chỉ mặc định
 		};
 	} catch (error) {
-		throw new Error(error);
+		// Bắt lỗi và trả về
+		return {
+			status: "ERR",
+			message: error.message
+		};
 	}
 };
+
 const assignDefaultRoleToAllUsers = async () => {
 	const defaultRole = await RoleService.createDefaultRole(); // Tạo hoặc lấy role mặc định
-	await User.updateMany({}, { roleId: defaultRole._id }); // Gán role cho tất cả người dùng
+	await User.updateMany({}, { role: defaultRole._id }); // Gán role cho tất cả người dùng
 };
 
 module.exports = {

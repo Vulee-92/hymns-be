@@ -74,4 +74,11 @@ const buildFeatureTree = (features, parentId = null) => {
     }));
 };
 
-module.exports = { createFeature, updateFeature, deleteFeature, getAllFeatures, getFeatureById, getFeatureTree };
+module.exports = { 
+  createFeature, 
+  updateFeature, 
+  deleteFeature, 
+  getAllFeatures, 
+  getFeatureById, 
+  getFeatureTree 
+};

@@ -48,11 +48,11 @@ router.post('/sign-up', userController.createUser);
  *             properties:
  *               email:
  *                 type: string
- *                 value: admin
+ *                 example: 'admin'
  *                 description: Email người dùng
  *               password:
  *                 type: string
- *                 value: 123123
+ *                 example: '123123'
  *                 description: Mật khẩu người dùng
  *     responses:
  *       200:
@@ -133,13 +133,17 @@ router.post('/log-out', userController.logoutUser);
  *               ward:
  *                 type: string
  *                 description: Phường
+ *               featurePackage:
+ *                 type: string
+ *                 description: ID của gói chức năng
  *     responses:
  *       200:
  *         description: Cập nhật thành công
  *       400:
  *         description: Lỗi khi cập nhật
  */
-router.put('/update-user/:id', authMiddleWare, checkPermission('edit'), userController.updateUser);
+
+router.put('/update-user/:id',userController.updateUser);
 
 /**
  * @swagger
@@ -179,7 +183,7 @@ router.delete('/delete-user/:id', authMiddleWare, checkPermission('delete'), use
  *       400:
  *         description: Lỗi khi lấy danh sách
  */
-router.get('/getAll', authMiddleWare, checkPermission('view'), userController.getAllUser);
+router.get('/getAll',  userController.getAllUser);
 
 /**
  * @swagger

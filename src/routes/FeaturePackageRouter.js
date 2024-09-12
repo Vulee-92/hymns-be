@@ -48,7 +48,7 @@ const { authMiddleWare, checkPermission } = require('../middleware/authMiddlewar
  *       403:
  *         description: Forbidden
  */
-router.post('/create', authMiddleWare, checkPermission('create'), FeaturePackageController.createFeaturePackage);
+router.post('/create',  FeaturePackageController.createFeaturePackage);
 
 // Thêm các route khác cho update và getAll
 

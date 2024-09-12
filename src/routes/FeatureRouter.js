@@ -64,7 +64,7 @@ const { authMiddleWare, checkPermission } = require('../middleware/authMiddlewar
  *       403:
  *         description: Forbidden
  */
-router.post('/create', authMiddleWare, checkPermission('features', 'add'), FeatureController.createFeature);
+router.post('/create',  FeatureController.createFeature);
 
 /**
  * @swagger

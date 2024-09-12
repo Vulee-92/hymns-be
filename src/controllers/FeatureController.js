@@ -57,4 +57,11 @@ const getFeatureTree = async (req, res) => {
   }
 };
 
-module.exports = { createFeature, updateFeature, deleteFeature, getAllFeatures, getFeatureById, getFeatureTree };
+module.exports = { 
+  createFeature, 
+  updateFeature, 
+  deleteFeature, 
+  getAllFeatures, 
+  getFeatureById, 
+  getFeatureTree 
+};

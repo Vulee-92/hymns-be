@@ -5,7 +5,7 @@ dotenv.config();
 const genneralAccessToken = async (payload) => {
   const access_token = jwt.sign({
     ...payload
-  }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
+  }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
   return access_token;
 };
