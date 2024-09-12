@@ -26,6 +26,8 @@ const ShippingRouter = require("./ShippingRouter");
 const CarrierRouter = require("./CarrierRouter"); 
 const PaymentMethodRouter = require("./PaymentMethodRouter");
 const RoleRouter = require("./RoleRouter");
+const FeatureRouter = require("./FeatureRouter");
+const FeaturePackageRouter = require("./FeaturePackageRouter");
 const routes = (app) => {
   app.use('/api/home', HomeRouter); 
   app.use("/api/blog", BlogRouter); 
@@ -49,7 +51,9 @@ const routes = (app) => {
   app.use('/api/carrier', CarrierRouter); 
   app.use('/api/payment-method', PaymentMethodRouter); 
   app.use('/api/role', RoleRouter); 
-
+  // Thêm các route mới
+  app.use('/api/feature', FeatureRouter);
+  app.use('/api/feature-package', FeaturePackageRouter);
   // Đường dẫn để hiển thị tài liệu Swagger
   app.use('/api-docs', basicAuthMiddleware, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

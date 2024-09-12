@@ -22,9 +22,21 @@ const updateRole = async (roleId, updateData) => {
   }
 };
 
+const deleteRole = async (roleId) => {
+  try {
+    const deletedRole = await Role.findByIdAndDelete(roleId);
+    if (!deletedRole) {
+      return { status: 'ERR', message: 'Role not found' };
+    }
+    return { status: 'OK', message: 'Role deleted successfully' };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 const getAllRoles = async () => {
   try {
-    const roles = await Role.find();
+    const roles = await Role.find().populate('featurePermissions.feature');
     return { status: 'OK', data: roles };
   } catch (error) {
     throw new Error(error.message);
@@ -33,7 +45,7 @@ const getAllRoles = async () => {
 
 const getRoleById = async (roleId) => {
   try {
-    const role = await Role.findById(roleId);
+    const role = await Role.findById(roleId).populate('featurePermissions.feature');
     if (!role) {
       return { status: 'ERR', message: 'Role not found' };
     }
@@ -42,26 +54,5 @@ const getRoleById = async (roleId) => {
     throw new Error(error.message);
   }
 };
-const createDefaultRole = async () => {
-  const defaultRole = {
-    name: "User",
-    code: "user",
-    permissions: {
-      view: true,
-      create: false,
-      edit: false,
-      delete: false
-    }
-  };
 
-  const existingRole = await Role.findOne({ code: defaultRole.code });
-  if (!existingRole) {
-    const newRole = new Role(defaultRole);
-    await newRole.save();
-    return newRole;
-  }
-  return existingRole;
-};
-
-
-module.exports = { createRole, updateRole, getAllRoles, getRoleById, createDefaultRole };
+module.exports = { createRole, updateRole, deleteRole, getAllRoles, getRoleById };

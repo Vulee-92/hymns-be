@@ -31,11 +31,20 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT',
         },
+        refreshTokenAuth: {
+          type: 'apiKey',
+          scheme: 'bearer',
+          
+          in: 'header',
+          name: 'x-refresh-token',
+          bearerFormat: 'JWT',
+        },
       },
     },
     security: [
       {
         bearerAuth: [],
+        refreshTokenAuth: [],
       },
     ],
   },

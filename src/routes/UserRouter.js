@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require('../controllers/UserController');
-const { authMiddleWare, authUserMiddleWare } = require("../middleware/authMiddleware");
+const { authMiddleWare, checkPermission } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -48,8 +48,12 @@ router.post('/sign-up', userController.createUser);
  *             properties:
  *               email:
  *                 type: string
+ *                 value: admin
+ *                 description: Email người dùng
  *               password:
  *                 type: string
+ *                 value: 123123
+ *                 description: Mật khẩu người dùng
  *     responses:
  *       200:
  *         description: Đăng nhập thành công
@@ -82,6 +86,7 @@ router.post('/sign-in', userController.loginUser);
  *         description: Lỗi khi đăng xuất
  */
 router.post('/log-out', userController.logoutUser);
+
 /**
  * @swagger
  * /api/user/update-user/{id}:
@@ -134,7 +139,7 @@ router.post('/log-out', userController.logoutUser);
  *       400:
  *         description: Lỗi khi cập nhật
  */
-router.put('/update-user/:id', authUserMiddleWare, userController.updateUser);
+router.put('/update-user/:id', authMiddleWare, checkPermission('edit'), userController.updateUser);
 
 /**
  * @swagger
@@ -157,7 +162,7 @@ router.put('/update-user/:id', authUserMiddleWare, userController.updateUser);
  *       400:
  *         description: Lỗi khi xóa
  */
-router.delete('/delete-user/:id', authMiddleWare, userController.deleteUser);
+router.delete('/delete-user/:id', authMiddleWare, checkPermission('delete'), userController.deleteUser);
 
 /**
  * @swagger
@@ -167,13 +172,14 @@ router.delete('/delete-user/:id', authMiddleWare, userController.deleteUser);
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
+ *       - refreshTokenAuth: []
  *     responses:
  *       200:
  *         description: Lấy danh sách thành công
  *       400:
  *         description: Lỗi khi lấy danh sách
  */
-router.get('/getAll',  userController.getAllUser);
+router.get('/getAll', authMiddleWare, checkPermission('view'), userController.getAllUser);
 
 /**
  * @swagger
@@ -183,6 +189,7 @@ router.get('/getAll',  userController.getAllUser);
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
+ *       - refreshTokenAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -196,7 +203,7 @@ router.get('/getAll',  userController.getAllUser);
  *       400:
  *         description: Lỗi khi lấy thông tin
  */
-router.get('/get-details/:id',  userController.getDetailsUser);
+router.get('/get-details/:id', authMiddleWare, checkPermission('view'), userController.getDetailsUser);
 
 /**
  * @swagger
@@ -248,7 +255,7 @@ router.post('/refresh-token', userController.refreshToken);
  *       400:
  *         description: Lỗi khi xóa
  */
-router.post('/delete-many', authMiddleWare, userController.deleteMany);
+router.post('/delete-many', authMiddleWare, checkPermission('delete'), userController.deleteMany);
 
 /**
  * @swagger
@@ -340,6 +347,7 @@ router.post('/forgot-password', userController.forgotPassword);
  *         description: Lỗi khi đặt lại mật khẩu
  */
 router.post('/reset-password/:id/:tokenReset', userController.resetPassword);
+
 /**
  * @swagger
  * /api/user/add-shipping-address:
@@ -388,7 +396,7 @@ router.post('/reset-password/:id/:tokenReset', userController.resetPassword);
  *       400:
  *         description: Lỗi khi thêm địa chỉ giao hàng
  */
-router.post('/add-shipping-address',  userController.addShippingAddress);
+router.post('/add-shipping-address', authMiddleWare, checkPermission('create'), userController.addShippingAddress);
 
 /**
  * @swagger
@@ -441,7 +449,7 @@ router.post('/add-shipping-address',  userController.addShippingAddress);
  *       400:
  *         description: Lỗi khi cập nhật địa chỉ giao hàng
  */
-router.put('/update-shipping-address', authUserMiddleWare, userController.updateShippingAddress);
+router.put('/update-shipping-address', authMiddleWare, checkPermission('edit'), userController.updateShippingAddress);
 
 /**
  * @swagger
@@ -470,7 +478,7 @@ router.put('/update-shipping-address', authUserMiddleWare, userController.update
  *       400:
  *         description: Lỗi khi xóa địa chỉ giao hàng
  */
-router.delete('/delete-shipping-address', authUserMiddleWare, userController.deleteShippingAddress);
+router.delete('/delete-shipping-address', authMiddleWare, checkPermission('delete'), userController.deleteShippingAddress);
 
 /**
  * @swagger
@@ -502,5 +510,6 @@ router.delete('/delete-shipping-address', authUserMiddleWare, userController.del
  *       400:
  *         description: Lỗi khi đặt địa chỉ giao hàng mặc định
  */
-router.put('/set-default-shipping-address', userController.setDefaultShippingAddress);
+router.put('/set-default-shipping-address', authMiddleWare, checkPermission('edit'), userController.setDefaultShippingAddress);
+
 module.exports = router;

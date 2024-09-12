@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const carrierController = require('../controllers/CarrierController');
-const { authUserMiddleWare, authMiddleWare } = require("../middleware/authMiddleware");
+const { authMiddleWare } = require("../middleware/authMiddleware");
 /**
  * @swagger
  * tags:

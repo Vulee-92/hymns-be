@@ -26,7 +26,8 @@ const userSchema = new mongoose.Schema(
 		province: { type: String },
 		ward: { type: String },
 		// Thêm trường này vào UserSchema
-		roleId: { type: mongoose.Schema.Types.ObjectId,ref: 'Role' },
+		role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' },
+		featurePackage: { type: mongoose.Schema.Types.ObjectId, ref: 'FeaturePackage' },
 		slug: { type: String },
 		isVerified: { type: Boolean,default: false },
 		cart: { type: mongoose.Schema.Types.ObjectId,ref: 'Cart' },

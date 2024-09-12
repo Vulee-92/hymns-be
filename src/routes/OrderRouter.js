@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const OrderController = require("../controllers/OrderController");
-const { authUserMiddleWare, authMiddleWare } = require("../middleware/authMiddleware");
+const {  authMiddleWare } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.post("/create", OrderController.createOrder);
  *       500:
  *         description: Server error
  */
-router.get("/get-all-order/:id", authUserMiddleWare, OrderController.getAllOrderDetails);
+router.get("/get-all-order/:id", OrderController.getAllOrderDetails);
 
 /**
  * @swagger
@@ -143,7 +143,7 @@ router.get("/get-details-order/:id", OrderController.getDetailsOrder);
  *       500:
  *         description: Server error
  */
-router.delete("/cancel-order/:id", authUserMiddleWare, OrderController.cancelOrderDetails);
+router.delete("/cancel-order/:id",  OrderController.cancelOrderDetails);
 
 /**
  * @swagger
@@ -172,7 +172,7 @@ router.delete("/cancel-order/:id", authUserMiddleWare, OrderController.cancelOrd
  *       500:
  *         description: Server error
  */
-router.put("/update/:id", authUserMiddleWare, OrderController.updateOrder);
+router.put("/update/:id", OrderController.updateOrder);
 
 
 
@@ -261,7 +261,7 @@ router.get("/get-all-order", OrderController.getAllOrder);
  *       500:
  *         description: Server error
  */
-router.delete("/:id", authUserMiddleWare, OrderController.deleteOrder);
+router.delete("/:id", OrderController.deleteOrder);
 
 /**
  * @swagger
@@ -291,7 +291,7 @@ router.delete("/:id", authUserMiddleWare, OrderController.deleteOrder);
  *       500:
  *         description: Server error
  */
-router.post("/delete-multiple", authUserMiddleWare, OrderController.deleteMultipleOrders);
+router.post("/delete-multiple", OrderController.deleteMultipleOrders);
 
 /**
  * @swagger
