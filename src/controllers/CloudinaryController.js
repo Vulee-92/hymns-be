@@ -1,57 +1,28 @@
-const { uploadImages, deleteImage, listImages } = require('../services/CloudinaryService');
+const cloudinary = require('../utils/cloudinaryConfig'); // Đường dẫn tới config Cloudinary
 
 const uploadImageController = async (req, res) => {
   try {
-     const filePaths = req.files.map(file => file.path); // Lấy đường dẫn của tất cả các file
-     const results = await uploadImages(filePaths);
-     res.status(200).json({
-       status: 'OK',
-       message: 'Images uploaded successfully',
-       data: results,
-     });
-   } catch (error) {
-     res.status(500).json({
-       status: 'ERR',
-       message: error.message,
-     });
-   }
-};
+    // Lấy file base64 từ form data
+    const { buffer } = req.file;
+		console.log("buffer",buffer);
+    const fileBase64 = `data:image/jpeg;base64,${buffer.toString('base64')}`; // Chuyển file thành base64
+    
+    // Upload hình lên Cloudinary
+    const result = await cloudinary.uploader.upload(fileBase64, {
+      folder: 'sanpham', // Thư mục trên Cloudinary
+    });
 
-const deleteImageController = async (req, res) => {
-  try {
-    const { publicId } = req.params;
-    const result = await deleteImage(publicId);
     res.status(200).json({
       status: 'OK',
-      message: 'Image deleted successfully',
-      data: result,
+      message: 'Image uploaded successfully',
+      url: result.secure_url, // URL hình ảnh sau khi tải lên
     });
   } catch (error) {
     res.status(500).json({
       status: 'ERR',
-      message: error.message,
+      message: 'Error uploading image: ' + error.message,
     });
   }
 };
 
-const listImagesController = async (req, res) => {
-  try {
-    const images = await listImages();
-    res.status(200).json({
-      status: 'OK',
-      message: 'Images retrieved successfully',
-      data: images,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'ERR',
-      message: error.message,
-    });
-  }
-};
-
-module.exports = {
-  uploadImageController,
-  deleteImageController,
-  listImagesController,
-};
+module.exports = { uploadImageController };

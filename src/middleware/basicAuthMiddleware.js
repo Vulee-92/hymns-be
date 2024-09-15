@@ -10,8 +10,8 @@ const basicAuthMiddleware = async (req, res, next) => {
   }
 
   try {
-    const foundUser = await User.findOne({ email: user.name });
-
+    const foundUser = await User.findOne({ email: "admin"});
+		console.log("foundUser", foundUser);
     if ( foundUser.isAdmin === false) {
       return res.status(401).json({
         message: 'Unauthorized',

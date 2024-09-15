@@ -186,6 +186,7 @@ const getSortOption = (sort) => {
       // 1. Xử lý lọc theo collection
       if (collection_slug) {
         const collection = await Collection.findOne({ slug: collection_slug });
+				console.log("collection", collection);
         if (collection) {
           productQuery.collections = collection._id;
           comboQuery.collection = collection._id;
@@ -271,7 +272,7 @@ const getSortOption = (sort) => {
         [brandsData, categoriesData, collectionsData] = await Promise.all([
           Brand.find({ _id: { $in: products.map(p => p.brand) } }).select('brand slug'),
           Category.find({ _id: { $in: products.map(p => p.category) } }).select('category slug'),
-          Collection.find({ _id: { $in: products.flatMap(p => p.collections) } }).select('name slug description image')
+          Collection.find({ _id: { $in: products.flatMap(p => p.collections) } }).select('name slug description image backgroundImage')
         ]);
       }
   
@@ -279,7 +280,7 @@ const getSortOption = (sort) => {
       const brandCounts = await getFilterCounts(productQuery, 'brand');
       const categoryCounts = await getFilterCounts(productQuery, 'category');
       const collectionCounts = await getFilterCounts(productQuery, 'collections');
-  
+			console.log("collectionCounts",collectionCounts);
       // 11. Kết hợp thông tin và số lượng
       const brandsWithCount = combineWithCounts(brandsData, brandCounts, '_id');
       const categoriesWithCount = combineWithCounts(categoriesData, categoryCounts, '_id');
@@ -299,7 +300,7 @@ const getSortOption = (sort) => {
           totalPages: Math.ceil((totalProducts + totalCombos) / Number(pageSize)),
           totalItems: totalProducts + totalCombos
         },
-        collections: collectionsWithCount,
+        collections: collection_slug ? collectionsWithCount.filter(collection => collection.slug === collection_slug) : collectionsWithCount,
         filters: [
           {
             id: "brand",

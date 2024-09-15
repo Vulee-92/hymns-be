@@ -6,7 +6,7 @@ const getBestSellers = async () => {
     const bestSellers = await Product.find()
       .sort({ selled: -1 }) // Giả sử bạn có trường 'sold' để lưu số lượng đã bán
       .limit(10)
-      .select('name price image selled');
+      .select('name price image slug selled');
 
     return {
       status: "OK",
@@ -22,7 +22,7 @@ const getNewArrivals = async () => {
     const newArrivals = await Product.find()
       .sort({ createdAt: -1 })
       .limit(10)
-      .select('name price image createdAt');
+      .select('name price image slug createdAt');
 
     return {
       status: "OK",
@@ -38,7 +38,7 @@ const getSpecials = async () => {
     const specials = await Product.find({ discount: { $gt: 0 } })
       .sort({ discount: -1 })
       .limit(10)
-      .select('name price image discount');
+      .select('name price image slug discount');
 
     return {
       status: "OK",
@@ -53,7 +53,7 @@ const getLatestBlogs = async () => {
       const latestBlogs = await Blog.find()
         .sort({ createdAt: -1 })
         .limit(5)
-        .select('title summary image createdAt');
+        .select('title summary slug image createdAt');
   
       return {
         status: "OK",
