@@ -1,12 +1,11 @@
-const cloudinary = require('../utils/cloudinaryConfig'); // Đường dẫn tới config Cloudinary
+const cloudinary = require('../utils/cloudinaryConfig');
 
 const uploadImageController = async (req, res) => {
   try {
-    // Lấy file base64 từ form data
-    const { buffer } = req.file;
-		console.log("buffer",buffer);
+    const { buffer } = req.file; // Lấy buffer từ file
     const fileBase64 = `data:image/jpeg;base64,${buffer.toString('base64')}`; // Chuyển file thành base64
-    
+    console.log("buffer", buffer);
+    console.log("base64",fileBase64);
     // Upload hình lên Cloudinary
     const result = await cloudinary.uploader.upload(fileBase64, {
       folder: 'sanpham', // Thư mục trên Cloudinary
