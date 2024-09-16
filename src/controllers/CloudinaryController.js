@@ -1,20 +1,13 @@
-const cloudinary = require('../utils/cloudinaryConfig');
+const ImageService = require('../services/CloudinaryService');
 
-const uploadImageController = async (req, res) => {
+const uploadImage = async (req, res) => {
   try {
-    const { buffer } = req.file; // Lấy buffer từ file
-    const fileBase64 = `data:image/jpeg;base64,${buffer.toString('base64')}`; // Chuyển file thành base64
-    console.log("buffer", buffer);
-    console.log("base64",fileBase64);
-    // Upload hình lên Cloudinary
-    const result = await cloudinary.uploader.upload(fileBase64, {
-      folder: 'sanpham', // Thư mục trên Cloudinary
-    });
-
+    const { imageBase64, name } = req.body;
+    const result = await ImageService.uploadImage(imageBase64, name);
     res.status(200).json({
       status: 'OK',
       message: 'Image uploaded successfully',
-      url: result.secure_url, // URL hình ảnh sau khi tải lên
+      data: result
     });
   } catch (error) {
     res.status(500).json({
@@ -24,4 +17,60 @@ const uploadImageController = async (req, res) => {
   }
 };
 
-module.exports = { uploadImageController };
+const deleteImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await ImageService.deleteImage(id);
+    res.status(200).json({
+      status: 'OK',
+      message: 'Image deleted successfully',
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Error deleting image: ' + error.message,
+    });
+  }
+};
+
+const updateImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const result = await ImageService.updateImage(id, name);
+    res.status(200).json({
+      status: 'OK',
+      message: 'Image updated successfully',
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Error updating image: ' + error.message,
+    });
+  }
+};
+
+const getAllImages = async (req, res) => {
+  try {
+    const result = await ImageService.getAllImages();
+    res.status(200).json({
+      status: 'OK',
+      message: 'Images retrieved successfully',
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Error retrieving images: ' + error.message,
+    });
+  }
+};
+
+module.exports = {
+  uploadImage,
+  deleteImage,
+  updateImage,
+  getAllImages
+};

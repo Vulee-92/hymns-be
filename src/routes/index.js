@@ -42,7 +42,7 @@ const routes = (app) => {
   app.use("/api/product", ProductRouter);
   app.use("/api/payment", PaymentRouter);
   app.use("/api/contact", ContactRouter);
-  app.use("/api/image", CloudinaryRoutes);
+  app.use("/api/images", CloudinaryRoutes);
   app.use('/api/dashboard', DashboardRouter); 
   app.use("/api/blog-category", BlogCateRouter);
   app.use("/api/brand-product", BrandProductRouter);
