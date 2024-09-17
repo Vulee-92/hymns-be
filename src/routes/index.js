@@ -29,6 +29,7 @@ const RoleRouter = require("./RoleRouter");
 const FeatureRouter = require("./FeatureRouter");
 const FeaturePackageRouter = require("./FeaturePackageRouter");
 const BannerRouter = require('./BannerRouter');
+const CourseRouter = require('./CourseRouter/CourseRouter');
 
 const routes = (app) => {
   app.use('/api/home', HomeRouter); 
@@ -54,6 +55,7 @@ const routes = (app) => {
   app.use('/api/payment-method', PaymentMethodRouter); 
   app.use('/api/role', RoleRouter); 
   app.use('/api/banner', BannerRouter);
+  app.use('/api/', CourseRouter);
 	
   // Thêm các route mới
   app.use('/api/feature', FeatureRouter);

@@ -382,7 +382,44 @@ const addShippingAddress = async (req, res) => {
 			});
 		}
 	};
+// Lấy thông tin profile của người dùng bằng email
+const getUserProfileByEmailController = async (req, res) => {
+    try {
+        const { email } = req.params;
+        const user = await UserService.getUserProfileByEmail(email);
+        if (!user) {
+            return res.status(404).json({ status: 'ERR', message: 'User not found' });
+        }
+        res.status(200).json({ status: 'OK', data: user });
+    } catch (error) {
+        res.status(500).json({ status: 'ERR', message: error.message });
+    }
+};
 
+// Tương tác giữa người dùng (theo dõi)
+const followUserController = async (req, res) => {
+    try {
+        const { followerId, followingId } = req.body; // Lấy ID người dùng từ body
+        const updatedUser = await UserService.followUser(followerId, followingId);
+        res.status(200).json({ status: 'OK', data: updatedUser });
+    } catch (error) {
+        res.status(500).json({ status: 'ERR', message: error.message });
+    }
+};
+
+// Lấy thông tin người dùng theo ID
+const getUserByIdController = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await UserService.getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ status: 'ERR', message: 'User not found' });
+        }
+        res.status(200).json({ status: 'OK', data: user });
+    } catch (error) {
+        res.status(500).json({ status: 'ERR', message: error.message });
+    }
+};
 module.exports = {
 	createUser,
 	loginUser,
@@ -400,5 +437,8 @@ module.exports = {
 	addShippingAddress,
   updateShippingAddress,
   deleteShippingAddress,
-  setDefaultShippingAddress
+  setDefaultShippingAddress,
+  getUserProfileByEmailController,
+  followUserController,
+  getUserByIdController,
 };

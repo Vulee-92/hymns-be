@@ -515,5 +515,76 @@ router.delete('/delete-shipping-address', authMiddleWare, checkPermission('delet
  *         description: Lỗi khi đặt địa chỉ giao hàng mặc định
  */
 router.put('/set-default-shipping-address', authMiddleWare, checkPermission('edit'), userController.setDefaultShippingAddress);
+/**
+ * @swagger
+ * /api/user/profile/{email}:
+ *   get:
+ *     summary: Get user profile by email
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         description: The email of the user to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/profile/:email', userController.getUserProfileByEmailController);
 
+/**
+ * @swagger
+ * /api/user/follow:
+ *   post:
+ *     summary: Follow a user
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               followerId:
+ *                 type: string
+ *               followingId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User followed successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/follow', userController.followUserController);
+
+/**
+ * @swagger
+ * /api/user/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', userController.getUserByIdController);
 module.exports = router;

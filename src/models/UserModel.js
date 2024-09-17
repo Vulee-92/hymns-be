@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
 		shippingAddresses: [addressSchema],
 		// ID của địa chỉ mặc định từ mảng shippingAddresses
 		defaultShippingAddress: { type: mongoose.Schema.Types.ObjectId },
+		following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+		// Các trường mới để theo dõi lớp học và môn học mà giáo viên dạy
+		teachingSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }], // Môn học mà giáo viên dạy
+		teachingClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
 	},
 	{
 		timestamps: true,

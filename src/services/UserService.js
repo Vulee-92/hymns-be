@@ -536,6 +536,38 @@ const assignDefaultRoleToAllUsers = async () => {
 	await User.updateMany({}, { role: defaultRole._id }); // Gán role cho tất cả người dùng
 };
 
+// Lấy thông tin profile của người dùng bằng email
+const getUserProfileByEmail = async (emails) => {
+	const email = `${emails}@gmail.com`;
+	console.log("emails", email);
+    return await User.findOne({ email }).select('name avatar following'); // Chỉ trả về tên, avatar và danh sách người theo dõi
+};
+
+// Tương tác giữa người dùng (theo dõi)
+const followUser = async (followerId, followingId) => {
+    const follower = await User.findById(followerId);
+    const following = await User.findById(followingId);
+
+    if (!follower || !following) {
+        throw new Error('User not found');
+    }
+
+    if (!follower.following) {
+        follower.following = [];
+    }
+
+    if (!follower.following.includes(followingId)) {
+        follower.following.push(followingId);
+        await follower.save();
+    }
+
+    return follower;
+};
+
+// Lấy thông tin người dùng theo ID
+const getUserById = async (userId) => {
+    return await User.findById(userId).select('name avatar following'); // Chỉ trả về tên, avatar và danh sách người theo dõi
+};
 module.exports = {
 	createUser,
 	loginUser, assignDefaultRoleToAllUsers,
@@ -553,4 +585,7 @@ module.exports = {
 	updateShippingAddress,
 	deleteShippingAddress,
 	setDefaultShippingAddress,
+	getUserProfileByEmail,
+    followUser,
+    getUserById,
 };
