@@ -1,4 +1,4 @@
-const AttendanceService = require("../services/AttendanceService");
+const AttendanceService = require("../../services/CourseService/AttendanceService");
 
 const markAttendanceController = async (req, res) => {
     const { studentId, classId, date } = req.body;

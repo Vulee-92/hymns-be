@@ -1,6 +1,6 @@
 const express = require('express');
-const ClassController = require('../controllers/ClassController');
-const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
+const ClassController = require('../../controllers/CourseController/ClassController');
+const { authMiddleWare, checkPermission } = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 

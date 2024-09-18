@@ -153,58 +153,75 @@ const verifyUser = async (id, data) => {
 	});
 };
 
-const loginUser = (userLogin) => {
-	return new Promise(async (resolve, reject) => {
-		const { email, password } = userLogin;
-		console.log("email", email);
-		console.log("password", password);
-		try {
-			const checkUser = await User.findOne({ email: email }).populate('featurePackage').populate('role');
-			console.log("checkUser", checkUser);
-			if (checkUser === null) {
-				resolve({
-					status: "ERR",
-					message: "The user is not defined",
-				});
-			}
-			if (checkUser.isVerified === false) {
-				resolve({
-					status: "ERR_EMAIL",
-					message: "Please verify your email first",
-				});
-			}
-			const comparePassword = bcrypt.compareSync(password, checkUser.password);
-			console.log("comparePassword", comparePassword);
-			if (!comparePassword) {
-				resolve({
-					status: "ERR",
-					message: "The password or user is incorrect",
-				});
-			}
-			  const access_token = await genneralAccessToken({
-			id: checkUser.id,
-			role: checkUser.role,
-			  });
-			  const refresh_token = await genneralRefreshToken({
-			id: checkUser.id,
-			role: checkUser.role,
-			  });
-			resolve({
-				status: "OK",
-				message: "SUCCESS",
-				access_token,
-				refresh_token,
-				data: {
-					user: checkUser,
-				}
-			});
-		} catch (e) {
-			reject(e);
-		}
-	});
+const loginUser = async (userLogin) => {
+  try {
+    const { email, password } = userLogin;
+
+    // Kiểm tra email
+    const user = await User.findOne({ email }).select('+password').populate('featurePackage').populate('role');
+    if (!user) {
+      return {
+        status: "ERR",
+        message: "Email or password is incorrect",
+      };
+    }
+
+    // Kiểm tra xác thực email
+    if (!user.isVerified) {
+      return {
+        status: "ERR_EMAIL",
+        message: "Please verify your email first",
+      };
+    }
+
+    // Kiểm tra trạng thái tài khoản
+    if (user.status === 'locked') {
+      return {
+        status: "ERR",
+        message: "Your account has been locked. Please contact support.",
+      };
+    }
+
+    // Kiểm tra mật khẩu
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return {
+        status: "ERR",
+        message: "Email or password is incorrect",
+      };
+    }
+
+    // Tạo tokens
+    const access_token = await genneralAccessToken({
+      id: user.id,
+      role: user.role,
+    });
+    const refresh_token = await genneralRefreshToken({
+      id: user.id,
+      role: user.role,
+    });
+
+    // Loại bỏ mật khẩu từ object user trước khi trả về
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+
+    return {
+      status: "OK",
+      message: "Login successful",
+      access_token,
+      refresh_token,
+      data: {
+        user: userWithoutPassword,
+      }
+    };
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      status: "ERR",
+      message: "An error occurred during login",
+    };
+  }
 };
-
-
 const deleteUser = (id) => {
 	return new Promise(async (resolve, reject) => {
 		try {

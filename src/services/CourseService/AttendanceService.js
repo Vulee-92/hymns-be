@@ -1,5 +1,5 @@
-const Attendance = require("../models/AttendanceModel");
-const Class = require("../models/ClassModel");
+const Attendance = require("../../models/CourseModel/AttendanceModel");
+const Class = require("../../models/CourseModel/ClassModel");
 
 const markAttendance = async (studentId, classId, date) => {
     const classInstance = await Class.findById(classId);

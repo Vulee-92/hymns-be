@@ -1,6 +1,6 @@
 const express = require('express');
-const SubjectController = require('../controllers/SubjectController');
-const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
+const SubjectController = require('../../controllers/CourseController/SubjectController');
+const { authMiddleWare, checkPermission } = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const Class = require("../models/ClassModel");
+const Class = require("../../models/CourseModel/ClassModel");
 
 const createClass = async (classData) => {
     const classInstance = new Class(classData);

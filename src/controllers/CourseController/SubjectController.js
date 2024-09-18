@@ -1,4 +1,4 @@
-const SubjectService = require("../services/SubjectService");
+const SubjectService = require("../../services/CourseService/SubjectService");
 
 const createSubjectController = async (req, res) => {
     try {

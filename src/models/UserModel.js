@@ -8,7 +8,7 @@ const addressSchema = new mongoose.Schema({
 	city: { type: String, required: true },
 	province: { type: String, required: true },
 	ward: { type: String, required: true },
-	isDefault: { type: Boolean, default: false } // Đánh dấu địa chỉ mặc định
+	isDefault: { type: Boolean, default: false }
 }, { _id: true });
 
 const userSchema = new mongoose.Schema(
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
 		password: { type: String, required: true },
 		isAdmin: { type: Boolean, default: false, required: true },
 		phone: { type: String },
-		address: { type: String }, // Địa chỉ chính hoặc nơi sinh sống
+		address: { type: String },
 		avatar: { type: String },
 		verificationCode: { type: Number },
 		verificationCodeExpires: { type: Date },
@@ -34,16 +34,27 @@ const userSchema = new mongoose.Schema(
 		shippingAddresses: [addressSchema],
 		defaultShippingAddress: { type: mongoose.Schema.Types.ObjectId },
 		following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-		teachingSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
-		teachingClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
-		enrolledClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
-		studentProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
 		isDeleted: { type: Boolean, default: false }
 	},
 	{
 		timestamps: true,
 	}
 );
+
+// Thêm virtual fields để liên kết với Teacher hoặc Student
+userSchema.virtual('teacherProfile', {
+  ref: 'Teacher',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: true
+});
+
+userSchema.virtual('studentProfile', {
+  ref: 'Student',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: true
+});
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;

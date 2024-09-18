@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const CartController = require('../controllers/CartController');
-const { authMiddleWare } = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -73,7 +73,7 @@ router.post('/add', CartController.addToCart);
  *       500:
  *         description: Lỗi khi xóa sản phẩm khỏi giỏ hàng
  */
-router.delete('/remove', authMiddleWare, CartController.removeFromCart);
+router.delete('/remove', authMiddleware, CartController.removeFromCart);
 
 /**
  * @swagger
@@ -107,7 +107,7 @@ router.delete('/remove', authMiddleWare, CartController.removeFromCart);
  *       500:
  *         description: Lỗi khi cập nhật số lượng sản phẩm
  */
-router.put('/update', authMiddleWare, CartController.updateCartItem);
+router.put('/update', authMiddleware, CartController.updateCartItem);
 
 /**
  * @swagger
@@ -135,7 +135,7 @@ router.put('/update', authMiddleWare, CartController.updateCartItem);
  *       500:
  *         description: Lỗi khi lấy thông tin giỏ hàng
  */
-router.post('/', authMiddleWare, CartController.getCart);
+router.post('/', authMiddleware, CartController.getCart);
 /**
  * @swagger
  * /api/cart/clear:
@@ -162,5 +162,5 @@ router.post('/', authMiddleWare, CartController.getCart);
  *       500:
  *         description: Lỗi khi xóa tất cả sản phẩm khỏi giỏ hàng
  */
-router.delete('/clear', authMiddleWare, CartController.clearCart);
+router.delete('/clear', authMiddleware, CartController.clearCart);
 module.exports = router;

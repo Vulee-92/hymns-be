@@ -1,7 +1,20 @@
 const UserService = require("../services/UserService");
 const JwtService = require("../services/JwtService");
 const User = require("../models/UserModel");
+const errorHandler = require('../utils/errorHandler');
+const logger = require('../utils/logger');
+const Joi = require('joi');
 
+const addressSchema = Joi.object({
+    fullName: Joi.string().required(),
+    phone: Joi.string().required(),
+    email: Joi.string().email().required(),
+    address: Joi.string().required(),
+    city: Joi.string().required(),
+    province: Joi.string().required(),
+    ward: Joi.string().required(),
+    isDefault: Joi.boolean().default(false)
+});
 
 const createUser = async (req,res) => {
 	try {
@@ -61,40 +74,65 @@ const createContact = async (req,res) => {
 	}
 };
 const loginUser = async (req, res) => {
-	try {
-	  const { email, password } = req.body;
-	  const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Email and password are required",
+      });
+    }
+
+    // Validate email format (except for 'admin')
+    const emailRegex = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+    if (email !== 'admin' && !emailRegex.test(email)) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Invalid email format",
+      });
+    }
+
+    // Call login service
+    const response = await UserService.loginUser({ email, password });
+
+    // Handle different response statuses
+    if (response.status === "ERR") {
+      return res.status(401).json(response);
+    }
+
+    if (response.status === "ERR_EMAIL") {
+      return res.status(403).json(response);
+    }
+
+    // Successful login
+    const { refresh_token, access_token, ...responseWithoutTokens } = response;
+
+    // Set refresh token as HTTP-only cookie
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    res.cookie("refresh_token", refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: "Lax",
+      path: "/",
+      expires,
+      // domain: ".yourdomain.com", // Uncomment and set your domain in production
+    });
+
+    // Send response with access token
+    return res.status(200).json({
+      ...response,
   
-	  if (!email || !password) {
-		return res.status(200).json({
-		  status: "ERR",
-		  message: "The input is required",
-		});
-	  } else if (email !== 'admin' && !reg.test(email)) {
-		return res.status(200).json({
-		  status: "ERR",
-		  message: "The input is email",
-		});
-	  }
-  
-	  const response = await UserService.loginUser(req.body);
-	  const { refresh_token, ...newResponse } = response;
-	  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Thiết lập thời gian hết hạn là 7 ngày sau khi đăng nhập
-	  res.cookie("refresh_token", refresh_token, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
-		sameSite: "Lax",
-		path: "/",
-		expires,
-		// domain: ".example.com", // Thay thế bằng miền của trang web của bạn
-	  });
-	  return res.status(200).json({ ...newResponse, refresh_token });
-	} catch (e) {
-	  return res.status(404).json({
-		message: e,
-	  });
-	}
-  };
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({
+      status: "ERR",
+      message: "An error occurred during login",
+    });
+  }
+};
 const deleteUser = async (req,res) => {
 	try {
 		const userId = req.params.id;
@@ -347,64 +385,75 @@ const addShippingAddress = async (req, res) => {
   }
 };
   
-  const updateShippingAddress = async (req, res) => {
+const updateShippingAddress = async (req, res) => {
 	try {
-	  const { userId, addressId, address } = req.body;
-	  const response = await UserService.updateShippingAddress(userId, addressId, address);
-	  return res.status(200).json(response);
-	} catch (e) {
-	  return res.status(500).json({
-		message: e.message || e,
-	  });
+			const { error } = addressSchema.validate(req.body.address);
+			if (error) {
+					return res.status(400).json({
+							status: "ERR",
+							message: error.details[0].message
+					});
+			}
+
+			const { userId, addressId, address } = req.body;
+			const response = await UserService.updateShippingAddress(userId, addressId, address);
+			logger.info(`Shipping address updated for user: ${userId}`);
+			return res.status(200).json(response);
+	} catch (error) {
+			logger.error(`Error updating shipping address: ${error.message}`);
+			return errorHandler(res, error);
 	}
-  };
+};
   
-  const deleteShippingAddress = async (req, res) => {
+ 
+const deleteShippingAddress = async (req, res) => {
 	try {
-	  const { userId, addressId } = req.body;
-	  const response = await UserService.deleteShippingAddress(userId, addressId);
-	  return res.status(200).json(response);
-	} catch (e) {
-	  return res.status(500).json({
-		message: e.message || e,
-	  });
+			const { userId, addressId } = req.body;
+			const response = await UserService.deleteShippingAddress(userId, addressId);
+			logger.info(`Shipping address deleted for user: ${userId}`);
+			return res.status(200).json(response);
+	} catch (error) {
+			logger.error(`Error deleting shipping address: ${error.message}`);
+			return errorHandler(res, error);
 	}
-  };
+};
   
-	const setDefaultShippingAddress = async (req, res) => {
-		try {
+const setDefaultShippingAddress = async (req, res) => {
+	try {
 			const { userId, addressId, isDefault } = req.body;
 			const response = await UserService.setDefaultShippingAddress(userId, addressId, isDefault);
+			logger.info(`Default shipping address set for user: ${userId}`);
 			return res.status(200).json(response);
-		} catch (e) {
-			return res.status(500).json({
-				message: e.message || e,
-			});
-		}
-	};
-// Lấy thông tin profile của người dùng bằng email
-const getUserProfileByEmailController = async (req, res) => {
-    try {
-        const { email } = req.params;
-        const user = await UserService.getUserProfileByEmail(email);
-        if (!user) {
-            return res.status(404).json({ status: 'ERR', message: 'User not found' });
-        }
-        res.status(200).json({ status: 'OK', data: user });
-    } catch (error) {
-        res.status(500).json({ status: 'ERR', message: error.message });
-    }
+	} catch (error) {
+			logger.error(`Error setting default shipping address: ${error.message}`);
+			return errorHandler(res, error);
+	}
 };
 
-// Tương tác giữa người dùng (theo dõi)
+const getUserProfileByEmailController = async (req, res) => {
+	try {
+			const { email } = req.params;
+			const user = await UserService.getUserProfileByEmail(email);
+			if (!user) {
+					return res.status(404).json({ status: 'ERR', message: 'User not found' });
+			}
+			return res.status(200).json({ status: 'OK', data: user });
+	} catch (error) {
+			logger.error(`Error getting user profile: ${error.message}`);
+			return errorHandler(res, error);
+	}
+};
+
 const followUserController = async (req, res) => {
-    try {
-        const { followerId, followingId } = req.body; // Lấy ID người dùng từ body
-        const updatedUser = await UserService.followUser(followerId, followingId);
-        res.status(200).json({ status: 'OK', data: updatedUser });
-    } catch (error) {
-        res.status(500).json({ status: 'ERR', message: error.message });
-    }
+	try {
+			const { followerId, followingId } = req.body;
+			const updatedUser = await UserService.followUser(followerId, followingId);
+			logger.info(`User ${followerId} followed user ${followingId}`);
+			return res.status(200).json({ status: 'OK', data: updatedUser });
+	} catch (error) {
+			logger.error(`Error following user: ${error.message}`);
+			return errorHandler(res, error);
+	}
 };
 
 // Lấy thông tin người dùng theo ID

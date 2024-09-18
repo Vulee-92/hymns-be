@@ -1,6 +1,6 @@
 const express = require('express');
-const AttendanceController = require('../controllers/AttendanceController');
-const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
+const AttendanceController = require('../../controllers/CourseController/AttendanceController');
+const { authMiddleWare, checkPermission } = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 

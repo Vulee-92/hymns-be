@@ -1,4 +1,4 @@
-const CourseService = require("../services/CourseService");
+const CourseService = require("../../services/CourseService/CourseService");
 
 const createCourseController = async (req, res) => {
     try {

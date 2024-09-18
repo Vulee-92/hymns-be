@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const teacherSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Liên kết tới User
     teachingSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }], // Môn học mà giáo viên dạy

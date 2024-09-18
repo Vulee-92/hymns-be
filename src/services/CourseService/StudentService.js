@@ -1,4 +1,4 @@
-const Student = require("../models/StudentModel");
+const Student = require("../../models/CourseModel/StudentModel");
 
 const createStudent = async (studentData) => {
     const student = new Student(studentData);

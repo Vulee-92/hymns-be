@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const RoleController = require('../controllers/RoleController');
-const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
+const { authMiddleware, checkPermission, adminMiddleware } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -9,6 +9,9 @@ const { authMiddleWare, checkPermission } = require('../middleware/authMiddlewar
  *   post:
  *     summary: Tạo vai trò mới
  *     tags: [Role]
+ *     security:
+ *       - bearerAuth: []
+ *       - refreshTokenAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -19,41 +22,50 @@ const { authMiddleWare, checkPermission } = require('../middleware/authMiddlewar
  *               name:
  *                 type: string
  *                 example: 'Admin'
- *               code:
+ *               description:
  *                 type: string
- *                 example: 'admin'
+ *                 example: 'Administrator role'
  *               permissions:
- *                 type: object
- *                 properties:
- *                   view:
- *                     type: boolean
- *                     example: true
- *                   create:
- *                     type: boolean
- *                     example: true
- *                   edit:
- *                     type: boolean
- *                     example: true
- *                   delete:
- *                     type: boolean
- *                     example: true
- *               isAdmin:
- *                 type: boolean
- *                 example: true
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     resource:
+ *                       type: string
+ *                       example: 'users'
+ *                     actions:
+ *                       type: object
+ *                       properties:
+ *                         create:
+ *                           type: boolean
+ *                           example: true
+ *                         read:
+ *                           type: boolean
+ *                           example: true
+ *                         update:
+ *                           type: boolean
+ *                           example: true
+ *                         delete:
+ *                           type: boolean
+ *                           example: true
  *     responses:
  *       201:
  *         description: Vai trò được tạo thành công
+ *       403:
+ *         description: Không có quyền tạo vai trò
  *       500:
  *         description: Lỗi khi tạo vai trò
  */
-router.post('/create', authMiddleWare, checkPermission('add'),RoleController.createRole);
+router.post('/create', authMiddleware, checkPermission('all', 'create'), RoleController.createRole);
 
 /**
  * @swagger
- * /api/role/update/{id}:
+ * /api/role/{id}:
  *   put:
  *     summary: Cập nhật vai trò theo ID
  *     tags: [Role]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -70,36 +82,53 @@ router.post('/create', authMiddleWare, checkPermission('add'),RoleController.cre
  *             properties:
  *               name:
  *                 type: string
- *                 example: 'Admin'
+ *                 example: 'Updated Admin'
+ *               description:
+ *                 type: string
+ *                 example: 'Updated Administrator role'
  *               permissions:
- *                 type: object
- *                 properties:
- *                   view:
- *                     type: boolean
- *                     example: true
- *                   add:
- *                     type: boolean
- *                     example: true
- *                   edit:
- *                     type: boolean
- *                     example: true
- *                   delete:
- *                     type: boolean
- *                     example: true
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     resource:
+ *                       type: string
+ *                       example: 'users'
+ *                     actions:
+ *                       type: object
+ *                       properties:
+ *                         create:
+ *                           type: boolean
+ *                           example: true
+ *                         read:
+ *                           type: boolean
+ *                           example: true
+ *                         update:
+ *                           type: boolean
+ *                           example: true
+ *                         delete:
+ *                           type: boolean
+ *                           example: true
  *     responses:
  *       200:
  *         description: Vai trò được cập nhật thành công
+ *       403:
+ *         description: Không có quyền cập nhật vai trò
+ *       404:
+ *         description: Không tìm thấy vai trò
  *       500:
  *         description: Lỗi khi cập nhật vai trò
  */
-router.put('/roles/:id', authMiddleWare, checkPermission('edit'), RoleController.updateRole);
+router.put('/:id', authMiddleware, checkPermission('roles', 'update'), RoleController.updateRole);
 
 /**
  * @swagger
- * /api/role/delete/{id}:
+ * /api/role/{id}:
  *   delete:
  *     summary: Xóa vai trò theo ID
  *     tags: [Role]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,31 +139,42 @@ router.put('/roles/:id', authMiddleWare, checkPermission('edit'), RoleController
  *     responses:
  *       200:
  *         description: Vai trò được xóa thành công
+ *       403:
+ *         description: Không có quyền xóa vai trò
+ *       404:
+ *         description: Không tìm thấy vai trò
  *       500:
  *         description: Lỗi khi xóa vai trò
  */
-router.delete('/delete/:id', authMiddleWare, checkPermission('delete'), RoleController.deleteRole);
+router.delete('/:id', authMiddleware, checkPermission('roles', 'delete'), RoleController.deleteRole);
 
 /**
  * @swagger
- * /api/role/get-all:
+ * /api/role:
  *   get:
  *     summary: Lấy tất cả vai trò
  *     tags: [Role]
+ *     security:
+ *       - bearerAuth: []
+ *       - refreshTokenAuth: []
  *     responses:
  *       200:
  *         description: Lấy tất cả vai trò thành công
+ *       403:
+ *         description: Không có quyền xem vai trò
  *       500:
  *         description: Lỗi khi lấy tất cả vai trò
  */
-router.get('/get-all', authMiddleWare, checkPermission('view'), RoleController.getAllRoles);
+router.get('/', authMiddleware, checkPermission('all', 'read'), RoleController.getAllRoles);
 
 /**
  * @swagger
- * /api/role/roles/{id}:
+ * /api/role/{id}:
  *   get:
  *     summary: Lấy vai trò theo ID
  *     tags: [Role]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,9 +185,13 @@ router.get('/get-all', authMiddleWare, checkPermission('view'), RoleController.g
  *     responses:
  *       200:
  *         description: Lấy vai trò thành công
+ *       403:
+ *         description: Không có quyền xem vai trò
+ *       404:
+ *         description: Không tìm thấy vai trò
  *       500:
  *         description: Lỗi khi lấy vai trò
  */
-router.get('/roles/:id', authMiddleWare, checkPermission('view'), RoleController.getRoleById);
+router.get('/:id', authMiddleware, checkPermission('roles', 'read'), RoleController.getRoleById);
 
 module.exports = router;
