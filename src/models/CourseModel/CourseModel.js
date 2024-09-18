@@ -6,9 +6,13 @@ const courseSchema = new mongoose.Schema(
         description: { type: String, required: true },
         instructor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         price: { type: Number, required: true },
-        duration: { type: String, required: true },
-        category: { type: String, required: true },
+        duration: { type: String, required: true }, // Ví dụ: "3 months"
+        category: { type: String, required: true }, // Ví dụ: "Beginner", "Advanced"
+        level: { type: String, enum: ['Basic', 'Intermediate', 'Advanced'], required: true }, // Mức độ khoá học
+        mainImage: { type: String, required: true },
+        additionalImages: [{ type: String }],
         classes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
+        isDeleted: { type: Boolean, default: false }
     },
     {
         timestamps: true,

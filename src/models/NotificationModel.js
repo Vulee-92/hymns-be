@@ -6,6 +6,7 @@ const notificationSchema = new mongoose.Schema(
     message: { type: String, required: true },
     data: { type: Object, required: false },
     read: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

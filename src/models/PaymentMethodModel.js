@@ -13,7 +13,8 @@ const paymentMethodSchema = new mongoose.Schema({
     accountNumber: { type: String },
     accountHolderName: { type: String }
   },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  isDeleted: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

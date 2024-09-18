@@ -18,6 +18,7 @@ const productSchema = new mongoose.Schema(
     selled: { type: Number },
     slug: { type: String },
     collections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Collections' }], // Một sản phẩm có thể thuộc nhiều bộ sưu tập
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

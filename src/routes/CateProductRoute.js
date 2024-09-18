@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CateProductController = require("../controllers/CateProductController");
+const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -44,7 +45,7 @@ router.post("/create", CateProductController.createCategory);
  *       500:
  *         description: Lỗi khi lấy danh sách danh mục sản phẩm
  */
-router.get("/get-all", CateProductController.getAllCategory);
+router.get("/get-all",authMiddleWare, checkPermission('view'),  CateProductController.getAllCategory);
 
 /**
  * @swagger

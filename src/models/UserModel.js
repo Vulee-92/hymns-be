@@ -26,20 +26,19 @@ const userSchema = new mongoose.Schema(
 		city: { type: String },
 		province: { type: String },
 		ward: { type: String },
-		// Liên kết với Role và FeaturePackage
 		role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' },
 		featurePackage: { type: mongoose.Schema.Types.ObjectId, ref: 'FeaturePackage' },
 		slug: { type: String },
 		isVerified: { type: Boolean, default: false },
 		cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' },
-		// Mảng lưu trữ nhiều địa chỉ giao hàng
 		shippingAddresses: [addressSchema],
-		// ID của địa chỉ mặc định từ mảng shippingAddresses
 		defaultShippingAddress: { type: mongoose.Schema.Types.ObjectId },
 		following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-		// Các trường mới để theo dõi lớp học và môn học mà giáo viên dạy
-		teachingSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }], // Môn học mà giáo viên dạy
+		teachingSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
 		teachingClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
+		enrolledClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
+		studentProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+		isDeleted: { type: Boolean, default: false }
 	},
 	{
 		timestamps: true,

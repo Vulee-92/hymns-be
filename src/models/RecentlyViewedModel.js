@@ -20,7 +20,8 @@ const RecentlyViewedSchema = new mongoose.Schema({
       slug: { type: String },
       countInStock: { type: Number },
       timestamp: { type: Date, default: Date.now },
-      viewCount: { type: Number, default: 1 }
+      viewCount: { type: Number, default: 1 },
+      isDeleted: { type: Boolean, default: false }
     },
   ],
 }, { timestamps: true });

@@ -15,7 +15,7 @@ const createCategory = async (req, res) => {
 
 const getAllCategory = async (req, res) => {
   try {
-    const response = await CategoryService.getAllCategory();
+    const response = await CategoryService.getAllCategory(req.user); // Truyền user vào
     return res.status(200).json(response);
   } catch (e) {
     return res.status(500).json({ message: e.message });

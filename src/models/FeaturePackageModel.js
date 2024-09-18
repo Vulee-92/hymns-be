@@ -23,7 +23,8 @@ const featurePackageSchema = new mongoose.Schema({
   description: { type: String },
 
   // Trạng thái gói: active, inactive
-  status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
+  status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },  
+  isDeleted: { type: Boolean, default: false },
 
   // Tự động thêm ngày tạo và ngày cập nhật
   createdAt: { type: Date, default: Date.now },

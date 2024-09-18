@@ -45,6 +45,7 @@ const featureSchema = new mongoose.Schema({
   
   // Trạng thái hoạt động của trang
   isActive: { type: Boolean, default: true },
+  isDeleted: { type: Boolean, default: false },
 
   // Tự động thêm ngày tạo và cập nhật
   createdAt: { type: Date, default: Date.now },

@@ -9,6 +9,7 @@ const contactSchema = new mongoose.Schema({
   status: { type: String, enum: ['new', 'in-progress', 'resolved'], default: 'new' },
   assignedTo: { type: String },
   notes: { type: String },
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Contact", contactSchema);

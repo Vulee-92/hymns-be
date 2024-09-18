@@ -16,6 +16,7 @@ const bannerSchema = new mongoose.Schema({
   mainImages: deviceImagesSchema,
   subImages: deviceImagesSchema,
   isActive: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 // Đảm bảo chỉ có một banner active

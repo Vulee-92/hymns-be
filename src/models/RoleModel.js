@@ -9,9 +9,9 @@ const roleSchema = new mongoose.Schema({
     edit: { type: Boolean, default: false },
     delete: { type: Boolean, default: false }
   },
-  isAdmin: { type: Boolean, default: false } // Đánh dấu vai trò là Admin
+  isAdmin: { type: Boolean, default: false }, // Đánh dấu vai trò là Admin 
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Role = mongoose.model('Role', roleSchema);
-
 module.exports = Role;

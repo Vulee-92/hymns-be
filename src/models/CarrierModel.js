@@ -53,7 +53,8 @@ const carrierSchema = new mongoose.Schema({
   isActive: { 
     type: Boolean, 
     default: true // Mặc định là hoạt động
-  }
+  },
+  isDeleted: { type: Boolean, default: false }
 }, {
   // Tự động thêm các trường `createdAt` và `updatedAt`
   timestamps: true

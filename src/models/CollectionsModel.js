@@ -8,6 +8,7 @@ const productCollectionsSchema = new mongoose.Schema(
     backgroundImage: { type: String, required: false },
     slug: { type: String, required: true, unique: true },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // Liên kết với các sản phẩm
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

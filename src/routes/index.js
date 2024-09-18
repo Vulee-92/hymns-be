@@ -30,7 +30,11 @@ const FeatureRouter = require("./FeatureRouter");
 const FeaturePackageRouter = require("./FeaturePackageRouter");
 const BannerRouter = require('./BannerRouter');
 const CourseRouter = require('./CourseRouter/CourseRouter');
-
+const classRoutes = require('./CourseRouter/ClassRouter');
+const subjectRoutes = require('./CourseRouter/SubjectRouter');
+const studentRoutes = require('./CourseRouter/StudentRouter');
+const teacherRoutes = require('./CourseRouter/TeacherRouter');
+const attendanceRoutes = require('./CourseRouter/AttendanceRouter');
 const routes = (app) => {
   app.use('/api/home', HomeRouter); 
   app.use("/api/blog", BlogRouter); 
@@ -56,7 +60,12 @@ const routes = (app) => {
   app.use('/api/role', RoleRouter); 
   app.use('/api/banner', BannerRouter);
   app.use('/api/', CourseRouter);
-	
+	app.use('/courses', courseRoutes);
+app.use('/classes', classRoutes);
+app.use('/subjects', subjectRoutes);
+app.use('/students', studentRoutes);
+app.use('/teachers', teacherRoutes);
+app.use('/attendance', attendanceRoutes);
   // Thêm các route mới
   app.use('/api/feature', FeatureRouter);
   app.use('/api/feature-package', FeaturePackageRouter);

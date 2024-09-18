@@ -93,8 +93,16 @@ const checkPermission = (action) => {
     return next();
   };
 };
+const adminMiddleware = (req, res, next) => {
+  if (req.user && req.user.role && req.user.role.isAdmin && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(403).json({ status: 'ERR', message: 'Access denied. Only admin can perform this action.' });
+  }
+};
 
 module.exports = {
   authMiddleWare,
-  checkPermission
+  checkPermission,
+  adminMiddleware
 };

@@ -1,5 +1,5 @@
 const express = require('express');
-const CourseController = require('../controllers/CourseController');
+const ClassController = require('../controllers/ClassController');
 const { authMiddleWare, checkPermission } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -7,16 +7,16 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Courses
- *   description: Quản lý khoá học
+ *   name: Classes
+ *   description: Quản lý lớp học
  */
 
 /**
  * @swagger
- * /courses:
+ * /classes:
  *   post:
- *     summary: Tạo khoá học mới
- *     tags: [Courses]
+ *     summary: Tạo lớp học mới
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -26,48 +26,47 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
+ *               subject:
+ *                 type: string
  *               title:
  *                 type: string
- *               description:
- *                 type: string
+ *               maxStudents:
+ *                 type: number
  *               instructor:
  *                 type: string
- *               price:
- *                 type: number
- *               duration:
+ *               startDate:
  *                 type: string
- *               category:
- *                 type: string
+ *                 format: date
  *     responses:
  *       201:
- *         description: Khoá học được tạo thành công
+ *         description: Lớp học được tạo thành công
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post('/', authMiddleWare, checkPermission('create'), CourseController.createCourseController);
+router.post('/', authMiddleWare, checkPermission('create'), ClassController.createClassController);
 
 /**
  * @swagger
- * /courses:
+ * /classes:
  *   get:
- *     summary: Lấy danh sách tất cả khoá học
- *     tags: [Courses]
+ *     summary: Lấy danh sách tất cả lớp học
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách khoá học
+ *         description: Danh sách lớp học
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get('/', authMiddleWare, checkPermission('view'), CourseController.getAllCoursesController);
+router.get('/', authMiddleWare, checkPermission('view'), ClassController.getAllClassesController);
 
 /**
  * @swagger
- * /courses/{id}:
+ * /classes/{id}:
  *   get:
- *     summary: Lấy thông tin khoá học theo ID
- *     tags: [Courses]
+ *     summary: Lấy thông tin lớp học theo ID
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -78,18 +77,18 @@ router.get('/', authMiddleWare, checkPermission('view'), CourseController.getAll
  *           type: string
  *     responses:
  *       200:
- *         description: Thông tin khoá học
+ *         description: Thông tin lớp học
  *       404:
- *         description: Không tìm thấy khoá học
+ *         description: Không tìm thấy lớp học
  */
-router.get('/:id', authMiddleWare, checkPermission('view'), CourseController.getCourseByIdController);
+router.get('/:id', authMiddleWare, checkPermission('view'), ClassController.getClassByIdController);
 
 /**
  * @swagger
- * /courses/{id}:
+ * /classes/{id}:
  *   put:
- *     summary: Cập nhật thông tin khoá học
- *     tags: [Courses]
+ *     summary: Cập nhật thông tin lớp học
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -105,32 +104,31 @@ router.get('/:id', authMiddleWare, checkPermission('view'), CourseController.get
  *           schema:
  *             type: object
  *             properties:
+ *               subject:
+ *                 type: string
  *               title:
  *                 type: string
- *               description:
- *                 type: string
+ *               maxStudents:
+ *                 type: number
  *               instructor:
  *                 type: string
- *               price:
- *                 type: number
- *               duration:
+ *               startDate:
  *                 type: string
- *               category:
- *                 type: string
+ *                 format: date
  *     responses:
  *       200:
- *         description: Khoá học được cập nhật thành công
+ *         description: Lớp học được cập nhật thành công
  *       404:
- *         description: Không tìm thấy khoá học
+ *         description: Không tìm thấy lớp học
  */
-router.put('/:id', authMiddleWare, checkPermission('edit'), CourseController.updateCourseController);
+router.put('/:id', authMiddleWare, checkPermission('edit'), ClassController.updateClassController);
 
 /**
  * @swagger
- * /courses/{id}:
+ * /classes/{id}:
  *   delete:
- *     summary: Xóa mềm khoá học
- *     tags: [Courses]
+ *     summary: Xóa mềm lớp học
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -141,18 +139,18 @@ router.put('/:id', authMiddleWare, checkPermission('edit'), CourseController.upd
  *           type: string
  *     responses:
  *       200:
- *         description: Khoá học được xóa mềm thành công
+ *         description: Lớp học được xóa mềm thành công
  *       404:
- *         description: Không tìm thấy khoá học
+ *         description: Không tìm thấy lớp học
  */
-router.delete('/:id', authMiddleWare, checkPermission('delete'), CourseController.softDeleteCourseController);
+router.delete('/:id', authMiddleWare, checkPermission('delete'), ClassController.softDeleteClassController);
 
 /**
  * @swagger
- * /courses/soft-delete:
+ * /classes/soft-delete:
  *   post:
- *     summary: Xóa mềm nhiều khoá học
- *     tags: [Courses]
+ *     summary: Xóa mềm nhiều lớp học
+ *     tags: [Classes]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -168,10 +166,10 @@ router.delete('/:id', authMiddleWare, checkPermission('delete'), CourseControlle
  *                   type: string
  *     responses:
  *       200:
- *         description: Các khoá học được xóa mềm thành công
+ *         description: Các lớp học được xóa mềm thành công
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post('/soft-delete', authMiddleWare, checkPermission('delete'), CourseController.softDeleteMultipleCoursesController);
+router.post('/soft-delete', authMiddleWare, checkPermission('delete'), ClassController.softDeleteMultipleClassesController);
 
-module.exports = router;    
+module.exports = router;

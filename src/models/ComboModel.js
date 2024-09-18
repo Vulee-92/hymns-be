@@ -19,7 +19,8 @@ const comboSchema = new mongoose.Schema({
   selled: { type: Number, default: 0 },
   slug: { type: String, required: true, unique: true },
   countInStock: { type: Number, required: true },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  isDeleted: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

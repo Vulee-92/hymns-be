@@ -2,9 +2,12 @@ const mongoose = require("mongoose");
 
 const subjectSchema = new mongoose.Schema(
     {
-        name: { type: String, required: true },
-        description: { type: String },
-        courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+        name: { type: String, required: true }, // Tên loại môn học (VD: Guitar, Piano, Drums)
+        description: { type: String }, // Mô tả về loại môn học
+        mainImage: { type: String, required: true }, // Hình ảnh chính cho loại môn học
+        additionalImages: [{ type: String }], // Hình ảnh bổ sung
+        courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }], // Liên kết tới các khoá học
+        isDeleted: { type: Boolean, default: false } // Đánh dấu loại môn học đã bị xóa
     },
     {
         timestamps: true,

@@ -14,6 +14,7 @@ const blogCategorySchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

@@ -7,6 +7,7 @@ const productBrandSchema = new mongoose.Schema(
     image: { type: String, required: false },
     slug: { type: String, required: true, unique: true },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // Liên kết với các sản phẩm
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

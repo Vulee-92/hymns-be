@@ -42,7 +42,8 @@ const orderSchema = new mongoose.Schema(
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
     qrCode: { type: String },
-    shipping: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipping' } // Tham chiếu đến Shipping
+    shipping: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipping' }, // Tham chiếu đến Shipping
+    isDeleted: { type: Boolean, default: false }
   },
   {
     timestamps: true,

@@ -20,7 +20,8 @@ const reviewSchema = new mongoose.Schema({
   comment: {
     type: String,
     required: true,
-  },
+  },  
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Review', reviewSchema);

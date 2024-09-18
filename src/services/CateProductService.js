@@ -28,9 +28,20 @@ const createCategoryProduct = async (newCategory) => {
   }
 };
 
-const getAllCategory = async () => {
+const getAllCategory = async (user) => { // Thêm tham số user
   try {
-    const allCategory = await CategoryProduct.find().sort({ createdAt: -1, updatedAt: -1 });
+    let query = {};
+
+    // Kiểm tra quyền của người dùng
+    if (user.role.isAdmin) {
+      // Nếu là admin, lấy tất cả danh mục (cả isDeleted là true và false)
+      query = {};
+    } else {
+      // Nếu không phải admin, chỉ lấy danh mục chưa bị xóa
+      query = { isDeleted: false };
+    }
+
+    const allCategory = await CategoryProduct.find(query).sort({ createdAt: -1, updatedAt: -1 });
     return { status: "OK", message: "Success", data: allCategory };
   } catch (e) {
     return { status: "ERR", message: e.message };
@@ -39,7 +50,7 @@ const getAllCategory = async () => {
 
 const deleteCategory = async (categoryId) => {
   try {
-    const result = await CategoryProduct.findByIdAndDelete(categoryId);
+    const result = await CategoryProduct.findByIdAndUpdate(categoryId, { isDeleted: true });
     if (result) {
       return { status: "OK", message: "Category deleted successfully" };
     } else {
